@@ -1,28 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
+import {
+  buildContentSecurityPolicy,
+  hasConfiguredWorldBrowserFlow,
+} from "@/lib/security/content-security-policy";
 import type { Database } from "@/lib/supabase/database.types";
 
 const securityHeaders = (response: NextResponse, nonce: string) => {
-  const isDevelopment = process.env.NODE_ENV === "development";
-  const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
-    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
-    : "";
-  const csp = [
-    "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""}`,
-    `style-src 'self' 'nonce-${nonce}'`,
-    "img-src 'self' blob: data:",
-    `connect-src 'self' ${supabaseOrigin}`,
-    "font-src 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
-  ].join("; ");
-
-  response.headers.set("Content-Security-Policy", csp);
+  response.headers.set(
+    "Content-Security-Policy",
+    buildContentSecurityPolicy({
+      isDevelopment: process.env.NODE_ENV === "development",
+      nonce,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      worldFlowConfigured: hasConfiguredWorldBrowserFlow(process.env),
+    }),
+  );
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Permissions-Policy",
