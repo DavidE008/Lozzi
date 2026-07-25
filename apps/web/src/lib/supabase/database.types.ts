@@ -2386,6 +2386,90 @@ export type Database = {
       }
     }
     Views: {
+      registrar_attention_queue: {
+        Row: {
+          course_code: string | null
+          course_title: string | null
+          institution_id: string | null
+          item_id: string | null
+          record_type: string | null
+          status: string | null
+          student_display_name: string | null
+          student_id: string | null
+          submitted_at: string | null
+          submitted_by_display_name: string | null
+          updated_at: string | null
+          version_number: number | null
+        }
+        Relationships: []
+      }
+      registrar_audit_activity: {
+        Row: {
+          action: string | null
+          activity_id: string | null
+          actor_display_name: string | null
+          actor_role: string | null
+          entity_id: string | null
+          entity_type: string | null
+          institution_id: string | null
+          occurred_at: string | null
+          outcome: string | null
+        }
+        Relationships: []
+      }
+      registrar_section_directory: {
+        Row: {
+          capacity: number | null
+          course_code: string | null
+          course_id: string | null
+          course_title: string | null
+          delivery_mode: string | null
+          enrolled_count: number | null
+          institution_id: string | null
+          instructors: string | null
+          location: string | null
+          schedule: string | null
+          section_code: string | null
+          section_id: string | null
+          status: string | null
+          term_id: string | null
+          term_name: string | null
+        }
+        Relationships: []
+      }
+      registrar_student_directory: {
+        Row: {
+          academic_status: string | null
+          display_name: string | null
+          expected_completion_date: string | null
+          institution_id: string | null
+          program_name: string | null
+          program_version_number: number | null
+          student_id: string | null
+          student_number: string | null
+        }
+        Relationships: []
+      }
+      registrar_workspace_summary: {
+        Row: {
+          active_student_count: number | null
+          add_drop_deadline: string | null
+          course_section_count: number | null
+          ends_on: string | null
+          grades_due_at: string | null
+          institution_id: string | null
+          institution_name: string | null
+          records_awaiting_publication: number | null
+          registration_closes_at: string | null
+          registration_opens_at: string | null
+          starts_on: string | null
+          term_id: string | null
+          term_name: string | null
+          term_status: string | null
+          withdrawal_deadline: string | null
+        }
+        Relationships: []
+      }
       student_current_courses: {
         Row: {
           code: string | null
