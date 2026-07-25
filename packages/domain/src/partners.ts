@@ -105,6 +105,7 @@ export const privateObjectMetadataSchema = z
     objectType: z.enum([
       "academic-record-snapshot",
       "degree-audit-context",
+      "progress-explanation",
       "record-sharing-package",
       "transcript-document",
     ]),

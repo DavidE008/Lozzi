@@ -317,6 +317,7 @@ begin
   if p_object_type not in (
       'academic-record-snapshot',
       'degree-audit-context',
+      'progress-explanation',
       'record-sharing-package',
       'transcript-document'
     )
