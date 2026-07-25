@@ -258,32 +258,35 @@ select is(
   1::bigint,
   'department deactivation appends a distinct audit event'
 );
+update public.institutions
+set name = 'Registrar should not change this'
+where id = '10000000-0000-4000-8000-000000000001';
+
 select is(
   (
-    with changed as (
-      update public.institutions
-      set name = 'Registrar should not change this'
-      where id = '10000000-0000-4000-8000-000000000001'
-      returning id
-    )
-    select count(*)::bigint from changed
+    select name
+    from public.institutions
+    where id = '10000000-0000-4000-8000-000000000001'
   ),
-  0::bigint,
+  'Northstar University',
   'registrars cannot modify institution settings'
 );
+
+update public.institution_memberships
+set status = 'inactive', deactivated_at = now()
+where institution_id = '10000000-0000-4000-8000-000000000001'
+  and user_id = '00000000-0000-4000-8000-000000000101'
+  and role = 'student';
+
 select is(
   (
-    with changed as (
-      update public.institution_memberships
-      set status = 'inactive', deactivated_at = now()
-      where institution_id = '10000000-0000-4000-8000-000000000001'
-        and user_id = '00000000-0000-4000-8000-000000000101'
-        and role = 'student'
-      returning id
-    )
-    select count(*)::bigint from changed
+    select status
+    from public.institution_memberships
+    where institution_id = '10000000-0000-4000-8000-000000000001'
+      and user_id = '00000000-0000-4000-8000-000000000101'
+      and role = 'student'
   ),
-  0::bigint,
+  'active',
   'registrars cannot modify memberships'
 );
 select throws_ok(
