@@ -41,6 +41,44 @@ interface PartnerSummaryClient {
   };
 }
 
+interface StudentWalletClient {
+  from(table: "student_wallets"): {
+    select(columns: "id, address, chain_id, status"): {
+      eq(
+        column: "student_id",
+        value: string,
+      ): {
+        eq(
+          column: "chain_id",
+          value: number,
+        ): {
+          eq(
+            column: "status",
+            value: "verified",
+          ): {
+            maybeSingle(): Promise<{
+              readonly data: unknown;
+              readonly error: { readonly code?: string } | null;
+            }>;
+          };
+        };
+      };
+    };
+  };
+}
+
+const studentWalletSchema = z.object({
+  address: z.string().regex(/^\\x[0-9a-fA-F]{40}$/u),
+  chain_id: z.literal(11155111),
+  id: z.string().uuid(),
+  status: z.literal("verified"),
+});
+
+export interface VerifiedStudentWallet {
+  readonly address: `0x${string}`;
+  readonly id: string;
+}
+
 export const getStudentPartnerStatus = cache(
   async (studentId: string): Promise<StudentPartnerStatus | null> => {
     const client = (await createClient()) as unknown as PartnerSummaryClient;
@@ -57,5 +95,28 @@ export const getStudentPartnerStatus = cache(
       return null;
     }
     return data ? partnerStatusSchema.parse(data) : null;
+  },
+);
+
+export const getVerifiedStudentWallet = cache(
+  async (studentId: string): Promise<VerifiedStudentWallet | null> => {
+    const client = (await createClient()) as unknown as StudentWalletClient;
+    const { data, error } = await client
+      .from("student_wallets")
+      .select("id, address, chain_id, status")
+      .eq("student_id", studentId)
+      .eq("chain_id", 11155111)
+      .eq("status", "verified")
+      .maybeSingle();
+
+    if (error) {
+      logEvent("warn", "student_verified_wallet_failed", {
+        category: error.code ?? "unknown",
+      });
+      return null;
+    }
+    if (!data) return null;
+    const wallet = studentWalletSchema.parse(data);
+    return { address: `0x${wallet.address.slice(2)}`, id: wallet.id };
   },
 );
