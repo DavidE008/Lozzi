@@ -16,6 +16,10 @@ const readSupabaseEnvironment = (name) => {
 
 const supabaseUrl = readSupabaseEnvironment("API_URL");
 const supabaseAnonKey = readSupabaseEnvironment("ANON_KEY");
+const supabaseServiceRoleKey = readSupabaseEnvironment("SERVICE_ROLE_KEY");
+const admin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 const createStudentClient = async (email, password) => {
   const client = createClient(supabaseUrl, supabaseAnonKey, {
@@ -50,6 +54,14 @@ const mateo = await createStudentClient(
 );
 
 const dataStructuresSectionId = "60000000-0000-4000-8000-000000000001";
+const setSectionCapacity = async (capacity) => {
+  const { error } = await admin
+    .from("course_sections")
+    .update({ capacity })
+    .eq("id", dataStructuresSectionId);
+  assert.ifError(error);
+};
+
 const aishaSection = (await catalog(aisha)).find(
   ({ section_id: sectionId }) => sectionId === dataStructuresSectionId,
 );
@@ -64,6 +76,7 @@ assert.equal(
   true,
   "The concurrency fixture must free one seat.",
 );
+await setSectionCapacity(1);
 
 const [aishaAttempt, mateoAttempt] = await Promise.all([
   rpc(aisha, "register_for_sections", {
@@ -101,7 +114,7 @@ const finalSection = (await catalog(aisha)).find(
 );
 assert.equal(
   finalSection?.enrolled_count,
-  2,
+  1,
   "The section must not over-enrol.",
 );
 
@@ -127,6 +140,8 @@ if (mateoAttempt.success) {
     "The seed enrollment must be restored.",
   );
 }
+
+await setSectionCapacity(2);
 
 console.log(
   "Registration concurrency test passed: one final seat, one winner.",
