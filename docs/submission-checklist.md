@@ -16,7 +16,16 @@
 
 ## Still-required credentials for later milestones
 
-- World App ID and action configuration.
+- Recoverable World RP signing key for `rp_27a81819333b3230`, stored only in
+  ignored local server configuration.
+- Callable World Developer Portal MCP access to verify the supplied legacy app
+  and RP, create/confirm all three actions, and poll registered environments.
+- Confirmed Selfie Check and Identity Check beta access.
+- A 32-byte AgentKit human-ID HMAC key and configurable World Chain mainnet RPC.
+- Explicit approval and World App QR completion for AgentBook registration of
+  `0xA8619B20cd66BBf9c3684EfE7D0B099DfE98AD5f`.
+- A real Proof-of-Human credential, a consenting document-backed adult
+  credential, Sandbox access, and anonymized tester feedback.
 - Ethereum Sepolia ENS parent name and authorized adapter key.
 - 0G Compute Router credentials and billing configuration.
 - WalletConnect project ID.

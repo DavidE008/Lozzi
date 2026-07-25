@@ -15,6 +15,8 @@ available to the application, browser, deployment platform, CI, or repository.
 | `WORLD_ID_ENVIRONMENT`              | Browser response and server | `staging`, `sandbox`, or `production`                 |
 | `SUPABASE_SERVICE_ROLE_KEY`         | Server only                 | Ignored `apps/web/.env.local`; never sent to a client |
 | `AGENTKIT_HUMAN_ID_HMAC_KEY`        | Server only                 | Ignored local secret storage; 32 random bytes         |
+| `WORLD_CHAIN_MAINNET_RPC_URL`       | Server and demo tooling     | Configurable canonical AgentBook reads                |
+| `AGENTKIT_AGENT_ADDRESS`            | Server and demo tooling     | Public checksummed address only                       |
 | Demo-agent private key and password | Agent demo client only      | Encrypted keystore outside the repository             |
 
 The World Developer key that appeared in chat is considered compromised. It
@@ -79,11 +81,50 @@ checksummed address, chain ID `480`, registration purpose, and relay behavior
 and wait for explicit approval of the World App QR. Verify the final transaction
 through a separately configured RPC read.
 
+Dedicated demo-agent registration preview:
+
+| Field          | Value                                                                 |
+| -------------- | --------------------------------------------------------------------- |
+| Address        | `0xA8619B20cd66BBf9c3684EfE7D0B099DfE98AD5f`                          |
+| Network        | World Chain mainnet, chain ID `480` (`eip155:480`)                    |
+| Purpose        | Message-only AgentKit identity for minimized degree-plan proposals    |
+| Relay behavior | World’s canonical CLI submits through its hosted registration relay   |
+| Authority      | No student linkage, custody, spending, enrollment, or academic writes |
+
+The encrypted keystore and its randomly generated password are both ignored
+under `.secrets/`. Registration remains paused until the operator explicitly
+approves this exact address/network/purpose/relay combination and completes the
+World App QR.
+
+## Local AgentKit demo
+
+1. Put the checksummed address above in `AGENTKIT_AGENT_ADDRESS`.
+2. Configure `WORLD_CHAIN_MAINNET_RPC_URL`,
+   `AGENTKIT_HUMAN_ID_HMAC_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and
+   `NEXT_PUBLIC_APP_URL` in ignored local runtime storage.
+3. Start the web app.
+4. As the synthetic student, open **Degree progress**, create the 30-minute
+   delegation, and copy it once.
+5. Run `pnpm --filter @lozzi/web agentkit:demo`. Paste the delegation only into
+   the hidden local prompt.
+6. The agent reads completion/eligibility flags and course codes, submits only
+   a pending proposal, and Casey Nguyen reviews it at `/advisor`.
+
+The three-use AgentKit counter is atomic per anonymous-human commitment and
+endpoint. Each student delegation is stricter: it allows one `degree-plan:read`
+and one `degree-plan:propose` use.
+
 ## Current provisioning status
 
-- Portal MCP connection: pending rotated local credential and Codex restart.
-- Existing Lozzi app/RP inspection: pending MCP connection.
+- Portal operator key: rotated locally by the operator.
+- Portal MCP visibility in this Codex session: unavailable; connector restart
+  or exposure is still required before administration can be verified.
+- Legacy app ID supplied by the operator:
+  `app_406624a7ab8b70f37f662453518dda71`.
+- RP ID supplied by the operator: `rp_27a81819333b3230`.
+- Existing Lozzi app/RP inspection: pending callable Portal MCP.
 - Selfie Check access: not yet confirmed.
 - Identity Check access: not yet confirmed.
 - Staging/production actions: not yet confirmed.
-- AgentBook registration: deliberately not started.
+- AgentBook keystore: generated locally and ignored.
+- AgentBook registration: deliberately paused before the World App QR.
