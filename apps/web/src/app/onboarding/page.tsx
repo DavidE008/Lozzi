@@ -12,8 +12,9 @@ export default function OnboardingPage() {
           Your profile is being prepared
         </h1>
         <p className="text-muted-foreground mt-3 leading-7">
-          Your account is valid, but it is not yet connected to an active
-          student record. Contact your registrar if this state persists.
+          Your account is valid, but it is not yet connected to a workspace
+          available in this milestone. Contact your institution administrator if
+          this state persists.
         </p>
         <Button
           className="mt-6"
