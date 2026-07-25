@@ -120,8 +120,8 @@ export function WorldIdFlowDialog({
         <div className="pr-8">
           <DialogTitle>Connect your World ID</DialogTitle>
           <DialogDescription>
-            Scan the code with World App. Lozzi receives a
-            privacy-preserving proof, not your biometric data.
+            Scan the code with World App. Lozzi receives a privacy-preserving
+            proof, not your biometric data.
           </DialogDescription>
         </div>
 
@@ -161,7 +161,7 @@ export function WorldIdFlowDialog({
             </div>
           ) : flow.connectorURI ? (
             <>
-              <div className="border-border bg-white border p-3">
+              <div className="border-border border bg-white p-3">
                 <QRCodeSVG
                   value={flow.connectorURI}
                   size={192}

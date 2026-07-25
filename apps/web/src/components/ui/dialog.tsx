@@ -65,10 +65,7 @@ function DialogContent({
   );
 }
 
-function DialogTitle({
-  className,
-  ...props
-}: DialogPrimitive.Title.Props) {
+function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
@@ -94,9 +91,4 @@ function DialogDescription({
   );
 }
 
-export {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-};
+export { Dialog, DialogContent, DialogDescription, DialogTitle };
