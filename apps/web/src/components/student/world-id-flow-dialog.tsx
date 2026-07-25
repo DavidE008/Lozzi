@@ -1,8 +1,11 @@
 "use client";
 
 import {
+  identityCheck,
   proofOfHuman,
+  selfieCheckLegacy,
   type IDKitResult,
+  type Preset,
   type RpContext,
   useIDKitRequest,
 } from "@worldcoin/idkit";
@@ -21,11 +24,32 @@ import { cn } from "@/lib/utils";
 
 export interface WorldIdFlowRequest {
   readonly action: string;
+  readonly allowLegacyProofs: boolean;
   readonly appId: `app_${string}`;
   readonly challengeId: string;
   readonly environment: "production" | "sandbox" | "staging";
+  readonly preset:
+    | {
+        readonly type: "proof-of-human";
+      }
+    | {
+        readonly type: "selfie-check-legacy";
+      }
+    | {
+        readonly attributes: readonly [
+          {
+            readonly type: "minimum_age";
+            readonly value: 18;
+          },
+        ];
+        readonly type: "identity-check";
+      };
+  readonly purpose:
+    "account-humanity" | "share-liveness" | "adult-share-consent";
+  readonly requireUserPresence: boolean;
   readonly rpContext: RpContext;
   readonly signal: string;
+  readonly subjectId?: string;
 }
 
 interface WorldIdFlowDialogProps {
@@ -37,6 +61,44 @@ interface WorldIdFlowDialogProps {
 }
 
 type HostStatus = "idle" | "verifying" | "verified" | "failed";
+
+const presetForRequest = (request: WorldIdFlowRequest): Preset => {
+  switch (request.preset.type) {
+    case "identity-check":
+      return identityCheck({
+        attributes: request.preset.attributes.map((attribute) => ({
+          type: attribute.type,
+          value: attribute.value,
+        })),
+        legacy_signal: request.signal,
+      });
+    case "selfie-check-legacy":
+      return selfieCheckLegacy({ signal: request.signal });
+    case "proof-of-human":
+      return proofOfHuman({ signal: request.signal });
+  }
+};
+
+const flowCopy = {
+  "account-humanity": {
+    title: "Connect your World ID",
+    description:
+      "Prove one unique person controls this account without sharing biometric data with Lozzi.",
+    qrLabel: "World account verification QR code",
+  },
+  "share-liveness": {
+    title: "Complete Selfie Check",
+    description:
+      "Confirm your presence before this sensitive share is activated. Lozzi never receives face data.",
+    qrLabel: "World Selfie Check QR code",
+  },
+  "adult-share-consent": {
+    title: "Confirm adult self-consent",
+    description:
+      "Attest only that you meet the minimum age requirement. Lozzi never receives your birth date or document details.",
+    qrLabel: "World adult consent QR code",
+  },
+} as const;
 
 export function WorldIdFlowDialog({
   open,
@@ -50,9 +112,11 @@ export function WorldIdFlowDialog({
     action: request.action,
     rp_context: request.rpContext,
     environment: request.environment,
-    allow_legacy_proofs: true,
-    preset: proofOfHuman({ signal: request.signal }),
+    allow_legacy_proofs: request.allowLegacyProofs,
+    require_user_presence: request.requireUserPresence,
+    preset: presetForRequest(request),
   });
+  const copy = flowCopy[request.purpose];
   const [hostStatus, setHostStatus] = useState<HostStatus>("idle");
   const lastResult = useRef<IDKitResult | null>(null);
   const lastErrorCode = useRef<typeof flow.errorCode>(null);
@@ -119,11 +183,8 @@ export function WorldIdFlowDialog({
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && close()}>
       <DialogContent>
         <div className="pr-8">
-          <DialogTitle>Connect your World ID</DialogTitle>
-          <DialogDescription>
-            Scan the code with World App. Lozzi receives a privacy-preserving
-            proof, not your biometric data.
-          </DialogDescription>
+          <DialogTitle>{copy.title}</DialogTitle>
+          <DialogDescription>{copy.description}</DialogDescription>
         </div>
 
         <div className="mt-6 flex min-h-56 flex-col items-center justify-center">
@@ -171,7 +232,7 @@ export function WorldIdFlowDialog({
                   level="M"
                   marginSize={1}
                   role="img"
-                  aria-label="World verification QR code"
+                  aria-label={copy.qrLabel}
                 />
               </div>
               <div role="status" className="mt-4 text-center">
@@ -181,7 +242,7 @@ export function WorldIdFlowDialog({
                     : "Scan with your phone to continue"}
                 </p>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  This code is time-limited and scoped to your Lozzi account.
+                  This code is time-limited and scoped to this Lozzi action.
                 </p>
               </div>
               <a
