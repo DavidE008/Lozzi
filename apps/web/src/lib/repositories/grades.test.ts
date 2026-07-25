@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   mapInstructorGradebook,
   mapInstructorSections,
+  mapStudentDegreeProgress,
 } from "./grades";
 
 const section = {
@@ -71,5 +72,37 @@ describe("grade repository mapping", () => {
       row_status: "complete",
     });
   });
-});
 
+  it("normalizes legacy degree requirements into a visible group", () => {
+    const progress = mapStudentDegreeProgress({
+      student_id: "student-1",
+      institution_id: "institution-1",
+      program_name: "Bachelor of Science in Computer Science",
+      program_version: 1,
+      degree_audit_snapshot_id: "snapshot-1",
+      academic_record_version_id: "version-1",
+      credits_earned: 3,
+      credits_required: 120,
+      gpa: 4,
+      progress_percent: 3,
+      requirement_results: [
+        { code: "CS 1301", status: "complete" },
+        { code: "CS 2305", status: "in-progress" },
+      ],
+      calculated_at: "2026-05-21T11:06:00Z",
+    });
+
+    expect(progress?.requirement_results).toEqual([
+      {
+        code: "CS 1301",
+        status: "complete",
+        group: "Program requirements",
+      },
+      {
+        code: "CS 2305",
+        status: "in-progress",
+        group: "Program requirements",
+      },
+    ]);
+  });
+});

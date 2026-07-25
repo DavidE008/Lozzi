@@ -133,7 +133,7 @@ const progressRowSchema = z.object({
   requirement_results: z.array(
     z.object({
       requirementId: z.string().optional(),
-      group: z.string(),
+      group: z.string().default("Program requirements"),
       courseId: z.string().optional(),
       code: z.string(),
       title: z.string().optional(),
@@ -206,6 +206,15 @@ export const mapInstructorGradebook = (
   return { section, rows, lifecycleState };
 };
 
+export const mapStudentAcademicRecords = (
+  source: unknown,
+): readonly StudentAcademicRecord[] =>
+  z.array(academicRecordRowSchema).parse(source);
+
+export const mapStudentDegreeProgress = (
+  source: unknown,
+): StudentDegreeProgress | null => (source ? progressRowSchema.parse(source) : null);
+
 export const getInstructorSections = cache(async () => {
   const client = await queryClient();
   const { data, error } = await client
@@ -272,7 +281,7 @@ export const getStudentAcademicRecords = cache(async (studentId: string) => {
     throw new Error("The academic record could not be loaded.");
   }
 
-  return z.array(academicRecordRowSchema).parse(data ?? []);
+  return mapStudentAcademicRecords(data ?? []);
 });
 
 export const getStudentDegreeProgress = cache(async (studentId: string) => {
@@ -288,7 +297,7 @@ export const getStudentDegreeProgress = cache(async (studentId: string) => {
     throw new Error("Degree progress could not be loaded.");
   }
 
-  return data ? progressRowSchema.parse(data) : null;
+  return mapStudentDegreeProgress(data);
 });
 
 const commitmentSubmissionSchema = z.object({
@@ -381,4 +390,3 @@ export const getRecordCommitmentPreview = async (
     }),
   };
 };
-
