@@ -126,7 +126,7 @@ describe("RegistrationExperience", () => {
       screen.getByRole("button", { name: /CS 2305 Data Structures/ }),
     ).toHaveAttribute("aria-expanded", "true");
     expect(
-      screen.getByText("All registration requirements are satisfied."),
+      screen.getByRole("heading", { name: "Eligibility check" }),
     ).toBeInTheDocument();
   });
 
@@ -148,10 +148,10 @@ describe("RegistrationExperience", () => {
     });
     render(<RegistrationExperience catalog={catalog} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Add section" }));
-    expect(screen.getByText("Selected credits").nextSibling).toHaveTextContent(
-      "3",
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Add CS 2305" }));
+    expect(
+      screen.getByText("Total planned credits").nextSibling,
+    ).toHaveTextContent("3 / 18");
     fireEvent.click(screen.getByRole("button", { name: "Review and Submit" }));
 
     await waitFor(() => expect(submitRegistration).toHaveBeenCalledTimes(1));

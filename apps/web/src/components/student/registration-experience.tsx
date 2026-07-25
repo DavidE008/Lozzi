@@ -10,13 +10,13 @@ import {
   BookOpenCheck,
   CalendarDays,
   Check,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Clock3,
+  Filter,
   Info,
   Search,
-  ShieldCheck,
-  Users,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 
@@ -54,6 +54,9 @@ const formatMeetings = (section: RegistrationSection) => {
     .map(([time, days]) => `${days.join("/")} ${time}`)
     .join(", ");
 };
+
+const courseDepartment = (course: RegistrationCourse) =>
+  course.code.split(" ")[0] ?? "Other";
 
 const sectionTone = (section: RegistrationSection) => {
   if (
@@ -108,7 +111,7 @@ function CourseRow({
     <article className="border-b last:border-b-0">
       <button
         type="button"
-        className="hover:bg-muted/45 grid w-full grid-cols-[1fr_auto] items-center gap-4 px-5 py-4 text-left transition-colors md:grid-cols-[8.5rem_1fr_5rem_8rem_2rem]"
+        className="hover:bg-muted/45 grid w-full grid-cols-[1fr_auto] items-center gap-4 px-4 py-3 text-left transition-colors md:grid-cols-[7.25rem_1fr_4rem_7.5rem_7rem_1rem]"
         onClick={onExpand}
         aria-expanded={expanded}
         aria-controls={`course-${course.id}`}
@@ -126,6 +129,13 @@ function CourseRow({
         </span>
         <span className="text-muted-foreground hidden text-sm md:block">
           {course.creditHours}
+        </span>
+        <span className="text-muted-foreground hidden truncate text-sm md:block">
+          {course.prerequisites.length > 0
+            ? course.prerequisites
+                .map((requirement) => requirement.code)
+                .join(", ")
+            : "None"}
         </span>
         <Badge
           variant="outline"
@@ -146,110 +156,183 @@ function CourseRow({
       {expanded ? (
         <div
           id={`course-${course.id}`}
-          className="bg-lozzi-ivory/55 border-t px-5 py-5"
+          className="border-lozzi-slate/40 border-t bg-white px-4 py-4"
         >
-          {course.prerequisites.length > 0 ? (
-            <p className="text-muted-foreground mb-4 flex items-center gap-2 text-sm">
-              <ShieldCheck
-                className="text-lozzi-teal size-4"
-                aria-hidden="true"
-              />
-              {course.prerequisites
-                .map(
-                  (requirement) =>
-                    `${requirement.kind === "corequisite" ? "Corequisite" : "Prerequisite"}: ${requirement.code}`,
-                )
-                .join(" · ")}
-            </p>
-          ) : null}
+          <div className="grid border xl:grid-cols-[0.9fr_1.4fr_1fr]">
+            <section className="border-b p-4 xl:border-r xl:border-b-0">
+              <h3 className="font-heading text-sm font-semibold">
+                About this course
+              </h3>
+              <p className="text-muted-foreground mt-3 text-xs leading-5">
+                Review the published meeting pattern, instructor, available
+                seats, and eligibility before adding this course.
+              </p>
+              <dl className="mt-5 space-y-2.5 border-t pt-3 text-xs">
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">Department</dt>
+                  <dd className="font-medium">{courseDepartment(course)}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">Credits</dt>
+                  <dd className="font-medium">{course.creditHours}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">Instruction mode</dt>
+                  <dd className="font-medium capitalize">
+                    {primarySection.deliveryMode.replaceAll("_", " ")}
+                  </dd>
+                </div>
+              </dl>
+            </section>
 
-          <div className="space-y-3">
-            {course.sections.map((section) => {
-              const selected = selectedSectionIds.has(section.id);
-              const status = sectionTone(section);
-              const alreadyRegistered =
-                section.enrollmentStatus !== null &&
-                ["pending", "enrolled", "waitlisted"].includes(
-                  section.enrollmentStatus,
-                );
-              return (
-                <div
-                  key={section.id}
+            <section className="border-b p-4 xl:border-r xl:border-b-0">
+              <h3 className="font-heading text-sm font-semibold">
+                Select a section
+              </h3>
+              <div className="text-muted-foreground mt-3 grid grid-cols-[3rem_1fr_1fr_4rem] gap-2 border-b pb-2 text-[10px] font-semibold tracking-wide uppercase">
+                <span>Section</span>
+                <span>Meeting time</span>
+                <span>Instructor</span>
+                <span className="text-right">Seats</span>
+              </div>
+              <div className="divide-y">
+                {course.sections.map((section) => {
+                  const selected = selectedSectionIds.has(section.id);
+                  const alreadyRegistered =
+                    section.enrollmentStatus !== null &&
+                    ["pending", "enrolled", "waitlisted"].includes(
+                      section.enrollmentStatus,
+                    );
+                  return (
+                    <button
+                      type="button"
+                      key={section.id}
+                      className={cn(
+                        "grid w-full grid-cols-[3rem_1fr_1fr_4rem] items-center gap-2 px-1 py-3 text-left text-xs",
+                        selected && "bg-lozzi-teal/8",
+                      )}
+                      disabled={
+                        !section.eligibility.eligible || alreadyRegistered
+                      }
+                      onClick={() => onSelect(section)}
+                    >
+                      <span className="flex items-center gap-1.5 font-semibold">
+                        <span
+                          className={cn(
+                            "border-lozzi-slate/60 block size-3 rounded-full border",
+                            selected && "border-lozzi-teal bg-lozzi-teal",
+                          )}
+                          aria-hidden="true"
+                        />
+                        {section.code}
+                      </span>
+                      <span>{formatMeetings(section)}</span>
+                      <span>{section.instructor}</span>
+                      <span className="text-right">
+                        {section.availableSeats}/{section.capacity}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-muted-foreground mt-3 flex items-center gap-1.5 text-xs">
+                <Clock3 className="size-3.5" aria-hidden="true" />
+                {primarySection.location ?? "Location to be announced"}
+              </p>
+            </section>
+
+            <section className="p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading text-sm font-semibold">
+                  Eligibility check
+                </h3>
+                <Badge
+                  variant="outline"
                   className={cn(
-                    "grid gap-4 rounded-sm border bg-white p-4 md:grid-cols-[1fr_auto] md:items-center",
-                    selected && "border-lozzi-teal ring-lozzi-teal/15 ring-2",
+                    primarySection.eligibility.eligible
+                      ? "border-lozzi-teal text-emerald-800"
+                      : "border-rose-200 text-rose-800",
                   )}
                 >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-lozzi-navy font-semibold">
-                        Section {section.code}
-                      </span>
-                      <Badge variant="outline" className={status.className}>
-                        {status.label}
-                      </Badge>
-                    </div>
-                    <div className="text-muted-foreground mt-2 grid gap-1.5 text-sm sm:grid-cols-2">
-                      <span className="flex items-center gap-2">
-                        <Clock3 className="size-3.5" aria-hidden="true" />
-                        {formatMeetings(section)}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <Users className="size-3.5" aria-hidden="true" />
-                        {section.instructor}
-                      </span>
-                      <span>
-                        {section.location ?? "Location to be announced"}
-                      </span>
-                      <span>
-                        {section.availableSeats} of {section.capacity} seats
-                        available
-                      </span>
-                    </div>
-
-                    {section.eligibility.blockingReasons.length > 0 ? (
-                      <ul
-                        className="mt-3 space-y-1"
-                        aria-label="Eligibility issues"
-                      >
-                        {section.eligibility.blockingReasons.map((reason) => (
-                          <li
-                            key={`${section.id}-${reason.code}-${reason.relatedEntityId}`}
-                            className="flex gap-2 text-sm text-rose-700"
-                          >
-                            <AlertCircle
-                              className="mt-0.5 size-4 shrink-0"
-                              aria-hidden="true"
-                            />
-                            {reason.message}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-3 flex items-center gap-2 text-sm text-emerald-700">
-                        <Check className="size-4" aria-hidden="true" />
-                        All registration requirements are satisfied.
-                      </p>
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant={selected ? "secondary" : "default"}
-                    disabled={
-                      !section.eligibility.eligible || alreadyRegistered
-                    }
-                    onClick={() => onSelect(section)}
-                    className="min-w-28"
-                  >
-                    {alreadyRegistered
+                  {primarySection.eligibility.eligible
+                    ? "Eligible"
+                    : registered
                       ? "Registered"
-                      : selected
-                        ? "Remove"
-                        : "Add section"}
-                  </Button>
-                </div>
-              );
-            })}
+                      : "Action needed"}
+                </Badge>
+              </div>
+              <ul className="mt-3 divide-y text-xs">
+                {[
+                  ["Academic status", "Active"],
+                  ["Registration open", "Yes"],
+                  [
+                    "Prerequisite",
+                    course.prerequisites.length > 0
+                      ? course.prerequisites.map((item) => item.code).join(", ")
+                      : "None",
+                  ],
+                  ["Seats available", `${primarySection.availableSeats} open`],
+                  ["Schedule conflict", "None detected"],
+                ].map(([label, value]) => (
+                  <li
+                    key={label}
+                    className="flex items-center justify-between gap-2 py-2"
+                  >
+                    <span className="flex items-center gap-2">
+                      <CheckCircle2
+                        className="text-lozzi-teal size-3.5"
+                        aria-hidden="true"
+                      />
+                      {label}
+                    </span>
+                    <span className="text-muted-foreground text-right">
+                      {value}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {primarySection.eligibility.blockingReasons.length > 0 ? (
+                <ul
+                  className="mt-3 space-y-1.5"
+                  aria-label="Eligibility issues"
+                >
+                  {primarySection.eligibility.blockingReasons.map((reason) => (
+                    <li
+                      key={`${primarySection.id}-${reason.code}-${reason.relatedEntityId}`}
+                      className="flex gap-2 border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900"
+                    >
+                      <AlertCircle
+                        className="mt-0.5 size-3.5 shrink-0"
+                        aria-hidden="true"
+                      />
+                      {reason.message}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              <Button
+                type="button"
+                variant={
+                  selectedSectionIds.has(primarySection.id)
+                    ? "secondary"
+                    : "default"
+                }
+                disabled={
+                  !primarySection.eligibility.eligible ||
+                  primarySection.enrollmentStatus !== null
+                }
+                onClick={() => onSelect(primarySection)}
+                className="mt-3 w-full"
+              >
+                {registered
+                  ? "Already registered"
+                  : selectedSectionIds.has(primarySection.id)
+                    ? "Remove from plan"
+                    : `Add ${course.code}`}
+              </Button>
+            </section>
           </div>
         </div>
       ) : null}
@@ -263,6 +346,10 @@ export function RegistrationExperience({
   readonly catalog: RegistrationCatalog | null;
 }) {
   const [query, setQuery] = useState("");
+  const [department, setDepartment] = useState("all");
+  const [credits, setCredits] = useState("all");
+  const [openOnly, setOpenOnly] = useState(false);
+  const [sortOrder, setSortOrder] = useState("code");
   const [expandedCourseId, setExpandedCourseId] = useState<string | null>(
     catalog?.courses.find((course) => course.code === "CS 2305")?.id ??
       catalog?.courses[0]?.id ??
@@ -278,11 +365,41 @@ export function RegistrationExperience({
 
   const filteredCourses = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return catalog?.courses ?? [];
-    return (catalog?.courses ?? []).filter((course) =>
-      `${course.code} ${course.title}`.toLowerCase().includes(normalized),
+    const matches = (catalog?.courses ?? []).filter(
+      (course) =>
+        (!normalized ||
+          `${course.code} ${course.title}`
+            .toLowerCase()
+            .includes(normalized)) &&
+        (department === "all" || courseDepartment(course) === department) &&
+        (credits === "all" || String(course.creditHours) === credits) &&
+        (!openOnly ||
+          course.sections.some(
+            (section) =>
+              section.status === "open" && section.availableSeats > 0,
+          )),
     );
-  }, [catalog, query]);
+    return [...matches].sort((left, right) =>
+      sortOrder === "title"
+        ? left.title.localeCompare(right.title)
+        : left.code.localeCompare(right.code),
+    );
+  }, [catalog, credits, department, openOnly, query, sortOrder]);
+
+  const departmentOptions = useMemo(
+    () => [...new Set((catalog?.courses ?? []).map(courseDepartment))].sort(),
+    [catalog],
+  );
+
+  const creditOptions = useMemo(
+    () =>
+      [
+        ...new Set(
+          (catalog?.courses ?? []).map((course) => course.creditHours),
+        ),
+      ].sort((left, right) => left - right),
+    [catalog],
+  );
 
   const selectedSections = useMemo(
     () =>
@@ -348,48 +465,111 @@ export function RegistrationExperience({
 
   return (
     <div className="mx-auto max-w-[88rem]">
-      <div className="mb-7">
-        <p className="text-lozzi-teal text-xs font-semibold tracking-[0.18em] uppercase">
-          {catalog.termName}
-        </p>
-        <h1 className="font-heading mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
+      <div className="mb-5">
+        <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           Register for Classes
         </h1>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm sm:text-base">
-          Search the course schedule, review your eligibility, and build a plan
-          before submitting.
+          Search for courses, review eligibility, and add to your schedule.
         </p>
       </div>
 
-      <div className="grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_19.5rem]">
         <section className="min-w-0 border bg-white">
-          <div className="border-b p-5">
-            <label
-              htmlFor="course-search"
-              className="mb-2 block text-xs font-semibold tracking-[0.12em] uppercase"
-            >
-              Course search
-            </label>
-            <div className="relative">
-              <Search
-                className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
-                aria-hidden="true"
-              />
-              <Input
-                id="course-search"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by course code or title"
-                className="h-11 pl-10"
-              />
+          <div className="border-b p-3">
+            <div className="flex items-center gap-3">
+              <div className="relative min-w-0 flex-1">
+                <label htmlFor="course-search" className="sr-only">
+                  Course search
+                </label>
+                <Search
+                  className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+                  aria-hidden="true"
+                />
+                <Input
+                  id="course-search"
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search by course title or code"
+                  className="h-9 pl-10"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="hidden sm:flex"
+              >
+                <Filter aria-hidden="true" />
+                Filters
+              </Button>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-[11rem_11rem_1fr]">
+              <label>
+                <span className="sr-only">Department</span>
+                <select
+                  value={department}
+                  onChange={(event) => setDepartment(event.target.value)}
+                  className="border-input h-9 w-full rounded-sm border bg-transparent px-3 text-sm"
+                >
+                  <option value="all">All departments</option>
+                  {departmentOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">Credits</span>
+                <select
+                  value={credits}
+                  onChange={(event) => setCredits(event.target.value)}
+                  className="border-input h-9 w-full rounded-sm border bg-transparent px-3 text-sm"
+                >
+                  <option value="all">All credits</option>
+                  {creditOptions.map((option) => (
+                    <option key={option} value={String(option)}>
+                      {option} credits
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-muted-foreground flex min-h-9 items-center gap-2 px-1 text-sm">
+                <input
+                  type="checkbox"
+                  checked={openOnly}
+                  onChange={(event) => setOpenOnly(event.target.checked)}
+                  className="accent-lozzi-teal size-4"
+                />
+                Show open sections only
+              </label>
             </div>
           </div>
 
-          <div className="text-muted-foreground bg-lozzi-ivory/70 hidden grid-cols-[8.5rem_1fr_5rem_8rem_2rem] gap-4 border-b px-5 py-2.5 text-[11px] font-semibold tracking-[0.12em] uppercase md:grid">
+          <div className="text-muted-foreground flex items-center justify-between border-b px-1 py-2 text-xs">
+            <span>
+              Showing {filteredCourses.length} course
+              {filteredCourses.length === 1 ? "" : "s"}
+            </span>
+            <label className="flex items-center gap-2">
+              <span>Sort by:</span>
+              <select
+                value={sortOrder}
+                onChange={(event) => setSortOrder(event.target.value)}
+                className="bg-transparent font-medium text-current"
+              >
+                <option value="code">Course code (A–Z)</option>
+                <option value="title">Course title (A–Z)</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="text-muted-foreground bg-lozzi-ivory/70 hidden grid-cols-[7.25rem_1fr_4rem_7.5rem_7rem_1rem] gap-4 border-b px-4 py-2 text-[10px] font-semibold tracking-[0.12em] uppercase md:grid">
             <span>Course</span>
             <span>Title</span>
             <span>Credits</span>
+            <span>Prerequisites</span>
             <span>Status</span>
             <span className="sr-only">Expand</span>
           </div>
@@ -420,17 +600,19 @@ export function RegistrationExperience({
           )}
         </section>
 
-        <aside className="space-y-4 xl:sticky xl:top-28">
+        <aside className="space-y-4 xl:sticky xl:top-28 xl:-mt-[5.75rem]">
           <section className="border bg-white">
             <div className="border-b px-5 py-4">
-              <p className="text-lozzi-teal text-[11px] font-semibold tracking-[0.15em] uppercase">
-                Planned schedule
-              </p>
-              <h2 className="font-heading mt-1 text-xl font-semibold">
-                Review your selection
-              </h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-heading text-lg font-semibold">
+                  Planned schedule
+                </h2>
+                <span className="text-muted-foreground text-xs">
+                  {selectedSections.length} courses · {selectionCredits} credits
+                </span>
+              </div>
             </div>
-            <div className="min-h-36 p-5">
+            <div className="min-h-[21rem] p-5">
               {selectedSections.length > 0 ? (
                 <ul className="space-y-4">
                   {selectedSections.map(({ course, section }) => (
@@ -452,51 +634,51 @@ export function RegistrationExperience({
                   ))}
                 </ul>
               ) : (
-                <div className="text-muted-foreground py-4 text-center text-sm">
-                  <CalendarDays className="mx-auto mb-3 size-6 opacity-60" />
-                  Add an eligible section to build your schedule.
+                <div className="text-muted-foreground flex min-h-[19rem] flex-col items-center justify-center text-center text-sm">
+                  <CalendarDays className="mb-4 size-10 opacity-60" />
+                  <strong className="text-foreground font-medium">
+                    No courses planned yet.
+                  </strong>
+                  <span className="mt-2 max-w-40">
+                    Select an eligible section to add it here.
+                  </span>
                 </div>
               )}
             </div>
             <div className="bg-lozzi-ivory/70 border-t px-5 py-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Selected credits</span>
-                <strong>{selectionCredits}</strong>
+                <span>Total planned credits</span>
+                <strong>{selectionCredits} / 18</strong>
               </div>
-            </div>
-            <div className="p-5">
-              <Button
-                className="w-full"
-                disabled={selectedSectionIds.size === 0 || isPending}
-                onClick={submit}
-              >
-                {isPending ? "Submitting…" : "Review and Submit"}
-              </Button>
-              {feedback ? (
-                <p
-                  role="status"
-                  className={cn(
-                    "mt-3 flex gap-2 text-sm",
-                    feedback.success ? "text-emerald-700" : "text-rose-700",
-                  )}
-                >
-                  {feedback.success ? (
-                    <Check className="mt-0.5 size-4 shrink-0" />
-                  ) : (
-                    <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                  )}
-                  {feedback.message}
-                </p>
-              ) : null}
             </div>
           </section>
 
-          <section className="border border-amber-200 bg-amber-50/70 p-4">
-            <p className="flex items-center gap-2 text-sm font-semibold text-amber-900">
-              <Clock3 className="size-4" aria-hidden="true" />
-              Registration window
+          <section className="border border-blue-200 bg-blue-50/50 p-4">
+            <p className="flex items-center gap-2 text-sm font-semibold">
+              <Info className="text-lozzi-teal size-4" aria-hidden="true" />
+              Registration tips
             </p>
-            <p className="mt-2 text-sm text-amber-900/75">
+            <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5 text-sm">
+              <li>Expand a course to compare sections.</li>
+              <li>Resolve holds before submitting.</li>
+              <li>Check meeting times for conflicts.</li>
+            </ul>
+          </section>
+
+          <section className="border-t border-b bg-transparent py-4">
+            <div className="flex items-center justify-between">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Clock3 className="size-4" aria-hidden="true" />
+                Registration window
+              </p>
+              <Badge
+                variant="outline"
+                className="border-lozzi-teal text-emerald-800"
+              >
+                Open
+              </Badge>
+            </div>
+            <p className="text-muted-foreground mt-2 text-xs leading-5">
               Registration closes{" "}
               {catalog.registrationClosesAt
                 ? new Date(catalog.registrationClosesAt).toLocaleDateString(
@@ -512,17 +694,31 @@ export function RegistrationExperience({
             </p>
           </section>
 
-          <section className="border bg-white p-4">
-            <p className="flex items-center gap-2 text-sm font-semibold">
-              <Info className="text-lozzi-teal size-4" aria-hidden="true" />
-              Registration tips
-            </p>
-            <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5 text-sm">
-              <li>Expand a course to compare sections.</li>
-              <li>Resolve holds before submitting.</li>
-              <li>Check meeting times for conflicts.</li>
-            </ul>
-          </section>
+          <div>
+            <Button
+              className="w-full"
+              disabled={selectedSectionIds.size === 0 || isPending}
+              onClick={submit}
+            >
+              {isPending ? "Submitting…" : "Review and Submit"}
+            </Button>
+            {feedback ? (
+              <p
+                role="status"
+                className={cn(
+                  "mt-3 flex gap-2 text-sm",
+                  feedback.success ? "text-emerald-700" : "text-rose-700",
+                )}
+              >
+                {feedback.success ? (
+                  <Check className="mt-0.5 size-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                )}
+                {feedback.message}
+              </p>
+            ) : null}
+          </div>
         </aside>
       </div>
     </div>
