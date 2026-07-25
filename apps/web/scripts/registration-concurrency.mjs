@@ -51,7 +51,11 @@ const dropResult = await rpc(aisha, "withdraw_from_section", {
   p_enrollment_id: aishaSection.enrollment_id,
   p_idempotency_key: randomUUID(),
 });
-assert.equal(dropResult.success, true, "The concurrency fixture must free one seat.");
+assert.equal(
+  dropResult.success,
+  true,
+  "The concurrency fixture must free one seat.",
+);
 
 const [aishaAttempt, mateoAttempt] = await Promise.all([
   rpc(aisha, "register_for_sections", {
@@ -87,13 +91,20 @@ assert(
 const finalSection = (await catalog(aisha)).find(
   ({ section_id: sectionId }) => sectionId === dataStructuresSectionId,
 );
-assert.equal(finalSection?.enrolled_count, 2, "The section must not over-enrol.");
+assert.equal(
+  finalSection?.enrolled_count,
+  2,
+  "The section must not over-enrol.",
+);
 
 if (mateoAttempt.success) {
   const mateoSection = (await catalog(mateo)).find(
     ({ section_id: sectionId }) => sectionId === dataStructuresSectionId,
   );
-  assert(mateoSection?.enrollment_id, "Mateo's winning enrollment is required.");
+  assert(
+    mateoSection?.enrollment_id,
+    "Mateo's winning enrollment is required.",
+  );
   await rpc(mateo, "withdraw_from_section", {
     p_enrollment_id: mateoSection.enrollment_id,
     p_idempotency_key: randomUUID(),
@@ -102,8 +113,13 @@ if (mateoAttempt.success) {
     p_section_ids: [dataStructuresSectionId],
     p_idempotency_key: randomUUID(),
   });
-  assert.equal(restoreResult.success, true, "The seed enrollment must be restored.");
+  assert.equal(
+    restoreResult.success,
+    true,
+    "The seed enrollment must be restored.",
+  );
 }
 
-console.log("Registration concurrency test passed: one final seat, one winner.");
-
+console.log(
+  "Registration concurrency test passed: one final seat, one winner.",
+);

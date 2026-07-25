@@ -184,7 +184,7 @@ export const evaluateEnrollmentEligibility = (
   ) {
     blockingReasons.push({
       code: "MAX_CREDIT_LOAD",
-      message: `This selection would exceed the ${input.maxCredits}-credit term limit.`,
+      message: `This selection would exceed the ${String(input.maxCredits)}-credit term limit.`,
       relatedEntityId: input.termId,
     });
   }
