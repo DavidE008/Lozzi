@@ -1,3 +1,5 @@
+import "server-only";
+
 import { Buffer } from "node:buffer";
 
 import { z } from "zod";

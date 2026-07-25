@@ -1,3 +1,5 @@
+import "server-only";
+
 import { hashSignal } from "@worldcoin/idkit-core/hashing";
 import { signRequest } from "@worldcoin/idkit-core/signing";
 import {

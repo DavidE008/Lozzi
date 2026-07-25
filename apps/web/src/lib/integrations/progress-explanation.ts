@@ -1,3 +1,5 @@
+import "server-only";
+
 import { randomBytes, randomUUID } from "node:crypto";
 
 import {
