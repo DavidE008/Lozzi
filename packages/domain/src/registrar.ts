@@ -13,6 +13,7 @@ export const hasRegistrarAccess = (roles: readonly InstitutionRole[]) =>
 export const roleHomePath = (roles: readonly InstitutionRole[]) => {
   if (hasRegistrarAccess(roles)) return "/registrar";
   if (roles.includes("instructor")) return "/instructor";
+  if (roles.includes("advisor")) return "/advisor";
   if (roles.includes("student")) return "/student";
   return "/onboarding";
 };

@@ -7,6 +7,8 @@ import {
   normalizeWorldNullifier,
   progressExplanationSchema,
   PROGRESS_EXPLANATION_DISCLAIMER,
+  WORLD_PURPOSES,
+  worldPurposeRequestSchema,
 } from "./partners";
 
 describe("partner integration domain", () => {
@@ -18,6 +20,55 @@ describe("partner integration domain", () => {
     expect(first).toBe(second);
     expect(first).not.toBe(other);
     expect(first).toMatch(/^0x[0-9a-f]{64}$/u);
+  });
+
+  it("binds sensitive World signals to the purpose and share draft", () => {
+    const userId = "11111111-1111-4111-8111-111111111111";
+    const firstDraft = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const secondDraft = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+
+    expect(createWorldSignal(userId, "share-liveness", firstDraft)).not.toBe(
+      createWorldSignal(userId, "share-liveness", secondDraft),
+    );
+    expect(createWorldSignal(userId, "share-liveness", firstDraft)).not.toBe(
+      createWorldSignal(userId, "adult-share-consent", firstDraft),
+    );
+  });
+
+  it("defines a closed least-disclosure World purpose mapping", () => {
+    expect(WORLD_PURPOSES["account-humanity"].action).toBe(
+      "lozzi-student-verification",
+    );
+    expect(WORLD_PURPOSES["account-humanity"].preset).toBe("proof-of-human");
+    expect(WORLD_PURPOSES["account-humanity"].requireUserPresence).toBe(false);
+
+    expect(WORLD_PURPOSES["share-liveness"].action).toBe(
+      "lozzi-sensitive-share-selfie-check",
+    );
+    expect(WORLD_PURPOSES["share-liveness"].preset).toBe("selfie-check-legacy");
+    expect(WORLD_PURPOSES["share-liveness"].requireSubject).toBe(true);
+
+    expect(WORLD_PURPOSES["adult-share-consent"].action).toBe(
+      "lozzi-adult-share-consent",
+    );
+    expect(WORLD_PURPOSES["adult-share-consent"].allowLegacyProofs).toBe(false);
+    expect(
+      WORLD_PURPOSES["adult-share-consent"].identityAttestationRequired,
+    ).toBe(true);
+    expect(WORLD_PURPOSES["adult-share-consent"].preset).toBe("identity-check");
+  });
+
+  it("requires share purposes to identify a share draft", () => {
+    expect(
+      worldPurposeRequestSchema.safeParse({ purpose: "share-liveness" })
+        .success,
+    ).toBe(false);
+    expect(
+      worldPurposeRequestSchema.safeParse({
+        purpose: "account-humanity",
+        subjectId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      }).success,
+    ).toBe(false);
   });
 
   it("normalizes a World nullifier as a decimal integer", () => {

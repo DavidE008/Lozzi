@@ -1,6 +1,8 @@
+import { parseEnvironment } from "@lozzi/domain";
 import { Clock3, ShieldCheck } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { SensitiveShareWizard } from "@/components/student/sensitive-share-wizard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeading } from "@/components/student/page-heading";
@@ -13,6 +15,9 @@ export default async function SharesPage() {
   const dashboard = await getDashboardForUser(user.id);
   if (!dashboard) redirect("/onboarding");
   const shares = await getShareRows(dashboard.studentId);
+  const worldCapability = parseEnvironment(process.env).capabilities.find(
+    ({ name }) => name === "world",
+  )!;
 
   return (
     <>
@@ -21,6 +26,7 @@ export default async function SharesPage() {
         title="Verified shares"
         description="Review synthetic record-sharing grants and their current access state."
       />
+      <SensitiveShareWizard worldCapability={worldCapability} />
       <div className="space-y-3">
         {shares.length ? (
           shares.map((share) => {

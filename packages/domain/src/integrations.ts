@@ -4,23 +4,47 @@ import type {
   PrivateObjectMetadata,
   ProgressExplanation,
   ProgressExplanationInput,
+  WorldPurpose,
   WorldRpContext,
   WorldVerificationSignal,
 } from "./partners";
 
 export interface WorldVerificationRequest {
   readonly action: string;
+  readonly allowLegacyProofs: boolean;
   readonly appId: string;
+  readonly environment: "production" | "sandbox" | "staging";
+  readonly preset:
+    | { readonly type: "proof-of-human" }
+    | { readonly type: "selfie-check-legacy" }
+    | {
+        readonly attributes: readonly [
+          { readonly type: "minimum_age"; readonly value: 18 },
+        ];
+        readonly type: "identity-check";
+      };
+  readonly purpose: WorldPurpose;
+  readonly requireUserPresence: boolean;
   readonly rpContext: WorldRpContext;
-  readonly signal: `0x${string}`;
+  readonly signal?: `0x${string}`;
+  readonly subjectId?: string;
 }
 
 export interface VerificationProvider {
   readonly capability: CapabilityState;
-  createRequest(authenticatedUserId: string): Promise<WorldVerificationRequest>;
+  createRequest(input: {
+    readonly authenticatedUserId: string;
+    readonly purpose: WorldPurpose;
+    readonly subjectId?: string;
+  }): Promise<WorldVerificationRequest>;
   verify(input: {
     readonly authenticatedUserId: string;
-    readonly idkitResult: unknown;
+    readonly challengeId?: string;
+    readonly expectedEnvironment: "production" | "sandbox" | "staging";
+    readonly expectedNonce: string;
+    readonly purpose: WorldPurpose;
+    readonly rawBody: string;
+    readonly subjectId?: string;
   }): Promise<WorldVerificationSignal>;
 }
 

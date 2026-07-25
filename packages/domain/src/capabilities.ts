@@ -10,7 +10,13 @@ export const capabilityStatusSchema = z.enum([
 export type CapabilityStatus = z.infer<typeof capabilityStatusSchema>;
 
 export type CapabilityName =
-  "supabase" | "world" | "world-chain" | "ens" | "zero-g" | "walletconnect";
+  | "supabase"
+  | "world"
+  | "world-agentkit"
+  | "world-chain"
+  | "ens"
+  | "zero-g"
+  | "walletconnect";
 
 export interface CapabilityState {
   readonly name: CapabilityName;

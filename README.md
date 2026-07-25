@@ -78,7 +78,11 @@ the complete acceptance record and remaining partner credentials.
 - [Milestone 5 fidelity review](docs/design/milestone-5-fidelity-review.md)
 - [Milestone 5 acceptance evidence](docs/verification/milestone-5.md)
 - [Synthetic test and demo accounts](docs/testing/test-accounts.md)
+- [World real-configuration runbook](docs/integrations/world-real-configuration.md)
+- [World prize evidence](docs/integrations/world-prize-evidence.md)
 
-World, ENS, 0G, WalletConnect, and World Chain deployment are deliberately
-unconfigured. The app reports that state honestly, and no registry has been
-deployed.
+World integration code is present, but Portal beta access, runtime secrets,
+production device evidence, and AgentBook registration are still deliberately
+unconfirmed. ENS, 0G, WalletConnect, and World Chain registry deployment remain
+unconfigured. The app reports those states honestly, and no Lozzi registry
+contract has been deployed.

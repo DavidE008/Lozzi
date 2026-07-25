@@ -20,19 +20,30 @@ interface MockFlowState {
 
 const flowMock = vi.hoisted(() => ({
   current: null as unknown as MockFlowState,
+  identityCheck: vi.fn(() => ({ type: "IdentityCheck" })),
   open: vi.fn(),
+  proofOfHuman: vi.fn(() => ({ type: "ProofOfHuman" })),
   reset: vi.fn(),
+  selfieCheckLegacy: vi.fn(() => ({ type: "SelfieCheckLegacy" })),
+  useIDKitRequest: vi.fn(() => flowMock.current),
 }));
 
 vi.mock("@worldcoin/idkit", () => ({
-  proofOfHuman: vi.fn(() => ({ type: "ProofOfHuman" })),
-  useIDKitRequest: vi.fn(() => flowMock.current),
+  identityCheck: flowMock.identityCheck,
+  proofOfHuman: flowMock.proofOfHuman,
+  selfieCheckLegacy: flowMock.selfieCheckLegacy,
+  useIDKitRequest: flowMock.useIDKitRequest,
 }));
 
 const request: WorldIdFlowRequest = {
   action: "verify-student-account-2026",
+  allowLegacyProofs: true,
   appId: "app_example",
+  challengeId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   environment: "staging",
+  preset: { type: "proof-of-human" },
+  purpose: "account-humanity",
+  requireUserPresence: false,
   rpContext: {
     rp_id: "rp_example",
     nonce: "0x01",
@@ -58,8 +69,12 @@ const baseFlow = (): MockFlowState => ({
 describe("WorldIdFlowDialog", () => {
   beforeEach(() => {
     flowMock.current = baseFlow();
+    flowMock.identityCheck.mockClear();
     flowMock.open.mockReset();
+    flowMock.proofOfHuman.mockClear();
     flowMock.reset.mockReset();
+    flowMock.selfieCheckLegacy.mockClear();
+    flowMock.useIDKitRequest.mockClear();
   });
 
   it("renders a local QR handoff without loading remote widget assets", () => {
@@ -74,12 +89,88 @@ describe("WorldIdFlowDialog", () => {
     );
 
     expect(
-      screen.getByRole("img", { name: "World verification QR code" }),
+      screen.getByRole("img", { name: "World account verification QR code" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Open World App" }),
     ).toHaveAttribute("href", flowMock.current.connectorURI);
     expect(flowMock.open).toHaveBeenCalledOnce();
+    expect(flowMock.proofOfHuman).toHaveBeenCalledWith({
+      signal: request.signal,
+    });
+  });
+
+  it("uses the purpose-bound Selfie Check preset and presence requirement", () => {
+    const selfieRequest: WorldIdFlowRequest = {
+      ...request,
+      action: "lozzi-sensitive-share-selfie-check",
+      preset: { type: "selfie-check-legacy" },
+      purpose: "share-liveness",
+      requireUserPresence: true,
+      subjectId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    };
+
+    render(
+      <WorldIdFlowDialog
+        open
+        request={selfieRequest}
+        onOpenChange={vi.fn()}
+        onVerify={vi.fn()}
+        onFlowError={vi.fn()}
+      />,
+    );
+
+    expect(flowMock.selfieCheckLegacy).toHaveBeenCalledWith({
+      signal: selfieRequest.signal,
+    });
+    expect(flowMock.useIDKitRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allow_legacy_proofs: true,
+        require_user_presence: true,
+      }),
+    );
+    expect(
+      screen.getByRole("img", { name: "World Selfie Check QR code" }),
+    ).toBeInTheDocument();
+  });
+
+  it("requests only a minimum-age Identity Check attribute", () => {
+    const identityRequest: WorldIdFlowRequest = {
+      ...request,
+      action: "lozzi-adult-share-consent",
+      allowLegacyProofs: false,
+      preset: {
+        attributes: [{ type: "minimum_age", value: 18 }],
+        type: "identity-check",
+      },
+      purpose: "adult-share-consent",
+      requireUserPresence: true,
+      subjectId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    };
+
+    render(
+      <WorldIdFlowDialog
+        open
+        request={identityRequest}
+        onOpenChange={vi.fn()}
+        onVerify={vi.fn()}
+        onFlowError={vi.fn()}
+      />,
+    );
+
+    expect(flowMock.identityCheck).toHaveBeenCalledWith({
+      attributes: [{ type: "minimum_age", value: 18 }],
+      legacy_signal: identityRequest.signal,
+    });
+    expect(flowMock.useIDKitRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allow_legacy_proofs: false,
+        require_user_presence: true,
+      }),
+    );
+    expect(
+      screen.getByRole("img", { name: "World adult consent QR code" }),
+    ).toBeInTheDocument();
   });
 
   it("surfaces a provider flow failure", async () => {

@@ -11,6 +11,9 @@ broadcast/
 !.env.example
 *.local
 *.log
+*.keystore.json
+*.password
+.secrets/
 .DS_Store
 supabase/.branches/
 supabase/.temp/

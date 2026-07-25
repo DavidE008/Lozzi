@@ -9,14 +9,16 @@ not configured.
 ## Censorship resistance
 
 - Risk: Supabase, the web host, World, the ENS RPC, 0G gateways, or an
-  institutional signer can block an optional operation. The institution also
-  controls academic administration by design.
+  institutional signer can block an optional operation. World can additionally
+  gate beta credentials, bridge traffic, the hosted AgentKit relay, and
+  AgentBook registration. The institution controls academic administration by
+  design.
 - Mitigation: the MIT-licensed schema, adapters, migrations, encryption format,
   and provider interfaces are reproducible. Partner failures are isolated from
   login, registration, grades, records, and deterministic progress.
 - User escape: another operator can fork and self-host Lozzi. Public ENS names,
-  0G roots, and later registry reads remain independently queryable through
-  alternative clients.
+  0G roots, AgentBook registration, and later registry reads remain
+  independently queryable through alternative clients and configurable RPCs.
 
 ## Open and free
 
@@ -31,13 +33,17 @@ not configured.
 ## Privacy
 
 - Risk: World observes proof traffic and network metadata; ENS publishes a
-  name-to-wallet relationship; 0G exposes transactions, roots, sizes, and
-  timing; the Router necessarily processes the minimized audit context.
-- Mitigation: World is bound to a non-public authenticated-user signal and the
-  proof is never stored. ENS receives no text records. Every 0G object is
-  encrypted with a fresh AES-256-GCM object key before upload, and PostgreSQL
-  receives only commitments, references, and lifecycle evidence. No analytics
-  run. Logs contain categories rather than student data.
+  name-to-wallet relationship; AgentBook reveals the demo-agent address and
+  registration timing; 0G exposes transactions, roots, sizes, and timing; the
+  Router necessarily processes the minimized audit context.
+- Mitigation: World requests are purpose- and challenge-bound. Lozzi stores no
+  proof, integrity bundle, biometric, document, or attested attribute value.
+  AgentKit stores only an HMAC commitment of its anonymous human identifier and
+  never links the public agent wallet to a student, World nullifier, or academic
+  commitment. ENS receives no text records. Every 0G object is encrypted with a
+  fresh AES-256-GCM object key before upload, and PostgreSQL receives only
+  commitments, references, and lifecycle evidence. No analytics run. Logs
+  contain categories rather than student data.
 - User escape: World, ENS, and 0G are opt-in and unnecessary for authoritative
   SIS reads. A student can rely on the deterministic audit without requesting
   an AI explanation.
@@ -45,13 +51,15 @@ not configured.
 ## Security
 
 - Risk: service-role credentials, World RP keys, the ENS signer, the funded 0G
-  storage signer, Router credentials, and wrapping keys are high-value
-  capabilities. A compromised server could submit unwanted partner operations.
+  storage signer, Router credentials, AgentKit HMAC key, and wrapping keys are
+  high-value capabilities. A compromised server could submit unwanted partner
+  operations.
 - Mitigation: keys remain server-only; RLS derives authority from memberships;
   mutations are authenticated and same-origin; partner payloads are
   schema-validated; ENS gas is capped; uploads are proof-downloaded and compared;
   calls expose pending and failure states; database writes are idempotent and
-  PII-free.
+  PII-free. The dedicated demo-agent EOA is zero-value, encrypted at rest, and
+  has no spending, custody, enrollment, or official-record authority.
 - User escape: revoke or rotate an individual provider credential without
   disabling the core SIS. Production key wrapping must use a recoverable KMS
   policy; loss of the wrapping key makes encrypted objects unrecoverable.
@@ -64,3 +72,9 @@ does not deploy a contract or claim that encrypted storage hides public
 transaction metadata. A live partner result is accepted only after the intended
 provider returns verifiable evidence; otherwise the product says **Not
 configured**, **Development mock**, or **Unavailable**.
+
+World may block beta credential access and its hosted registration relay.
+AgentBook necessarily publishes the demo-agent address and registration timing.
+These compromises are bounded by direct configurable RPC reads, MIT-licensed
+reproducible code, zero custody, and no public linkage to a student or academic
+commitment.
