@@ -117,8 +117,18 @@ export class ZeroGComputeProvider implements ComputeProvider {
       );
     }
 
+    const validatedExplanation =
+      progressExplanationSchema.safeParse(explanation);
+    if (!validatedExplanation.success) {
+      throw new PartnerIntegrationError(
+        "invalid-response",
+        "0G Compute returned an explanation that failed schema validation.",
+        { cause: validatedExplanation.error },
+      );
+    }
+
     return {
-      ...progressExplanationSchema.parse(explanation),
+      ...validatedExplanation.data,
       providerRequestId: routerResult.data.id,
     };
   }
