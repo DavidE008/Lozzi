@@ -6,15 +6,15 @@
 
 All accounts belong to the fictional **Northstar University** tenant.
 
-| Person           | Role       | Email                                  | Password                    | Primary test use                                  |
-| ---------------- | ---------- | -------------------------------------- | --------------------------- | ------------------------------------------------- |
-| Aisha Rahman     | Student    | `aisha.demo@lozzi.example`             | `Northstar-Demo-2026!`       | Completed prerequisite, current enrollment        |
-| Mateo Silva      | Student    | `mateo.demo@lozzi.example`             | `Synthetic-Only-2026!`       | Eligible registration and final-seat concurrency  |
-| Priya Nair       | Student    | `priya.demo@lozzi.example`             | `Synthetic-Only-2026!`       | Blocking academic-hold denial                     |
-| Jordan Lee       | Registrar  | `jordan.registrar@lozzi.example`       | `Synthetic-Only-2026!`       | Institution-scoped academic administration        |
-| Elena Martinez   | Instructor | `elena.instructor@lozzi.example`       | `Synthetic-Only-2026!`       | Assigned-section roster and future grade workflow |
-| James Wilson     | Instructor | `james.instructor@lozzi.example`       | `Synthetic-Only-2026!`       | Unrelated-roster authorization denial             |
-| Casey Nguyen     | Advisor    | `casey.advisor@lozzi.example`          | `Synthetic-Only-2026!`       | Assigned-student access                           |
+| Person         | Role       | Email                            | Password               | Primary test use                                  |
+| -------------- | ---------- | -------------------------------- | ---------------------- | ------------------------------------------------- |
+| Aisha Rahman   | Student    | `aisha.demo@lozzi.example`       | `Northstar-Demo-2026!` | Completed prerequisite, current enrollment        |
+| Mateo Silva    | Student    | `mateo.demo@lozzi.example`       | `Synthetic-Only-2026!` | Eligible registration and final-seat concurrency  |
+| Priya Nair     | Student    | `priya.demo@lozzi.example`       | `Synthetic-Only-2026!` | Blocking academic-hold denial                     |
+| Jordan Lee     | Registrar  | `jordan.registrar@lozzi.example` | `Synthetic-Only-2026!` | Institution-scoped academic administration        |
+| Elena Martinez | Instructor | `elena.instructor@lozzi.example` | `Synthetic-Only-2026!` | Assigned-section roster and future grade workflow |
+| James Wilson   | Instructor | `james.instructor@lozzi.example` | `Synthetic-Only-2026!` | Unrelated-roster authorization denial             |
+| Casey Nguyen   | Advisor    | `casey.advisor@lozzi.example`    | `Synthetic-Only-2026!` | Assigned-student access                           |
 
 ## Suggested demo order
 

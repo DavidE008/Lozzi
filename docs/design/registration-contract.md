@@ -55,4 +55,3 @@ component conventions.
 - Eligibility is conveyed by icon, label, and text—not color alone.
 - Registration results use live-region feedback without moving keyboard focus.
 - Desktop table semantics degrade to labelled stacked rows on narrow screens.
-

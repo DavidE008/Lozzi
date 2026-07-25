@@ -65,4 +65,3 @@ The approved registration concept in
 - Every successful mutation has a PII-free audit event.
 - Desktop and mobile registration/schedule flows match the approved Lozzi visual
   system and pass keyboard and accessible-name checks.
-
