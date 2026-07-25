@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { logEvent } from "@/lib/logging";
+import { getRoleHomeForUser } from "@/lib/repositories/access";
 import { assertSameOrigin } from "@/lib/security/origin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,11 +20,12 @@ export interface SignInResult {
 export const signIn = async (
   input: z.infer<typeof credentialsSchema>,
 ): Promise<SignInResult> => {
+  let destination: string;
   try {
     await assertSameOrigin();
     const credentials = credentialsSchema.parse(input);
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword(credentials);
+    const { data, error } = await supabase.auth.signInWithPassword(credentials);
 
     if (error) {
       logEvent("warn", "sign_in_denied", {
@@ -33,7 +35,7 @@ export const signIn = async (
     }
 
     logEvent("info", "sign_in_succeeded");
-    return {};
+    destination = await getRoleHomeForUser(data.user.id);
   } catch (error) {
     logEvent("warn", "sign_in_rejected", {
       category:
@@ -41,6 +43,8 @@ export const signIn = async (
     });
     return { error: "Sign-in could not be completed. Please try again." };
   }
+
+  redirect(destination);
 };
 
 export const signOut = async () => {
