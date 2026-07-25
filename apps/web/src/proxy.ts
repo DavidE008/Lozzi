@@ -69,7 +69,8 @@ export async function proxy(request: NextRequest) {
     const authenticated = Boolean(data?.claims?.sub);
     const protectedRoute =
       request.nextUrl.pathname.startsWith("/student") ||
-      request.nextUrl.pathname.startsWith("/registrar");
+      request.nextUrl.pathname.startsWith("/registrar") ||
+      request.nextUrl.pathname.startsWith("/instructor");
 
     if (protectedRoute && !authenticated) {
       const signInUrl = request.nextUrl.clone();
