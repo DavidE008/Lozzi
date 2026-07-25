@@ -31,6 +31,10 @@ registrar permission assertions also pass after normalizing the legacy
 synthetic record that was already official but still carried an `approved`
 submission state.
 
+The hosted migration ledger includes `repair_grade_schedule_encoding`, and a
+catalog probe confirms both instructor views contain neither legacy dash nor
+legacy bullet mojibake.
+
 Authenticated hosted probes confirm:
 
 - Elena sees her assigned sections, three historical/current gradebook rows,
@@ -70,6 +74,8 @@ observations expected for a newly seeded synthetic workload.
   GitHub `Contracts` job is the authoritative Foundry result.
 - Docker is unavailable locally; the GitHub `Database` job is the
   authoritative clean reset, pgTAP, and database-lint result.
+- The implementation pull-request [Quality run](https://github.com/DavidE008/Lozzi/actions/runs/30152555313)
+  passes Application, Database, Contracts, and Secret scanning.
 - Browser QA at `1536 × 1024` and `390 × 844` verifies live calculation,
   mobile navigation, responsive table behavior, valid controls, and zero
   console warnings or errors.
