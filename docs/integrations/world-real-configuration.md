@@ -91,10 +91,14 @@ Dedicated demo-agent registration preview:
 | Relay behavior | World’s canonical CLI submits through its hosted registration relay   |
 | Authority      | No student linkage, custody, spending, enrollment, or academic writes |
 
-The encrypted keystore and its randomly generated password are both ignored
-under `.secrets/`. Registration remains paused until the operator explicitly
-approves this exact address/network/purpose/relay combination and completes the
-World App QR.
+The encrypted keystore is ignored under `.secrets/`. On Windows, its random
+password is protected with CurrentUser-scoped DPAPI and both files receive
+explicit account-only ACLs; on other platforms the password is entered through
+a hidden local TTY and is never persisted. A legacy plaintext password can be
+migrated once with
+`node apps/web/scripts/migrate-agent-keystore-password.mjs` from the repository
+root. Registration remains paused until the operator explicitly approves this
+exact address/network/purpose/relay combination and completes the World App QR.
 
 ## Local AgentKit demo
 
@@ -105,8 +109,10 @@ World App QR.
 3. Start the web app.
 4. As the synthetic student, open **Degree progress**, create the 30-minute
    delegation, and copy it once.
-5. Run `pnpm --filter @lozzi/web agentkit:demo`. Paste the delegation only into
-   the hidden local prompt.
+5. Run `pnpm --filter @lozzi/web agentkit:demo`. On non-Windows platforms,
+   enter the keystore passphrase; then paste the delegation into the hidden
+   local prompt. The default loopback origin is allowed over HTTP, while every
+   non-loopback `--base-url` must use HTTPS.
 6. The agent reads completion/eligibility flags and course codes, submits only
    a pending proposal, and Casey Nguyen reviews it at `/advisor`.
 

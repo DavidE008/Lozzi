@@ -9,7 +9,7 @@
     "agentkit:demo": "node scripts/agentkit-degree-plan-demo.mjs",
     "agentkit:keystore": "node scripts/create-agent-keystore.mjs",
     "lint": "eslint . --max-warnings=0",
-    "test": "vitest run",
+    "test": "vitest run && node --test scripts/*.test.mjs",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },

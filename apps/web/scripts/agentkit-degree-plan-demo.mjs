@@ -5,59 +5,34 @@ import process from "node:process";
 import { createAgentkitClient } from "@worldcoin/agentkit";
 import { Wallet } from "ethers";
 
+import {
+  parseDemoBaseUrl,
+  promptHidden,
+  unprotectPasswordForCurrentWindowsUser,
+} from "./agentkit-local-secrets.mjs";
+
 const secretDirectory = path.resolve(process.cwd(), "../../.secrets");
 const keystorePath = path.join(
   secretDirectory,
   "lozzi-demo-agent.keystore.json",
 );
-const passwordPath = path.join(secretDirectory, "lozzi-demo-agent.password");
-const baseUrl =
+const protectedPasswordPath = path.join(
+  secretDirectory,
+  "lozzi-demo-agent.password.dpapi",
+);
+const baseUrl = parseDemoBaseUrl(
   process.argv
     .find((argument) => argument.startsWith("--base-url="))
-    ?.slice("--base-url=".length) ?? "http://localhost:3000";
+    ?.slice("--base-url=".length) ?? "http://localhost:3000",
+);
 
-const promptHidden = async (prompt) => {
-  if (!process.stdin.isTTY || !process.stdin.setRawMode) {
-    throw new Error("The delegation token must be entered in a local TTY.");
-  }
-  process.stdout.write(prompt);
-  process.stdin.setRawMode(true);
-  process.stdin.resume();
-  process.stdin.setEncoding("utf8");
-
-  return new Promise((resolve, reject) => {
-    let value = "";
-    const onData = (character) => {
-      if (character === "\u0003") {
-        cleanup();
-        reject(new Error("Cancelled."));
-        return;
-      }
-      if (character === "\r" || character === "\n") {
-        cleanup();
-        process.stdout.write("\n");
-        resolve(value);
-        return;
-      }
-      if (character === "\u007f" || character === "\b") {
-        value = value.slice(0, -1);
-        return;
-      }
-      value += character;
-    };
-    const cleanup = () => {
-      process.stdin.off("data", onData);
-      process.stdin.setRawMode(false);
-      process.stdin.pause();
-    };
-    process.stdin.on("data", onData);
-  });
-};
-
-const [encryptedKeystore, password] = await Promise.all([
-  readFile(keystorePath, "utf8"),
-  readFile(passwordPath, "utf8").then((value) => value.trim()),
-]);
+const encryptedKeystore = await readFile(keystorePath, "utf8");
+const password =
+  process.platform === "win32"
+    ? await unprotectPasswordForCurrentWindowsUser(
+        await readFile(protectedPasswordPath, "utf8"),
+      )
+    : await promptHidden("Demo-agent keystore passphrase: ");
 const wallet = await Wallet.fromEncryptedJson(encryptedKeystore, password);
 const delegationToken = await promptHidden("One-time Lozzi delegation: ");
 if (!/^[A-Za-z0-9_-]{43}$/u.test(delegationToken)) {
