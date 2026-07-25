@@ -47,8 +47,7 @@ export const hasConfiguredWorldBrowserFlow = (
   environment: Readonly<Record<string, string | undefined>>,
 ) =>
   Boolean(
-    environment.WORLD_APP_ID &&
+    environment.NEXT_PUBLIC_WORLD_APP_ID &&
       environment.WORLD_RP_ID &&
       environment.WORLD_RP_SIGNING_KEY,
   );
-

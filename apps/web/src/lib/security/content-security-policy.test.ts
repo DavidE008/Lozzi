@@ -36,17 +36,16 @@ describe("content security policy", () => {
   it("requires the complete server-side World credential set", () => {
     expect(
       hasConfiguredWorldBrowserFlow({
-        WORLD_APP_ID: "app_example",
+        NEXT_PUBLIC_WORLD_APP_ID: "app_example",
         WORLD_RP_ID: "rp_example",
       }),
     ).toBe(false);
     expect(
       hasConfiguredWorldBrowserFlow({
-        WORLD_APP_ID: "app_example",
+        NEXT_PUBLIC_WORLD_APP_ID: "app_example",
         WORLD_RP_ID: "rp_example",
         WORLD_RP_SIGNING_KEY: "secret",
       }),
     ).toBe(true);
   });
 });
-
