@@ -9,8 +9,11 @@ overrides:
   tmp@<0.2.7: 0.2.7
 
 allowBuilds:
+  bufferutil: false
+  es5-ext: false
   sharp: true
   unrs-resolver: true
+  utf-8-validate: false
 
 minimumReleaseAgeExclude:
   - "@hookform/resolvers@5.4.1"
