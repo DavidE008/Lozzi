@@ -95,11 +95,11 @@ test("student searches registration rows and reviews the hosted schedule", async
     page.getByText("Calculus I", { exact: true }).first(),
   ).toBeVisible();
   await page.getByRole("button", { name: "MATH 1314 Calculus I" }).click();
-  await page.getByRole("button", { name: "Add section" }).click();
+  await page.getByRole("button", { name: "Add MATH 1314" }).click();
   await expect(
     page.getByText("Selected credits").locator("xpath=.."),
   ).toContainText("3");
-  await page.getByRole("button", { name: "Remove" }).click();
+  await page.getByRole("button", { name: "Remove from plan" }).click();
 
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
   await expect(page).toHaveURL(/\/student\/schedule$/u);
