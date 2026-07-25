@@ -27,8 +27,10 @@ export type Database = {
           previous_version_id: string | null
           published_at: string | null
           salt_reference: string
+          source_grade_record_id: string | null
           status: string
           student_id: string
+          superseded_at: string | null
           version_number: number
         }
         Insert: {
@@ -43,8 +45,10 @@ export type Database = {
           previous_version_id?: string | null
           published_at?: string | null
           salt_reference: string
+          source_grade_record_id?: string | null
           status?: string
           student_id: string
+          superseded_at?: string | null
           version_number: number
         }
         Update: {
@@ -59,8 +63,10 @@ export type Database = {
           previous_version_id?: string | null
           published_at?: string | null
           salt_reference?: string
+          source_grade_record_id?: string | null
           status?: string
           student_id?: string
+          superseded_at?: string | null
           version_number?: number
         }
         Relationships: [
@@ -990,6 +996,7 @@ export type Database = {
       }
       grade_records: {
         Row: {
+          correction_reason_code: string | null
           created_at: string
           created_by: string
           credit_hours_earned: number
@@ -1002,9 +1009,11 @@ export type Database = {
           is_current: boolean
           previous_grade_record_id: string | null
           published_at: string
+          superseded_at: string | null
           version_number: number
         }
         Insert: {
+          correction_reason_code?: string | null
           created_at?: string
           created_by: string
           credit_hours_earned?: number
@@ -1017,9 +1026,11 @@ export type Database = {
           is_current?: boolean
           previous_grade_record_id?: string | null
           published_at: string
+          superseded_at?: string | null
           version_number: number
         }
         Update: {
+          correction_reason_code?: string | null
           created_at?: string
           created_by?: string
           credit_hours_earned?: number
@@ -1032,6 +1043,7 @@ export type Database = {
           is_current?: boolean
           previous_grade_record_id?: string | null
           published_at?: string
+          superseded_at?: string | null
           version_number?: number
         }
         Relationships: [
@@ -1068,52 +1080,79 @@ export type Database = {
       grade_submissions: {
         Row: {
           approved_at: string | null
+          approved_by: string | null
+          assignment_average: number | null
           correction_reason_code: string | null
           created_at: string
           created_by: string | null
+          draft_revision: number
           enrollment_id: string
-          grade_code: string
+          final_exam_score: number | null
+          grade_code: string | null
           grade_points: number | null
           id: string
+          idempotency_key: string
           institution_id: string
+          participation_score: number | null
+          previous_grade_submission_id: string | null
           published_at: string | null
+          published_by: string | null
           state: string
           submitted_at: string | null
           submitted_by: string
+          total_score: number | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           approved_at?: string | null
+          approved_by?: string | null
+          assignment_average?: number | null
           correction_reason_code?: string | null
           created_at?: string
           created_by?: string | null
+          draft_revision?: number
           enrollment_id: string
-          grade_code: string
+          final_exam_score?: number | null
+          grade_code?: string | null
           grade_points?: number | null
           id?: string
+          idempotency_key?: string
           institution_id: string
+          participation_score?: number | null
+          previous_grade_submission_id?: string | null
           published_at?: string | null
+          published_by?: string | null
           state?: string
           submitted_at?: string | null
           submitted_by: string
+          total_score?: number | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           approved_at?: string | null
+          approved_by?: string | null
+          assignment_average?: number | null
           correction_reason_code?: string | null
           created_at?: string
           created_by?: string | null
+          draft_revision?: number
           enrollment_id?: string
-          grade_code?: string
+          final_exam_score?: number | null
+          grade_code?: string | null
           grade_points?: number | null
           id?: string
+          idempotency_key?: string
           institution_id?: string
+          participation_score?: number | null
+          previous_grade_submission_id?: string | null
           published_at?: string | null
+          published_by?: string | null
           state?: string
           submitted_at?: string | null
           submitted_by?: string
+          total_score?: number | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -1143,6 +1182,7 @@ export type Database = {
           key_hash: string
           operation: string
           request_commitment: string
+          result: Json | null
           result_reference: string | null
           status: string
         }
@@ -1154,6 +1194,7 @@ export type Database = {
           key_hash: string
           operation: string
           request_commitment: string
+          result?: Json | null
           result_reference?: string | null
           status?: string
         }
@@ -1165,6 +1206,7 @@ export type Database = {
           key_hash?: string
           operation?: string
           request_commitment?: string
+          result?: Json | null
           result_reference?: string | null
           status?: string
         }
@@ -2493,6 +2535,60 @@ export type Database = {
       }
     }
     Views: {
+      instructor_assigned_sections: {
+        Row: {
+          capacity: number | null
+          course_code: string | null
+          course_title: string | null
+          institution_id: string | null
+          institution_name: string | null
+          last_saved_at: string | null
+          lifecycle_state: string | null
+          location: string | null
+          roster_count: number | null
+          schedule: string | null
+          section_code: string | null
+          section_id: string | null
+          section_status: string | null
+          term_id: string | null
+          term_name: string | null
+        }
+        Relationships: []
+      }
+      instructor_section_gradebook: {
+        Row: {
+          assignment_average: number | null
+          correction_reason_code: string | null
+          course_code: string | null
+          course_title: string | null
+          current_grade_record_id: string | null
+          current_grade_record_version: number | null
+          draft_revision: number | null
+          enrollment_id: string | null
+          final_exam_score: number | null
+          grade_code: string | null
+          grade_points: number | null
+          grade_submission_id: string | null
+          institution_id: string | null
+          institution_name: string | null
+          last_saved_at: string | null
+          lifecycle_state: string | null
+          location: string | null
+          participation_score: number | null
+          previous_grade_submission_id: string | null
+          row_status: string | null
+          schedule: string | null
+          section_code: string | null
+          section_id: string | null
+          student_display_name: string | null
+          student_id: string | null
+          student_initials: string | null
+          term_id: string | null
+          term_name: string | null
+          total_score: number | null
+        }
+        Relationships: []
+      }
       registrar_attention_queue: {
         Row: {
           course_code: string | null
@@ -2558,6 +2654,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      registrar_grade_queue: {
+        Row: {
+          approved_at: string | null
+          correction_reason_code: string | null
+          course_code: string | null
+          course_title: string | null
+          current_grade_record_id: string | null
+          current_grade_record_version: number | null
+          grade_code: string | null
+          grade_points: number | null
+          grade_submission_id: string | null
+          institution_id: string | null
+          previous_grade_submission_id: string | null
+          section_code: string | null
+          section_id: string | null
+          state: string | null
+          student_display_name: string | null
+          student_id: string | null
+          submitted_at: string | null
+          submitted_by_display_name: string | null
+          term_name: string | null
+          total_score: number | null
+        }
+        Relationships: []
       }
       registrar_section_directory: {
         Row: {
@@ -2640,6 +2761,31 @@ export type Database = {
           },
         ]
       }
+      student_academic_record: {
+        Row: {
+          academic_record_version: number | null
+          academic_record_version_id: string | null
+          anchor_status: string | null
+          attempted_credit_hours: number | null
+          correction_reason_code: string | null
+          course_code: string | null
+          course_id: string | null
+          course_title: string | null
+          credit_hours_earned: number | null
+          grade_code: string | null
+          grade_points: number | null
+          grade_record_id: string | null
+          institution_id: string | null
+          is_current: boolean | null
+          previous_grade_record_id: string | null
+          published_at: string | null
+          student_id: string | null
+          superseded_at: string | null
+          term_name: string | null
+          version_number: number | null
+        }
+        Relationships: []
+      }
       student_dashboard_summary: {
         Row: {
           academic_status: string | null
@@ -2668,6 +2814,23 @@ export type Database = {
           },
         ]
       }
+      student_degree_progress: {
+        Row: {
+          academic_record_version_id: string | null
+          calculated_at: string | null
+          credits_earned: number | null
+          credits_required: number | null
+          degree_audit_snapshot_id: string | null
+          gpa: number | null
+          institution_id: string | null
+          program_name: string | null
+          program_version: number | null
+          progress_percent: number | null
+          requirement_results: Json | null
+          student_id: string | null
+        }
+        Relationships: []
+      }
       student_recent_activity: {
         Row: {
           activity_id: string | null
@@ -2681,6 +2844,10 @@ export type Database = {
       }
     }
     Functions: {
+      approve_grade_submission: {
+        Args: { p_grade_submission_id: string; p_idempotency_key: string }
+        Returns: Json
+      }
       check_registration_eligibility: {
         Args: { requested_section_ids?: string[]; section_id: string }
         Returns: Json
@@ -2714,8 +2881,37 @@ export type Database = {
           term_name: string
         }[]
       }
+      publish_grade_submission: {
+        Args: {
+          p_content_commitment: string
+          p_grade_submission_id: string
+          p_idempotency_key: string
+          p_salt_reference: string
+        }
+        Returns: Json
+      }
       register_for_sections: {
         Args: { p_idempotency_key: string; p_section_ids: string[] }
+        Returns: Json
+      }
+      save_grade_drafts: {
+        Args: {
+          p_grades: Json
+          p_idempotency_key: string
+          p_section_id: string
+        }
+        Returns: Json
+      }
+      start_grade_correction: {
+        Args: {
+          p_grade_record_id: string
+          p_idempotency_key: string
+          p_reason_code: string
+        }
+        Returns: Json
+      }
+      submit_section_grades: {
+        Args: { p_idempotency_key: string; p_section_id: string }
         Returns: Json
       }
       withdraw_from_section: {
