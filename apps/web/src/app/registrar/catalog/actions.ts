@@ -70,6 +70,7 @@ const deactivateSchema = baseSchema.extend({
     "department",
     "course",
     "program",
+    "program_version",
     "requirement",
     "prerequisite",
   ]),
@@ -234,17 +235,23 @@ export const deactivateCatalogResource = async (
                 .update({ status: "inactive", deactivated_at: deactivatedAt })
                 .eq("id", value.id)
                 .eq("institution_id", value.institutionId)
-            : value.resource === "requirement"
+            : value.resource === "program_version"
               ? await supabase
-                  .from("program_requirements")
-                  .update({ deactivated_at: deactivatedAt })
+                  .from("program_versions")
+                  .update({ status: "retired" })
                   .eq("id", value.id)
                   .eq("institution_id", value.institutionId)
-              : await supabase
-                  .from("course_prerequisites")
-                  .update({ deactivated_at: deactivatedAt })
-                  .eq("id", value.id)
-                  .eq("institution_id", value.institutionId);
+              : value.resource === "requirement"
+                ? await supabase
+                    .from("program_requirements")
+                    .update({ deactivated_at: deactivatedAt })
+                    .eq("id", value.id)
+                    .eq("institution_id", value.institutionId)
+                : await supabase
+                    .from("course_prerequisites")
+                    .update({ deactivated_at: deactivatedAt })
+                    .eq("id", value.id)
+                    .eq("institution_id", value.institutionId);
 
     if (result.error) {
       return mutationError("catalog_resource_deactivate_failed", result.error);
