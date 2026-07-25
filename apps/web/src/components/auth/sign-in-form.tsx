@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, LockKeyhole } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -20,7 +19,6 @@ const signInSchema = z.object({
 type SignInValues = z.infer<typeof signInSchema>;
 
 export function SignInForm() {
-  const router = useRouter();
   const [serverError, setServerError] = useState<string>();
   const [isPending, startTransition] = useTransition();
   const {
@@ -38,10 +36,7 @@ export function SignInForm() {
       const result = await signIn(values);
       if (result.error) {
         setServerError(result.error);
-        return;
       }
-      router.push("/student");
-      router.refresh();
     });
   });
 

@@ -39,3 +39,17 @@ export type {
   VerificationSignal,
   WalletProvider,
 } from "./integrations";
+export {
+  hasRegistrarAccess,
+  roleHomePath,
+  type AcademicStructureRepository,
+  type InstitutionAccess,
+  type InstitutionRole,
+  type MembershipAdministrationRepository,
+  type RegistrarActivity,
+  type RegistrarAttentionItem,
+  type RegistrarSection,
+  type RegistrarStudent,
+  type RegistrarWorkspace,
+  type RegistrarWorkspaceRepository,
+} from "./registrar";

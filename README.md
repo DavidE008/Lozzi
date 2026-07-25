@@ -1,9 +1,10 @@
 # Lozzi
 
 Lozzi is a privacy-first, verifiable Student Information System for colleges
-and universities. Milestones 0–1 establish the product, security, data,
-contract, CI, and authenticated student-dashboard foundations without
-deploying contracts or claiming live partner integrations.
+and universities. Milestones 0–2 establish the product, security, data,
+contract, CI, authenticated student dashboard, and institution-scoped
+registrar foundations without deploying contracts or claiming live partner
+integrations.
 
 ## Synthetic student demo
 
@@ -42,6 +43,7 @@ pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:e2e
 pnpm build
 pnpm audit:dependencies
 pnpm contracts:test
@@ -61,6 +63,8 @@ the complete acceptance record and remaining partner credentials.
 - [Approved design specification](docs/design/specification.md)
 - [Dashboard fidelity review](docs/design/fidelity-review.md)
 - [Milestones 0–1 acceptance evidence](docs/verification/acceptance.md)
+- [Registrar fidelity review](docs/design/registrar-fidelity-review.md)
+- [Milestone 2 acceptance evidence](docs/verification/milestone-2.md)
 
 World, ENS, 0G, WalletConnect, and World Chain deployment are deliberately
 unconfigured. The app reports that state honestly, and no registry has been

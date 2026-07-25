@@ -34,24 +34,36 @@ test("student signs in, sees hosted rows, navigates, and signs out", async ({
   await expect(page.getByText("4.00")).toBeVisible();
   await expect(page.getByText("CS 2305", { exact: true })).toBeVisible();
 
-  await page.getByRole("link", { name: "Academic record" }).click();
+  await Promise.all([
+    page.waitForURL(/\/student\/record$/u),
+    page.getByRole("link", { name: "Academic record" }).click(),
+  ]);
   await expect(
     page.getByRole("heading", { name: "Academic record" }),
   ).toBeVisible();
   await expect(page.getByText("CS 1301")).toBeVisible();
   await expect(page.getByText("Verified", { exact: true })).toBeVisible();
 
-  await page.getByRole("link", { name: "Degree progress" }).click();
+  await Promise.all([
+    page.waitForURL(/\/student\/progress$/u),
+    page.getByRole("link", { name: "Degree progress" }).click(),
+  ]);
   await expect(
     page.getByRole("heading", { name: "Degree progress" }),
   ).toBeVisible();
 
-  await page.getByRole("link", { name: "Verified shares" }).click();
+  await Promise.all([
+    page.waitForURL(/\/student\/shares$/u),
+    page.getByRole("link", { name: "Verified shares" }).click(),
+  ]);
   await expect(
     page.getByRole("heading", { name: "Verified shares" }),
   ).toBeVisible();
 
-  await page.getByRole("link", { name: "Settings" }).click();
+  await Promise.all([
+    page.waitForURL(/\/student\/settings$/u),
+    page.getByRole("link", { name: "Settings" }).click(),
+  ]);
   await expect(page.getByText("World verification")).toBeVisible();
   await expect(page.getByText("Not configured").first()).toBeVisible();
 
@@ -72,7 +84,10 @@ test("mobile navigation reaches every student destination", async ({
   await expect(
     page.getByRole("navigation", { name: "Student navigation" }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Degree progress" }).click();
+  await Promise.all([
+    page.waitForURL(/\/student\/progress$/u),
+    page.getByRole("link", { name: "Degree progress" }).click(),
+  ]);
   await expect(
     page.getByRole("heading", { name: "Degree progress" }),
   ).toBeVisible();

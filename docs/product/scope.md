@@ -1,6 +1,6 @@
 # Product scope
 
-## Outcome
+## Milestones 0–1 outcome
 
 Milestones 0–1 prove that Lozzi can present one trustworthy student record from
 a normalized, institution-scoped system while keeping partner and onchain
@@ -29,5 +29,17 @@ capabilities honest and optional.
 
 The synthetic Aisha account signs in, sees a reproducible 4.00 GPA and 3 of 120
 credits, navigates every visible student destination, and cannot read another
-student's rows. The contracts compile and pass authorization, linkage,
+student’s rows. The contracts compile and pass authorization, linkage,
 idempotency, expiration, revocation, privacy, and event tests.
+
+## Milestone 2 extension
+
+Milestone 2 adds institution-scoped academic-structure management and the
+approved registrar workspace. Registrars can maintain departments, terms,
+program versions and requirements, courses, prerequisites, sections,
+instructor assignments, and meetings through validated server actions.
+Institution administrators can additionally manage institution settings,
+memberships, and staff-role assignments.
+
+Course registration, grade publication, partner integrations, and onchain
+shipping remain outside this milestone.

@@ -146,7 +146,7 @@ export const getRecordRows = async (studentId: string) => {
   const { data, error } = await supabase
     .from("grade_records")
     .select(
-      "id, grade_code, credit_hours_earned, published_at, enrollments!inner(student_id, course_sections!inner(courses!inner(code, title)))",
+      "id, grade_code, credit_hours_earned, published_at, enrollments!grade_records_enrollment_id_fkey!inner(student_id, course_sections!enrollments_section_id_fkey!inner(courses!course_sections_course_id_fkey!inner(code, title)))",
     )
     .eq("is_current", true)
     .eq("enrollments.student_id", studentId)
