@@ -58,13 +58,15 @@ export function SignInForm() {
           {...register("email")}
         />
         {errors.email ? (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
+          <p className="text-destructive text-sm">{errors.email.message}</p>
         ) : null}
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Password</Label>
-          <span className="text-xs text-muted-foreground">Recovery via your institution</span>
+          <span className="text-muted-foreground text-xs">
+            Recovery via your institution
+          </span>
         </div>
         <Input
           id="password"
@@ -74,12 +76,12 @@ export function SignInForm() {
           {...register("password")}
         />
         {errors.password ? (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
+          <p className="text-destructive text-sm">{errors.password.message}</p>
         ) : null}
       </div>
       {serverError ? (
         <div
-          className="rounded-sm border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+          className="border-destructive/30 bg-destructive/5 text-destructive rounded-sm border px-3 py-2 text-sm"
           role="alert"
         >
           {serverError}

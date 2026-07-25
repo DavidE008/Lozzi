@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { signOut } from "@/app/auth/actions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -36,7 +37,13 @@ const navigation = [
   { href: "/student/settings", label: "Settings", icon: Settings },
 ] as const;
 
-function Navigation({ mobile = false }: { readonly mobile?: boolean }) {
+function Navigation({
+  mobile = false,
+  onNavigate,
+}: {
+  readonly mobile?: boolean;
+  readonly onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   return (
     <nav aria-label="Student navigation" className="space-y-1">
@@ -47,13 +54,14 @@ function Navigation({ mobile = false }: { readonly mobile?: boolean }) {
           <Link
             key={href}
             href={href}
+            onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors",
               active
                 ? mobile
                   ? "bg-accent text-accent-foreground"
-                  : "bg-white/10 text-white before:-ml-3 before:h-5 before:w-0.5 before:bg-lozzi-teal"
+                  : "before:bg-lozzi-teal bg-white/10 text-white before:-ml-3 before:h-5 before:w-0.5"
                 : mobile
                   ? "text-muted-foreground hover:bg-muted"
                   : "text-white/65 hover:bg-white/5 hover:text-white",
@@ -79,18 +87,24 @@ export function StudentShell({
   readonly initials: string;
   readonly institutionName: string;
 }) {
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+
   return (
-    <div className="min-h-screen bg-background lg:grid lg:grid-cols-[15rem_1fr]">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-lozzi-navy text-white lg:flex">
+    <div className="bg-background min-h-screen lg:grid lg:grid-cols-[15rem_1fr]">
+      <aside className="bg-lozzi-navy fixed inset-y-0 left-0 z-30 hidden w-60 flex-col text-white lg:flex">
         <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
-          <LozziCrest className="h-11 w-10 text-lozzi-navy drop-shadow-[0_0_0.5px_white]" />
+          <LozziCrest className="text-lozzi-navy h-11 w-10 drop-shadow-[0_0_0.5px_white]" />
           <div>
-            <p className="font-heading text-2xl font-semibold leading-none">{brandConfig.name}</p>
-            <p className="mt-1 text-[10px] uppercase tracking-wider text-white/45">Student portal</p>
+            <p className="font-heading text-2xl leading-none font-semibold">
+              {brandConfig.name}
+            </p>
+            <p className="mt-1 text-[10px] tracking-wider text-white/45 uppercase">
+              Student portal
+            </p>
           </div>
         </div>
         <div className="px-4 py-7">
-          <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">
+          <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-white/35 uppercase">
             My academics
           </p>
           <Navigation />
@@ -104,7 +118,9 @@ export function StudentShell({
             </Avatar>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{displayName}</p>
-              <p className="truncate text-[11px] text-white/45">{institutionName}</p>
+              <p className="truncate text-[11px] text-white/45">
+                {institutionName}
+              </p>
             </div>
           </div>
           <form action={signOut}>
@@ -121,34 +137,48 @@ export function StudentShell({
       </aside>
 
       <div className="lg:col-start-2">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur sm:px-6 lg:h-20 lg:px-10">
+        <header className="bg-background/95 sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 backdrop-blur sm:px-6 lg:h-20 lg:px-10">
           <div className="flex items-center gap-3 lg:hidden">
-            <Sheet>
-              <SheetTrigger render={<Button variant="ghost" size="icon" aria-label="Open navigation" />}>
+            <Sheet
+              open={mobileNavigationOpen}
+              onOpenChange={setMobileNavigationOpen}
+            >
+              <SheetTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Open navigation"
+                  />
+                }
+              >
                 <Menu />
               </SheetTrigger>
               <SheetContent side="left" className="w-72">
                 <SheetHeader>
-                  <SheetTitle className="flex items-center gap-3 font-heading text-2xl">
-                    <LozziCrest className="h-10 w-9 text-lozzi-navy" />
+                  <SheetTitle className="font-heading flex items-center gap-3 text-2xl">
+                    <LozziCrest className="text-lozzi-navy h-10 w-9" />
                     {brandConfig.name}
                   </SheetTitle>
                   <SheetDescription>{institutionName}</SheetDescription>
                 </SheetHeader>
                 <div className="px-4">
-                  <Navigation mobile />
+                  <Navigation
+                    mobile
+                    onNavigate={() => setMobileNavigationOpen(false)}
+                  />
                 </div>
               </SheetContent>
             </Sheet>
-            <LozziCrest className="h-9 w-8 text-lozzi-navy" />
+            <LozziCrest className="text-lozzi-navy h-9 w-8" />
           </div>
           <div className="hidden lg:block">
-            <p className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+            <p className="text-muted-foreground text-xs font-medium tracking-[0.15em] uppercase">
               {institutionName}
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <BookOpen className="size-4 text-lozzi-teal" aria-hidden="true" />
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
+            <BookOpen className="text-lozzi-teal size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Fall 2026</span>
           </div>
         </header>

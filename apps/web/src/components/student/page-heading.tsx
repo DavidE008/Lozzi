@@ -9,13 +9,15 @@ export function PageHeading({
 }) {
   return (
     <header className="mb-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lozzi-teal">
+      <p className="text-lozzi-teal text-xs font-semibold tracking-[0.18em] uppercase">
         {eyebrow}
       </p>
-      <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h1 className="font-heading mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
         {title}
       </h1>
-      <p className="mt-2 max-w-2xl leading-6 text-muted-foreground">{description}</p>
+      <p className="text-muted-foreground mt-2 max-w-2xl leading-6">
+        {description}
+      </p>
     </header>
   );
 }

@@ -18,7 +18,11 @@ export interface CommitmentInput {
 }
 
 const canonicalizeValue = (value: JsonValue): string => {
-  if (value === null || typeof value === "boolean" || typeof value === "string") {
+  if (
+    value === null ||
+    typeof value === "boolean" ||
+    typeof value === "string"
+  ) {
     return JSON.stringify(value);
   }
   if (typeof value === "number") {
@@ -45,9 +49,13 @@ export const commitmentPreimage = ({
   salt,
   payload,
 }: CommitmentInput): string =>
-  [DOMAIN_PREFIX, domain, institutionId, salt.toLowerCase(), canonicalizeJson(payload)].join(
-    "\u0000",
-  );
+  [
+    DOMAIN_PREFIX,
+    domain,
+    institutionId,
+    salt.toLowerCase(),
+    canonicalizeJson(payload),
+  ].join("\u0000");
 
 export const createCommitment = (input: CommitmentInput): `0x${string}` =>
   keccak256(stringToHex(commitmentPreimage(input)));

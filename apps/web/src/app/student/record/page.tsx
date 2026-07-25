@@ -25,7 +25,7 @@ export default async function AcademicRecordPage() {
           {records.length ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[42rem] text-left text-sm">
-                <thead className="border-b bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
+                <thead className="bg-muted/40 text-muted-foreground border-b text-xs tracking-wider uppercase">
                   <tr>
                     <th className="px-6 py-4 font-medium">Course</th>
                     <th className="px-6 py-4 font-medium">Credits</th>
@@ -41,14 +41,20 @@ export default async function AcademicRecordPage() {
                       <tr key={record.id}>
                         <td className="px-6 py-5">
                           <p className="font-medium">{section.courses.code}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">{section.courses.title}</p>
+                          <p className="text-muted-foreground mt-1 text-xs">
+                            {section.courses.title}
+                          </p>
                         </td>
-                        <td className="px-6 py-5">{record.credit_hours_earned}</td>
-                        <td className="px-6 py-5 font-heading text-lg font-semibold">{record.grade_code}</td>
-                        <td className="px-6 py-5 text-muted-foreground">
-                          {new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(
-                            new Date(record.published_at),
-                          )}
+                        <td className="px-6 py-5">
+                          {record.credit_hours_earned}
+                        </td>
+                        <td className="font-heading px-6 py-5 text-lg font-semibold">
+                          {record.grade_code}
+                        </td>
+                        <td className="text-muted-foreground px-6 py-5">
+                          {new Intl.DateTimeFormat("en", {
+                            dateStyle: "medium",
+                          }).format(new Date(record.published_at))}
                         </td>
                         <td className="px-6 py-5">
                           <Badge className="bg-lozzi-teal/10 text-lozzi-teal hover:bg-lozzi-teal/10">
@@ -62,7 +68,7 @@ export default async function AcademicRecordPage() {
               </table>
             </div>
           ) : (
-            <div className="p-10 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground p-10 text-center text-sm">
               No published academic records yet.
             </div>
           )}

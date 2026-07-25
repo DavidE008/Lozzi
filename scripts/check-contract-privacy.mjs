@@ -13,7 +13,9 @@ const forbidden = [
   "Northstar University",
 ];
 
-const files = (await readdir(sourceDirectory)).filter((file) => file.endsWith(".sol"));
+const files = (await readdir(sourceDirectory)).filter((file) =>
+  file.endsWith(".sol"),
+);
 const violations = [];
 
 for (const file of files) {
@@ -24,7 +26,9 @@ for (const file of files) {
 }
 
 if (violations.length) {
-  console.error(`Sensitive fixture strings found in contracts:\n${violations.join("\n")}`);
+  console.error(
+    `Sensitive fixture strings found in contracts:\n${violations.join("\n")}`,
+  );
   process.exit(1);
 }
 

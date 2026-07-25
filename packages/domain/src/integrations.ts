@@ -11,21 +11,21 @@ export interface VerificationProvider {
   verify(proof: unknown): Promise<VerificationSignal>;
 }
 
-export interface IdentityVerificationProvider extends VerificationProvider {}
+export type IdentityVerificationProvider = VerificationProvider;
 
 export interface NameProvider {
   readonly capability: CapabilityState;
   resolveSubname(label: string): Promise<string | null>;
 }
 
-export interface NamingProvider extends NameProvider {}
+export type NamingProvider = NameProvider;
 
 export interface ComputeProvider {
   readonly capability: CapabilityState;
   infer(input: Readonly<Record<string, unknown>>): Promise<unknown>;
 }
 
-export interface PrivateInferenceProvider extends ComputeProvider {}
+export type PrivateInferenceProvider = ComputeProvider;
 
 export interface PrivateStorageProvider {
   readonly capability: CapabilityState;
@@ -34,17 +34,25 @@ export interface PrivateStorageProvider {
     readonly ciphertextSha256: `0x${string}`;
     readonly encryptionMode: "aes-256-gcm" | "ecies";
     readonly wrappingKeyReference: string;
-  }): Promise<{ readonly objectReference: string; readonly rootHash: `0x${string}` }>;
+  }): Promise<{
+    readonly objectReference: string;
+    readonly rootHash: `0x${string}`;
+  }>;
 }
 
 export interface WalletProvider {
   readonly capability: CapabilityState;
-  requestStudentAuthorization(payloadHash: `0x${string}`): Promise<`0x${string}`>;
+  requestStudentAuthorization(
+    payloadHash: `0x${string}`,
+  ): Promise<`0x${string}`>;
 }
 
 export interface CommitmentPublisher {
   readonly capability: CapabilityState;
-  publishRecord(commitment: `0x${string}`, idempotencyKey: `0x${string}`): Promise<`0x${string}`>;
+  publishRecord(
+    commitment: `0x${string}`,
+    idempotencyKey: `0x${string}`,
+  ): Promise<`0x${string}`>;
 }
 
-export interface BlockchainAnchorProvider extends CommitmentPublisher {}
+export type BlockchainAnchorProvider = CommitmentPublisher;

@@ -24,7 +24,11 @@ const formatDate = (value: string) =>
     year: "numeric",
   }).format(new Date(value));
 
-export function DashboardView({ dashboard }: { readonly dashboard: StudentDashboard }) {
+export function DashboardView({
+  dashboard,
+}: {
+  readonly dashboard: StudentDashboard;
+}) {
   const metrics = [
     {
       label: "Program",
@@ -47,7 +51,8 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
     {
       label: "Active holds",
       value: `${dashboard.activeHolds}`,
-      detail: dashboard.activeHolds === 0 ? "Clear to register" : "Action required",
+      detail:
+        dashboard.activeHolds === 0 ? "Clear to register" : "Action required",
       icon: ShieldCheck,
     },
   ] as const;
@@ -56,36 +61,51 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
     <>
       <section className="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lozzi-teal">
+          <p className="text-lozzi-teal text-xs font-semibold tracking-[0.18em] uppercase">
             Student overview
           </p>
-          <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="font-heading mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
             Welcome back, {dashboard.displayName.split(" ")[0]}
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Here is where your academic journey stands today.
           </p>
         </div>
         <Badge
           variant="outline"
-          className="w-fit gap-2 border-lozzi-teal/30 bg-lozzi-teal/5 px-3 py-1.5 text-lozzi-teal"
+          className="border-lozzi-teal/30 bg-lozzi-teal/5 text-lozzi-teal w-fit gap-2 px-3 py-1.5"
         >
-          <span className="size-1.5 rounded-full bg-lozzi-teal" aria-hidden="true" />
-          {dashboard.academicStanding === "active" ? "Good academic standing" : dashboard.academicStanding}
+          <span
+            className="bg-lozzi-teal size-1.5 rounded-full"
+            aria-hidden="true"
+          />
+          {dashboard.academicStanding === "active"
+            ? "Good academic standing"
+            : dashboard.academicStanding}
         </Badge>
       </section>
 
-      <section aria-label="Academic summary" className="grid gap-px overflow-hidden rounded-sm border bg-border sm:grid-cols-2 xl:grid-cols-4">
+      <section
+        aria-label="Academic summary"
+        className="bg-border grid gap-px overflow-hidden rounded-sm border sm:grid-cols-2 xl:grid-cols-4"
+      >
         {metrics.map(({ label, value, detail, icon: Icon }) => (
-          <div key={label} className="min-h-36 bg-card p-5">
+          <div key={label} className="bg-card min-h-36 p-5">
             <div className="mb-5 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-              <Icon className="size-4 text-lozzi-teal" aria-hidden="true" />
+              <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                {label}
+              </p>
+              <Icon className="text-lozzi-teal size-4" aria-hidden="true" />
             </div>
-            <p className={cn("font-heading text-3xl font-semibold", label === "Program" && "text-2xl")}>
+            <p
+              className={cn(
+                "font-heading text-3xl font-semibold",
+                label === "Program" && "text-2xl",
+              )}
+            >
               {value}
             </p>
-            <p className="mt-2 text-xs text-muted-foreground">{detail}</p>
+            <p className="text-muted-foreground mt-2 text-xs">{detail}</p>
           </div>
         ))}
       </section>
@@ -94,10 +114,16 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
         <Card className="gap-0 overflow-hidden py-0 shadow-none">
           <CardHeader className="flex-row items-center justify-between border-b px-6 py-5">
             <div>
-              <CardTitle className="font-heading text-xl">Current courses</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">Fall 2026 · Enrolled</p>
+              <CardTitle className="font-heading text-xl">
+                Current courses
+              </CardTitle>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Fall 2026 · Enrolled
+              </p>
             </div>
-            <Badge variant="secondary">{dashboard.currentCourses.length} course</Badge>
+            <Badge variant="secondary">
+              {dashboard.currentCourses.length} course
+            </Badge>
           </CardHeader>
           <CardContent className="p-0">
             {dashboard.currentCourses.length ? (
@@ -107,19 +133,30 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className="text-xs font-semibold uppercase tracking-wider text-lozzi-teal">
+                          <span className="text-lozzi-teal text-xs font-semibold tracking-wider uppercase">
                             {course.code}
                           </span>
-                          <span className="text-xs text-muted-foreground">Section {course.section}</span>
+                          <span className="text-muted-foreground text-xs">
+                            Section {course.section}
+                          </span>
                         </div>
-                        <h2 className="mt-2 font-heading text-xl font-semibold">{course.title}</h2>
-                        <p className="mt-1 text-sm text-muted-foreground">{course.instructor}</p>
+                        <h2 className="font-heading mt-2 text-xl font-semibold">
+                          {course.title}
+                        </h2>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {course.instructor}
+                        </p>
                       </div>
-                      <Button variant="outline" size="sm" render={<Link href="/student/record" />}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        nativeButton={false}
+                        render={<Link href="/student/record" />}
+                      >
                         Details <ArrowUpRight aria-hidden="true" />
                       </Button>
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground mt-5 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4 text-xs">
                       <span className="flex items-center gap-2">
                         <CalendarDays className="size-3.5" aria-hidden="true" />
                         {course.schedule}
@@ -134,9 +171,14 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
               </ul>
             ) : (
               <div className="p-10 text-center">
-                <BookMarked className="mx-auto size-8 text-muted-foreground/40" aria-hidden="true" />
+                <BookMarked
+                  className="text-muted-foreground/40 mx-auto size-8"
+                  aria-hidden="true"
+                />
                 <p className="mt-3 font-medium">No current courses</p>
-                <p className="mt-1 text-sm text-muted-foreground">Enrolled courses will appear here.</p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Enrolled courses will appear here.
+                </p>
               </div>
             )}
           </CardContent>
@@ -145,12 +187,16 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
         <div className="space-y-8">
           <Card className="shadow-none">
             <CardHeader>
-              <CardTitle className="font-heading text-xl">Degree progress</CardTitle>
+              <CardTitle className="font-heading text-xl">
+                Degree progress
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-end justify-between">
-                <span className="font-heading text-4xl font-semibold">{dashboard.progressPercent}%</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="font-heading text-4xl font-semibold">
+                  {dashboard.progressPercent}%
+                </span>
+                <span className="text-muted-foreground text-xs">
                   {dashboard.creditsEarned}/{dashboard.creditsRequired} credits
                 </span>
               </div>
@@ -161,7 +207,8 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
               />
               <Button
                 variant="link"
-                className="mt-4 h-auto p-0 text-lozzi-teal"
+                className="text-lozzi-teal mt-4 h-auto p-0"
+                nativeButton={false}
                 render={<Link href="/student/progress" />}
               >
                 View degree audit <ArrowUpRight aria-hidden="true" />
@@ -171,7 +218,9 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
 
           <Card className="shadow-none">
             <CardHeader>
-              <CardTitle className="font-heading text-xl">Recent activity</CardTitle>
+              <CardTitle className="font-heading text-xl">
+                Recent activity
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {dashboard.recentActivity.length ? (
@@ -191,8 +240,10 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
                       />
                       <div>
                         <p className="text-sm font-medium">{activity.title}</p>
-                        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{activity.detail}</p>
-                        <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <p className="text-muted-foreground mt-0.5 text-xs leading-5">
+                          {activity.detail}
+                        </p>
+                        <p className="text-muted-foreground mt-1 flex items-center gap-1.5 text-[11px]">
                           <Clock3 className="size-3" aria-hidden="true" />
                           {formatDate(activity.occurredAt)}
                         </p>
@@ -201,7 +252,9 @@ export function DashboardView({ dashboard }: { readonly dashboard: StudentDashbo
                   ))}
                 </ol>
               ) : (
-                <p className="text-sm text-muted-foreground">No recent academic activity.</p>
+                <p className="text-muted-foreground text-sm">
+                  No recent academic activity.
+                </p>
               )}
             </CardContent>
           </Card>

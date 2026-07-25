@@ -24,7 +24,9 @@ export default async function SettingsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="shadow-none">
           <CardHeader>
-            <CardTitle className="font-heading text-xl">Student profile</CardTitle>
+            <CardTitle className="font-heading text-xl">
+              Student profile
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div className="flex justify-between border-b pb-3">
@@ -43,14 +45,21 @@ export default async function SettingsPage() {
         </Card>
         <Card className="shadow-none">
           <CardHeader>
-            <CardTitle className="font-heading text-xl">Capability status</CardTitle>
+            <CardTitle className="font-heading text-xl">
+              Capability status
+            </CardTitle>
           </CardHeader>
           <CardContent className="divide-y">
             {capabilities.map((capability) => (
-              <div key={capability.name} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+              <div
+                key={capability.name}
+                className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+              >
                 <div>
                   <p className="text-sm font-medium">{capability.label}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{capability.detail}</p>
+                  <p className="text-muted-foreground mt-0.5 text-xs">
+                    {capability.detail}
+                  </p>
                 </div>
                 <Badge
                   variant="outline"
@@ -60,7 +69,9 @@ export default async function SettingsPage() {
                       : "text-muted-foreground"
                   }
                 >
-                  {capability.status === "available" ? "Available" : "Not configured"}
+                  {capability.status === "available"
+                    ? "Available"
+                    : "Not configured"}
                 </Badge>
               </div>
             ))}

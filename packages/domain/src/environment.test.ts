@@ -5,9 +5,9 @@ import { parseEnvironment } from "./environment";
 describe("environment capability detection", () => {
   it("reports optional partners honestly", () => {
     const result = parseEnvironment({ NODE_ENV: "test" });
-    expect(result.capabilities.every(({ status }) => status === "not-configured")).toBe(
-      true,
-    );
+    expect(
+      result.capabilities.every(({ status }) => status === "not-configured"),
+    ).toBe(true);
   });
 
   it("requires both public Supabase values", () => {

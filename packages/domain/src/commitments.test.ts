@@ -32,7 +32,10 @@ describe("RFC 8785 commitment inputs", () => {
   });
 
   it("changes when only the salt changes", () => {
-    const other = createCommitment({ ...fixture, salt: `0x${"22".repeat(32)}` });
+    const other = createCommitment({
+      ...fixture,
+      salt: `0x${"22".repeat(32)}`,
+    });
     expect(createCommitment(fixture)).not.toBe(other);
   });
 });

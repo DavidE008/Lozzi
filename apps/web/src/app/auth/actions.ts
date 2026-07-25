@@ -26,7 +26,9 @@ export const signIn = async (
     const { error } = await supabase.auth.signInWithPassword(credentials);
 
     if (error) {
-      logEvent("warn", "sign_in_denied", { category: error.code ?? "auth_error" });
+      logEvent("warn", "sign_in_denied", {
+        category: error.code ?? "auth_error",
+      });
       return { error: "Those sign-in details were not recognised." };
     }
 
@@ -34,7 +36,8 @@ export const signIn = async (
     return {};
   } catch (error) {
     logEvent("warn", "sign_in_rejected", {
-      category: error instanceof z.ZodError ? "invalid_input" : "request_rejected",
+      category:
+        error instanceof z.ZodError ? "invalid_input" : "request_rejected",
     });
     return { error: "Sign-in could not be completed. Please try again." };
   }

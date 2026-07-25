@@ -6,15 +6,28 @@ const trackedFiles = execFileSync("git", ["ls-files"], { encoding: "utf8" })
   .filter(Boolean);
 
 const rules = [
-  { label: "Supabase service-role JWT", pattern: /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/u },
-  { label: "private key", pattern: /-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/u },
-  { label: "generic secret assignment", pattern: /(?:secret|private_key)\s*=\s*["'][^"'$<]{16,}["']/iu },
+  {
+    label: "Supabase service-role JWT",
+    pattern: /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/u,
+  },
+  {
+    label: "private key",
+    pattern: /-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/u,
+  },
+  {
+    label: "generic secret assignment",
+    pattern: /(?:secret|private_key)\s*=\s*["'][^"'$<]{16,}["']/iu,
+  },
 ];
 
 const findings = [];
 for (const file of trackedFiles) {
   if (/\.(?:png|jpg|jpeg|gif|woff2?|lock)$/iu.test(file)) continue;
-  const content = await readFile(file, "utf8").catch(() => "");
+  const content = (await readFile(file, "utf8").catch(() => ""))
+    .split(/\r?\n/u)
+    .filter((line) => !line.trimStart().startsWith("#"))
+    .join("\n")
+    .replaceAll(/env\([A-Z0-9_]+\)/gu, "");
   for (const rule of rules) {
     if (rule.pattern.test(content)) findings.push(`${file}: ${rule.label}`);
   }

@@ -32,10 +32,15 @@ describe("DashboardView", () => {
   it("renders the approved academic summary accessibly", () => {
     render(<DashboardView dashboard={dashboard} />);
 
-    expect(screen.getByRole("heading", { name: "Welcome back, Aisha" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Welcome back, Aisha" }),
+    ).toBeVisible();
     expect(screen.getByText("4.00")).toBeVisible();
     expect(screen.getByText("CS 2305")).toBeVisible();
-    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-label", "3% degree progress");
+    expect(screen.getByRole("progressbar")).toHaveAttribute(
+      "aria-label",
+      "3% degree progress",
+    );
     expect(screen.getByText("No recent academic activity.")).toBeVisible();
   });
 

@@ -50,12 +50,12 @@ flowchart LR
 
 ## State-transition audit
 
-| Transition | Caller | Motivation | If no caller |
-| --- | --- | --- | --- |
-| Register institution | registry owner | onboard an approved institution | institution remains unavailable |
-| Set institution admin/signer | active institution admin | rotate least-privilege operators | prior scoped authority remains |
-| Commit record version | active institutional signer | publish a verifiable academic commitment | offchain SIS remains canonical |
-| Create/revoke share grant | active institutional signer relaying student consent | satisfy a student-authorized share | no public share is created/revoked |
+| Transition                   | Caller                                               | Motivation                               | If no caller                       |
+| ---------------------------- | ---------------------------------------------------- | ---------------------------------------- | ---------------------------------- |
+| Register institution         | registry owner                                       | onboard an approved institution          | institution remains unavailable    |
+| Set institution admin/signer | active institution admin                             | rotate least-privilege operators         | prior scoped authority remains     |
+| Commit record version        | active institutional signer                          | publish a verifiable academic commitment | offchain SIS remains canonical     |
+| Create/revoke share grant    | active institutional signer relaying student consent | satisfy a student-authorized share       | no public share is created/revoked |
 
 Nothing is automatic. A later worker pays gas, retries the outbox item, and
 records the receipt. Milestones 0–1 deliberately stop before that worker or

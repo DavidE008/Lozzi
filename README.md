@@ -43,6 +43,7 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm audit:dependencies
 pnpm contracts:test
 pnpm secrets:scan
 ```
@@ -50,3 +51,17 @@ pnpm secrets:scan
 Run `supabase start && supabase db reset && supabase test db` when Docker is
 available. See [docs/submission-checklist.md](docs/submission-checklist.md) for
 the complete acceptance record and remaining partner credentials.
+
+## Architecture and design evidence
+
+- [System architecture and trust boundaries](docs/architecture/system.md)
+- [Privacy threat model](docs/architecture/privacy-threat-model.md)
+- [Normalized data model](docs/architecture/data-model.md)
+- [Registry proposal](docs/contracts/registry-proposal.md)
+- [Approved design specification](docs/design/specification.md)
+- [Dashboard fidelity review](docs/design/fidelity-review.md)
+- [Milestones 0–1 acceptance evidence](docs/verification/acceptance.md)
+
+World, ENS, 0G, WalletConnect, and World Chain deployment are deliberately
+unconfigured. The app reports that state honestly, and no registry has been
+deployed.

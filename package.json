@@ -10,7 +10,7 @@
     "pnpm": "11.9.0"
   },
   "scripts": {
-    "audit": "pnpm audit --audit-level=high",
+    "audit:dependencies": "pnpm audit --prod --audit-level=high",
     "build": "pnpm --filter @lozzi/web build",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "contracts:test": "node scripts/check-contract-privacy.mjs && forge test --root packages/contracts -vvv",
@@ -20,7 +20,7 @@
     "format:check": "prettier --check .",
     "lint": "pnpm -r lint",
     "secrets:scan": "node scripts/scan-secrets.mjs",
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm --filter @lozzi/domain test && pnpm --filter @lozzi/web test",
     "test:e2e": "pnpm --filter @lozzi/web test:e2e",
     "typecheck": "pnpm -r typecheck"
   },

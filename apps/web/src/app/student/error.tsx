@@ -11,12 +11,20 @@ export default function StudentError({
   readonly reset: () => void;
 }) {
   return (
-    <div className="rounded-sm border border-destructive/25 bg-card p-8 text-center" role="alert">
-      <AlertTriangle className="mx-auto size-9 text-destructive" aria-hidden="true" />
-      <h1 className="mt-4 font-heading text-2xl font-semibold">Your workspace could not be loaded</h1>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-        Your data remains protected. Try the request again, or contact your registrar if
-        the issue persists.
+    <div
+      className="border-destructive/25 bg-card rounded-sm border p-8 text-center"
+      role="alert"
+    >
+      <AlertTriangle
+        className="text-destructive mx-auto size-9"
+        aria-hidden="true"
+      />
+      <h1 className="font-heading mt-4 text-2xl font-semibold">
+        Your workspace could not be loaded
+      </h1>
+      <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm leading-6">
+        Your data remains protected. Try the request again, or contact your
+        registrar if the issue persists.
       </p>
       <Button className="mt-5" onClick={reset}>
         Try again
