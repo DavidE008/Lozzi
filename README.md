@@ -1,10 +1,10 @@
 # Lozzi
 
 Lozzi is a privacy-first, verifiable Student Information System for colleges
-and universities. Milestones 0–3 establish the product, security, data,
-contract, CI, authenticated student dashboard, and institution-scoped
-registrar foundations plus deterministic student registration, without
-deploying contracts or claiming live partner integrations.
+and universities. Milestones 0–5 establish the product, security, normalized
+data, contract, CI, authenticated role products, deterministic registration and
+grades, record versioning, degree progress, and optional partner boundaries.
+No contract is deployed and no unconfigured partner is presented as live.
 
 ## Synthetic student demo
 
@@ -73,6 +73,9 @@ the complete acceptance record and remaining partner credentials.
 - [Milestone 3 product scope](docs/product/milestone-3.md)
 - [Milestone 3 registration design contract](docs/design/registration-contract.md)
 - [Milestone 3 acceptance evidence](docs/verification/milestone-3.md)
+- [Milestone 4 acceptance evidence](docs/verification/milestone-4.md)
+- [Milestone 5 partner scope](docs/product/milestone-5.md)
+- [Milestone 5 acceptance evidence](docs/verification/milestone-5.md)
 - [Synthetic test and demo accounts](docs/testing/test-accounts.md)
 
 World, ENS, 0G, WalletConnect, and World Chain deployment are deliberately
