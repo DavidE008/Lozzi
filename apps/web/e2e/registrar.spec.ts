@@ -47,12 +47,15 @@ test("registrar sees hosted rows and every navigation destination", async ({
   ] as const) {
     await page.getByRole("link", { name: link, exact: true }).first().click();
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+
+    if (link === "Records") {
+      await expect(page.getByText("The queue is clear")).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Published record history" }),
+      ).toBeVisible();
+    }
   }
 
-  await expect(page.getByText("The queue is clear")).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Published record history" }),
-  ).toBeVisible();
   await expect(page.getByText("Not configured").first()).toBeVisible();
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/auth$/u);
