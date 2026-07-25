@@ -190,8 +190,8 @@ select is(
 );
 select is(
   (select count(*)::bigint from public.registrar_section_directory),
-  2::bigint,
-  'the registrar section directory exposes both seeded sections'
+  7::bigint,
+  'the registrar section directory exposes all seeded sections'
 );
 
 select lives_ok(
