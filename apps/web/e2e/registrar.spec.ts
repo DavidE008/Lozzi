@@ -31,10 +31,9 @@ test("registrar sees hosted rows and every navigation destination", async ({
     page.getByRole("heading", { name: "Registrar workspace" }),
   ).toBeVisible();
   await expect(page.getByText("Northstar University").first()).toBeVisible();
-  await expect(page.getByText("Mateo Silva")).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Publish record" }),
-  ).toBeDisabled();
+  ).toHaveAttribute("href", "/registrar/records");
 
   for (const [link, heading] of [
     ["Students", "Students"],
@@ -50,6 +49,10 @@ test("registrar sees hosted rows and every navigation destination", async ({
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
   }
 
+  await expect(page.getByText("The queue is clear")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Published record history" }),
+  ).toBeVisible();
   await expect(page.getByText("Not configured").first()).toBeVisible();
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/auth$/u);
