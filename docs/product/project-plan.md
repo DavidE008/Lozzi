@@ -19,3 +19,7 @@ Milestones 0–1 were delivered through `codex/milestones-0-1`. Milestone 2 uses
 small, independently reviewable commits on `codex/milestone-2`. A gate is
 complete only when its executable checks pass; documentation never substitutes
 for a failing control.
+
+Milestone 2 implementation and local acceptance are complete. Final acceptance
+is recorded only after pull request 2 passes every GitHub quality gate and is
+merged to `main`.
