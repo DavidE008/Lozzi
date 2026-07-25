@@ -15,6 +15,10 @@ the mapping between a person and any onchain identifier.
 - Operator or log sink collecting unnecessary PII.
 - Onchain observer linking commitments through predictable payloads.
 - Database reader attempting to decrypt stored objects.
+- Partner response or SDK payload attempting to inject unvalidated content.
+- Replayed World proof, forged RP context, or mismatched authenticated signal.
+- ENS resolution used to correlate a public wallet with a private student.
+- AI provider retaining or returning private academic context unexpectedly.
 
 ## Controls
 
@@ -29,10 +33,21 @@ the mapping between a person and any onchain identifier.
   bundles.
 - Nonce CSP, secure headers, same-origin checks, cookie sessions, dependency
   audit, secret scanning, and PII-free structured logs.
+- Server-generated, short-lived World RP signatures; exact proof forwarding;
+  authenticated signal binding; numeric nullifier uniqueness.
+- ENS lookup only after student-authorized wallet linking; no public
+  student-directory lookup and no sensitive text records.
+- Minimum structured 0G prompts, bounded responses, strict schema validation,
+  request/response commitments, and advisory-only output.
+- Partner secrets remain server-only. Development mocks are rejected in
+  production and visibly labeled everywhere they appear.
 
 ## Residual risks
 
 Supabase and the institution remain trusted processors. Timing and signer
 activity become public after deployment. A malicious authorized registrar can
 enter false data; append-only versioning and audit evidence improve
-accountability but cannot prove real-world truth.
+accountability but cannot prove real-world truth. World, Ethereum RPC, ENS, 0G,
+and the future key wrapper remain external processors with availability and
+metadata-leakage risk. Minimum disclosure and optional capability states reduce
+but do not eliminate those risks.
