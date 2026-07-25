@@ -7,11 +7,11 @@ evidence.
 
 ## Qualification map
 
-| Integration                       | Prize-facing behavior                                                           | Implementation evidence                                                                                          | Manual evidence status            |
-| --------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| AgentKit degree-planning agent    | A registered human-backed agent receives three free uses per human and endpoint | Hono/x402 route, canonical `eip155:480` AgentBook lookup, Supabase nonce/usage storage, encrypted demo-agent EOA | Registration and live run pending |
-| Sensitive-share Selfie Check      | Fresh presence is required for a specific 30-minute sensitive-share draft       | Purpose-bound `selfieCheckLegacy`, authenticated-student and draft signal, one-time challenge, atomic activation | Sandbox and production QA pending |
-| Adult self-consent Identity Check | The student attests only that the minimum-age requirement is met                | World ID 4 `identityCheck([{ type: "minimum_age", value: 18 }])` and server-side `identity_attested === true`    | Production credential QA pending  |
+| Integration                       | Prize-facing behavior                                                              | Implementation evidence                                                                                          | Manual evidence status            |
+| --------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| AgentKit degree-planning agent    | A registered human-backed agent receives three free uses per human and endpoint    | Hono/x402 route, canonical `eip155:480` AgentBook lookup, Supabase nonce/usage storage, encrypted demo-agent EOA | Registration and live run pending |
+| Sensitive-share Selfie Check      | A verifier-confirmed Selfie Check is required for a specific 30-minute share draft | Purpose-bound `selfieCheckLegacy`, authenticated-student and draft signal, one-time challenge, atomic activation | Sandbox and production QA pending |
+| Adult self-consent Identity Check | The student attests only that the minimum-age requirement is met                   | World ID 4 `identityCheck([{ type: "minimum_age", value: 18 }])` and server-side `identity_attested === true`    | Production credential QA pending  |
 
 ## Privacy and authorization evidence
 
