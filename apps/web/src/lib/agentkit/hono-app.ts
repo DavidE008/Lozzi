@@ -40,10 +40,56 @@ const WORLD_CHAIN = "eip155:480" as const;
 const WORLD_USDC = "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1";
 const CONTEXT_ENDPOINT = "/api/agentkit/degree-plan/context" as const;
 const PROPOSALS_ENDPOINT = "/api/agentkit/degree-plan/proposals" as const;
+const MAX_PROPOSAL_BODY_BYTES = 16_384;
 const endpoints = new Set<AgentKitEndpoint>([
   CONTEXT_ENDPOINT,
   PROPOSALS_ENDPOINT,
 ]);
+
+export class AgentRequestBodyTooLargeError extends Error {
+  constructor() {
+    super("The AgentKit request body is too large.");
+    this.name = "AgentRequestBodyTooLargeError";
+  }
+}
+
+export const readBoundedJsonBody = async (
+  request: Request,
+  maximumBytes = MAX_PROPOSAL_BODY_BYTES,
+): Promise<unknown> => {
+  const declaredLength = Number(request.headers.get("content-length") ?? "0");
+  if (Number.isFinite(declaredLength) && declaredLength > maximumBytes) {
+    throw new AgentRequestBodyTooLargeError();
+  }
+
+  const reader = request.body?.getReader();
+  if (!reader) return JSON.parse(await request.text()) as unknown;
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > maximumBytes) {
+        await reader.cancel();
+        throw new AgentRequestBodyTooLargeError();
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const body = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return JSON.parse(new TextDecoder().decode(body)) as unknown;
+};
 
 const proposalInputSchema = z
   .object({
@@ -177,19 +223,20 @@ export const createDegreePlanAgentApp = (
 
   app.post(PROPOSALS_ENDPOINT, async (context) => {
     try {
-      const contentLength = Number(context.req.header("content-length") ?? "0");
-      if (contentLength > 16_384) {
-        return context.json({ error: "Proposal request is too large." }, 413);
-      }
       const authorization = requireAgentAuthorization("degree-plan:propose");
-      const input = proposalInputSchema.parse(await context.req.json());
+      const input = proposalInputSchema.parse(
+        await readBoundedJsonBody(context.req.raw),
+      );
       const proposal = await submitAgentDegreePlanProposal(
         authorization,
         input,
       );
       context.header("cache-control", "no-store");
       return context.json(proposal, 201);
-    } catch {
+    } catch (error) {
+      if (error instanceof AgentRequestBodyTooLargeError) {
+        return context.json({ error: "Proposal request is too large." }, 413);
+      }
       return context.json(
         { error: "The degree-plan proposal could not be submitted." },
         400,

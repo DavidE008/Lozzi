@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import type { FacilitatorClient } from "@x402/core/http";
 import { decodePaymentRequiredHeader } from "@x402/core/http";
 
-import { createDegreePlanAgentApp } from "./hono-app";
+import {
+  AgentRequestBodyTooLargeError,
+  createDegreePlanAgentApp,
+  readBoundedJsonBody,
+} from "./hono-app";
 
 const config = {
   agentAddress: "0x1111111111111111111111111111111111111111",
@@ -33,6 +37,28 @@ const facilitator: FacilitatorClient = {
 };
 
 describe("degree-plan Hono/x402 surface", () => {
+  it("enforces proposal size from actual bytes, not Content-Length", async () => {
+    const accepted = new Request("https://lozzi.example/proposals", {
+      body: JSON.stringify({ courseCodes: ["CS 2305"], summary: "Review" }),
+      method: "POST",
+    });
+    await expect(readBoundedJsonBody(accepted, 1_024)).resolves.toEqual({
+      courseCodes: ["CS 2305"],
+      summary: "Review",
+    });
+
+    for (const headers of [undefined, { "content-length": "1" }]) {
+      const oversized = new Request("https://lozzi.example/proposals", {
+        body: JSON.stringify({ summary: "a".repeat(2_048) }),
+        headers,
+        method: "POST",
+      });
+      await expect(readBoundedJsonBody(oversized, 1_024)).rejects.toBeInstanceOf(
+        AgentRequestBodyTooLargeError,
+      );
+    }
+  });
+
   it("requires a short-lived student delegation before x402 processing", async () => {
     const response = await createDegreePlanAgentApp(config, {
       facilitator,
