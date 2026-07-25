@@ -10,14 +10,9 @@ select has_view(
 
 select ok(
   'security_invoker=true' = any (
-    select option_value
-    from pg_options_to_table(
-      (
-        select reloptions
-        from pg_class
-        where oid = 'public.registrar_registration_activity'::regclass
-      )
-    )
+    select unnest(reloptions)
+    from pg_class
+    where oid = 'public.registrar_registration_activity'::regclass
   ),
   'registrar registration activity uses security_invoker'
 );

@@ -660,6 +660,31 @@ values (
   '00000000-0000-4000-8000-000000000201'
 );
 
+insert into public.grade_records (
+  id,
+  institution_id,
+  enrollment_id,
+  grade_submission_id,
+  version_number,
+  grade_code,
+  grade_points,
+  credit_hours_earned,
+  published_at,
+  created_by
+)
+values (
+  '72000000-0000-4000-8000-000000000102',
+  '10000000-0000-4000-8000-000000000001',
+  '70000000-0000-4000-8000-000000000102',
+  '71000000-0000-4000-8000-000000000102',
+  1,
+  'B',
+  3,
+  3,
+  '2026-05-22 11:05:00+00',
+  '00000000-0000-4000-8000-000000000201'
+);
+
 insert into public.academic_record_versions (
   id,
   institution_id,
