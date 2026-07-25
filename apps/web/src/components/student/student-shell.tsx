@@ -4,7 +4,9 @@ import { brandConfig } from "@lozzi/domain";
 import { LozziCrest } from "@lozzi/ui";
 import {
   BookOpen,
+  CalendarDays,
   CircleGauge,
+  Clock3,
   FileBadge,
   GraduationCap,
   LogOut,
@@ -31,9 +33,11 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { href: "/student", label: "Overview", icon: CircleGauge },
-  { href: "/student/record", label: "Academic record", icon: FileBadge },
-  { href: "/student/progress", label: "Degree progress", icon: GraduationCap },
-  { href: "/student/shares", label: "Verified shares", icon: Share2 },
+  { href: "/student/register", label: "Registration", icon: CalendarDays },
+  { href: "/student/schedule", label: "Schedule", icon: Clock3 },
+  { href: "/student/record", label: "Record", icon: FileBadge },
+  { href: "/student/progress", label: "Progress", icon: GraduationCap },
+  { href: "/student/shares", label: "Shares", icon: Share2 },
   { href: "/student/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -180,6 +184,10 @@ export function StudentShell({
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <BookOpen className="text-lozzi-teal size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Fall 2026</span>
+            <span className="text-border hidden sm:inline">/</span>
+            <span className="text-foreground hidden font-medium sm:inline">
+              {displayName}
+            </span>
           </div>
         </header>
         <main className="px-4 py-7 sm:px-6 lg:px-10 lg:py-9">{children}</main>
