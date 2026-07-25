@@ -27,11 +27,15 @@ export default async function InstructorLayout({
     redirect(roleHomePath(access?.roles ?? []));
   }
 
+  const currentTermName =
+    sections.find(({ section_status }) => section_status === "open")
+      ?.term_name ?? sections[0]?.term_name;
+
   return (
     <InstructorShell
       displayName={profile?.displayName ?? "Instructor"}
       institutionName={access.institutionName}
-      termName={sections[0]?.term_name ?? "No assigned term"}
+      termName={currentTermName ?? "No assigned term"}
     >
       {children}
     </InstructorShell>
