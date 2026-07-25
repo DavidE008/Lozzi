@@ -171,3 +171,21 @@ export const getShareRows = async (studentId: string) => {
   }
   return data ?? [];
 };
+
+export const getCurrentAcademicRecordVersionId = async (
+  studentId: string,
+): Promise<string | null> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("academic_record_versions")
+    .select("id")
+    .eq("student_id", studentId)
+    .eq("status", "published")
+    .eq("is_current", true)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("The current academic record could not be loaded.");
+  }
+  return data?.id ?? null;
+};
