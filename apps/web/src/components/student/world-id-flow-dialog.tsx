@@ -22,7 +22,8 @@ import { cn } from "@/lib/utils";
 export interface WorldIdFlowRequest {
   readonly action: string;
   readonly appId: `app_${string}`;
-  readonly environment: "production" | "staging";
+  readonly challengeId: string;
+  readonly environment: "production" | "sandbox" | "staging";
   readonly rpContext: RpContext;
   readonly signal: string;
 }

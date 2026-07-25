@@ -32,6 +32,7 @@ vi.mock("@worldcoin/idkit", () => ({
 const request: WorldIdFlowRequest = {
   action: "verify-student-account-2026",
   appId: "app_example",
+  challengeId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   environment: "staging",
   rpContext: {
     rp_id: "rp_example",

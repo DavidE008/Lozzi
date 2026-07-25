@@ -123,10 +123,6 @@ const normalizeSignalHash = (value: string): `0x${string}` =>
 
 type CreateRequestInput = Parameters<VerificationProvider["createRequest"]>[0];
 type VerifyInput = Parameters<VerificationProvider["verify"]>[0];
-type LegacyVerifyInput = {
-  readonly authenticatedUserId: string;
-  readonly idkitResult: unknown;
-};
 
 export class WorldVerificationProvider implements VerificationProvider {
   readonly capability = {
@@ -137,12 +133,8 @@ export class WorldVerificationProvider implements VerificationProvider {
   };
 
   async createRequest(
-    input: CreateRequestInput | string,
+    normalizedInput: CreateRequestInput,
   ): Promise<WorldVerificationRequest> {
-    const normalizedInput: CreateRequestInput =
-      typeof input === "string"
-        ? { authenticatedUserId: input, purpose: "account-humanity" }
-        : input;
     const parsedInput = worldPurposeRequestSchema.parse({
       purpose: normalizedInput.purpose,
       subjectId: normalizedInput.subjectId,
@@ -188,20 +180,8 @@ export class WorldVerificationProvider implements VerificationProvider {
     };
   }
 
-  async verify(
-    input: LegacyVerifyInput | VerifyInput,
-  ): Promise<VerifiedWorldProof> {
+  async verify(normalizedInput: VerifyInput): Promise<VerifiedWorldProof> {
     const config = getWorldConfig();
-    const normalizedInput: VerifyInput =
-      "idkitResult" in input
-        ? {
-            authenticatedUserId: input.authenticatedUserId,
-            expectedEnvironment: config.environment,
-            expectedNonce: idKitResultSchema.parse(input.idkitResult).nonce,
-            purpose: "account-humanity",
-            rawBody: JSON.stringify(input.idkitResult),
-          }
-        : input;
     const definition = WORLD_PURPOSES[normalizedInput.purpose];
     const parsed = parseRawIdKitResult(normalizedInput.rawBody);
 
@@ -242,7 +222,7 @@ export class WorldVerificationProvider implements VerificationProvider {
 
     const expectedSignalHash = hashSignal(
       createWorldSignal(
-        input.authenticatedUserId,
+        normalizedInput.authenticatedUserId,
         normalizedInput.purpose,
         normalizedInput.subjectId,
       ),

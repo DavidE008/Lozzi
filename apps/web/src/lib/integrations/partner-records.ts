@@ -3,6 +3,7 @@ import "server-only";
 import type {
   IntegrationFailureCategory,
   PrivateObjectMetadata,
+  WorldPurpose,
   WorldVerificationSignal,
 } from "@lozzi/domain";
 import { namehash } from "viem";
@@ -11,6 +12,40 @@ import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/service";
 
 interface PartnerRpcClient {
+  rpc(
+    name: "create_world_proof_challenge",
+    params: {
+      p_action_id: string;
+      p_environment: string;
+      p_expected_signal_hash: string | null;
+      p_expires_at: string;
+      p_nonce: string;
+      p_purpose: WorldPurpose;
+      p_student_id: string;
+      p_subject_id: string | null;
+    },
+  ): Promise<{
+    readonly data: unknown;
+    readonly error: { readonly code?: string } | null;
+  }>;
+  rpc(
+    name: "consume_world_proof_challenge",
+    params: {
+      p_challenge_id: string;
+      p_credential_type: string;
+      p_identity_attested: boolean;
+      p_nullifier: string;
+      p_presence_status: string;
+      p_protocol_version: string;
+      p_provider_response_id: string | null;
+      p_signal_hash: string | null;
+      p_student_id: string;
+      p_verified_at: string;
+    },
+  ): Promise<{
+    readonly data: unknown;
+    readonly error: { readonly code?: string } | null;
+  }>;
   rpc(
     name: "record_world_verification",
     params: {
@@ -111,11 +146,129 @@ interface PartnerRpcClient {
 const idResultSchema = (property: "objectId" | "runId") =>
   z.object({ [property]: z.uuid() });
 
+const challengeResultSchema = z.object({
+  challengeId: z.uuid(),
+  expiresAt: z.iso.datetime(),
+});
+
 const bytea = (value: string): string => {
   if (!/^0x[0-9a-fA-F]+$/u.test(value)) {
     throw new TypeError("Expected a hexadecimal bytea value");
   }
   return `\\x${value.slice(2)}`;
+};
+
+const hexadecimalFromBytea = (value: string): `0x${string}` => {
+  if (!/^\\x[0-9a-fA-F]+$/u.test(value)) {
+    throw new TypeError("Expected a PostgreSQL hexadecimal bytea value");
+  }
+  return `0x${value.slice(2)}`;
+};
+
+export interface StoredWorldChallenge {
+  readonly action: string;
+  readonly challengeId: string;
+  readonly environment: "production" | "sandbox" | "staging";
+  readonly expectedSignalHash: `0x${string}` | null;
+  readonly expiresAt: string;
+  readonly nonce: `0x${string}`;
+  readonly purpose: WorldPurpose;
+  readonly subjectId: string | null;
+}
+
+export const createWorldProofChallenge = async (input: {
+  readonly action: string;
+  readonly environment: "production" | "sandbox" | "staging";
+  readonly expectedSignalHash: `0x${string}` | null;
+  readonly expiresAt: string;
+  readonly nonce: `0x${string}`;
+  readonly purpose: WorldPurpose;
+  readonly studentId: string;
+  readonly subjectId?: string;
+}): Promise<{ readonly challengeId: string; readonly expiresAt: string }> => {
+  const client = createServiceClient() as unknown as PartnerRpcClient;
+  const { data, error } = await client.rpc("create_world_proof_challenge", {
+    p_action_id: input.action,
+    p_environment: input.environment,
+    p_expected_signal_hash: input.expectedSignalHash
+      ? bytea(input.expectedSignalHash)
+      : null,
+    p_expires_at: input.expiresAt,
+    p_nonce: bytea(input.nonce),
+    p_purpose: input.purpose,
+    p_student_id: input.studentId,
+    p_subject_id: input.subjectId ?? null,
+  });
+  if (error) throw error;
+  return challengeResultSchema.parse(data);
+};
+
+export const getWorldProofChallenge = async (
+  challengeId: string,
+  studentId: string,
+): Promise<StoredWorldChallenge | null> => {
+  const client = createServiceClient();
+  const { data, error } = await client
+    .from("world_proof_challenges" as never)
+    .select(
+      "id, action_id, environment, expected_signal_hash, expires_at, nonce, purpose, subject_id, consumed_at",
+    )
+    .eq("id", challengeId)
+    .eq("student_id", studentId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  const row = data as unknown as {
+    readonly action_id: string;
+    readonly consumed_at: string | null;
+    readonly environment: "production" | "sandbox" | "staging";
+    readonly expected_signal_hash: string | null;
+    readonly expires_at: string;
+    readonly id: string;
+    readonly nonce: string;
+    readonly purpose: WorldPurpose;
+    readonly subject_id: string | null;
+  };
+  if (row.consumed_at || new Date(row.expires_at) <= new Date()) return null;
+
+  return {
+    action: row.action_id,
+    challengeId: row.id,
+    environment: row.environment,
+    expectedSignalHash: row.expected_signal_hash
+      ? hexadecimalFromBytea(row.expected_signal_hash)
+      : null,
+    expiresAt: row.expires_at,
+    nonce: hexadecimalFromBytea(row.nonce),
+    purpose: row.purpose,
+    subjectId: row.subject_id,
+  };
+};
+
+export const consumeWorldProofChallenge = async (
+  input: WorldVerificationSignal & {
+    readonly providerResponseId?: string;
+    readonly studentId: string;
+  },
+): Promise<void> => {
+  if (!input.challengeId) {
+    throw new TypeError("World challenge ID is required");
+  }
+  const client = createServiceClient() as unknown as PartnerRpcClient;
+  const { error } = await client.rpc("consume_world_proof_challenge", {
+    p_challenge_id: input.challengeId,
+    p_credential_type: input.credentialType,
+    p_identity_attested: input.identityAttested,
+    p_nullifier: input.nullifierDecimal,
+    p_presence_status: input.presenceStatus,
+    p_protocol_version: input.protocolVersion,
+    p_provider_response_id: input.providerResponseId ?? null,
+    p_signal_hash: input.signalHash ? bytea(input.signalHash) : null,
+    p_student_id: input.studentId,
+    p_verified_at: input.verifiedAt,
+  });
+  if (error) throw error;
 };
 
 export const recordEnsIdentity = async (input: {

@@ -57,6 +57,7 @@ export function WorldVerificationCard({
       const response = await fetch("/api/integrations/world/request", {
         method: "POST",
         headers: { "content-type": "application/json" },
+        body: JSON.stringify({ purpose: "account-humanity" }),
       });
       if (!response.ok) throw new Error("World verification is unavailable.");
       const payload = (await response.json()) as WorldIdFlowRequest;
@@ -73,11 +74,15 @@ export function WorldVerificationCard({
     setPending(true);
     setError(null);
     try {
-      const response = await fetch("/api/integrations/world/verify", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(result),
-      });
+      if (!request) throw new Error("World challenge is missing.");
+      const response = await fetch(
+        `/api/integrations/world/verify?challengeId=${encodeURIComponent(request.challengeId)}`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(result),
+        },
+      );
       const payload = (await response.json()) as {
         readonly error?: string;
         readonly verifiedAt?: string;
