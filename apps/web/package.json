@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "agentkit:demo": "node scripts/agentkit-degree-plan-demo.mjs",
+    "agentkit:keystore": "node scripts/create-agent-keystore.mjs",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:e2e": "playwright test",
