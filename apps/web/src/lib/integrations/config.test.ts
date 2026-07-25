@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getAgentKitConfig,
   getEnsConfig,
   getWorldConfig,
   getZeroGStorageConfig,
@@ -40,6 +41,30 @@ describe("partner server configuration", () => {
     });
 
     expect(config.environment).toBe("sandbox");
+  });
+
+  it("requires isolated AgentKit RPC and HMAC configuration", () => {
+    expect(() =>
+      getAgentKitConfig({
+        AGENTKIT_AGENT_ADDRESS: `0x${"11".repeat(20)}`,
+        NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      }),
+    ).toThrow(/World AgentKit is not configured/u);
+
+    expect(
+      getAgentKitConfig({
+        AGENTKIT_AGENT_ADDRESS: `0x${"11".repeat(20)}`,
+        AGENTKIT_HUMAN_ID_HMAC_KEY: Buffer.alloc(32, 7).toString("base64"),
+        NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+        WORLD_CHAIN_MAINNET_RPC_URL: "https://worldchain.example",
+      }),
+    ).toEqual({
+      agentAddress: `0x${"11".repeat(20)}`,
+      appUrl: "http://localhost:3000",
+      facilitatorUrl: "https://x402-worldchain.vercel.app/facilitator",
+      humanIdHmacKey: Buffer.alloc(32, 7).toString("base64"),
+      worldChainRpcUrl: "https://worldchain.example",
+    });
   });
 
   it("requires a checksummed-length ENS registrar and signer", () => {

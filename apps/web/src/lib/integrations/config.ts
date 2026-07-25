@@ -62,11 +62,31 @@ const serviceDatabaseConfigSchema = z
   })
   .strict();
 
+const agentKitConfigSchema = z
+  .object({
+    agentAddress: addressSchema,
+    appUrl: z.url(),
+    facilitatorUrl: z.url(),
+    humanIdHmacKey: z.string().refine(
+      (value) => {
+        try {
+          return Buffer.from(value, "base64").length === 32;
+        } catch {
+          return false;
+        }
+      },
+      { message: "Expected a base64-encoded 32-byte HMAC key" },
+    ),
+    worldChainRpcUrl: z.url(),
+  })
+  .strict();
+
 export type WorldConfig = z.infer<typeof worldConfigSchema>;
 export type EnsConfig = z.infer<typeof ensConfigSchema>;
 export type ZeroGStorageConfig = z.infer<typeof zeroGStorageConfigSchema>;
 export type ZeroGComputeConfig = z.infer<typeof zeroGComputeConfigSchema>;
 export type ServiceDatabaseConfig = z.infer<typeof serviceDatabaseConfigSchema>;
+export type AgentKitConfig = z.infer<typeof agentKitConfigSchema>;
 
 export class IntegrationConfigurationError extends Error {
   readonly category = "configuration";
@@ -132,4 +152,17 @@ export const getServiceDatabaseConfig = (
   parseRequired("Supabase server writes", serviceDatabaseConfigSchema, {
     secretKey: source.SUPABASE_SERVICE_ROLE_KEY,
     url: source.NEXT_PUBLIC_SUPABASE_URL,
+  });
+
+export const getAgentKitConfig = (
+  source: Readonly<Record<string, string | undefined>> = process.env,
+): AgentKitConfig =>
+  parseRequired("World AgentKit", agentKitConfigSchema, {
+    agentAddress: source.AGENTKIT_AGENT_ADDRESS,
+    appUrl: source.NEXT_PUBLIC_APP_URL,
+    facilitatorUrl:
+      source.AGENTKIT_FACILITATOR_URL ??
+      "https://x402-worldchain.vercel.app/facilitator",
+    humanIdHmacKey: source.AGENTKIT_HUMAN_ID_HMAC_KEY,
+    worldChainRpcUrl: source.WORLD_CHAIN_MAINNET_RPC_URL,
   });
