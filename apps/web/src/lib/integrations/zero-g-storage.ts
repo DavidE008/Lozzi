@@ -121,8 +121,11 @@ const createSdkStorageDriver = (): ZeroGStorageDriver => ({
         transactionHash: bytes32(uploadResult.txHash, "transaction hash"),
       };
     } finally {
-      await file?.close();
-      await rm(temporaryDirectory, { recursive: true, force: true });
+      try {
+        await file?.close();
+      } finally {
+        await rm(temporaryDirectory, { recursive: true, force: true });
+      }
     }
   },
 });
