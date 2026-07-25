@@ -230,6 +230,7 @@ select
   record.id as grade_record_id,
   record.institution_id,
   enrollment.student_id,
+  course.id as course_id,
   course.code as course_code,
   course.title as course_title,
   term.name as term_name,

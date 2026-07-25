@@ -221,7 +221,6 @@ export const buildAcademicRecordCommitmentPayload = ({
       earnedCredits: record.earnedCredits,
       gradeCode: record.gradeCode,
       gradePoints: record.gradePoints,
-      publishedAt: record.publishedAt,
       version: record.versionNumber,
     })),
 });
