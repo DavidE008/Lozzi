@@ -210,7 +210,7 @@ select is(
 reset role;
 
 select ok(
-  'security_invoker=on' = any (
+  'security_invoker=true' = any (
     select unnest(reloptions)
     from pg_class
     where oid = 'public.student_dashboard_summary'::regclass
@@ -218,7 +218,7 @@ select ok(
   'dashboard view uses security_invoker'
 );
 select ok(
-  'security_invoker=on' = any (
+  'security_invoker=true' = any (
     select unnest(reloptions)
     from pg_class
     where oid = 'public.student_current_courses'::regclass
@@ -226,7 +226,7 @@ select ok(
   'current courses view uses security_invoker'
 );
 select ok(
-  'security_invoker=on' = any (
+  'security_invoker=true' = any (
     select unnest(reloptions)
     from pg_class
     where oid = 'public.student_recent_activity'::regclass
