@@ -3,6 +3,7 @@ import { CheckCircle2, Circle, Clock3 } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { PageHeading } from "@/components/student/page-heading";
+import { DegreePlanAgentCard } from "@/components/student/degree-plan-agent-card";
 import { ProgressExplanationCard } from "@/components/student/progress-explanation-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,9 @@ export default async function DegreeProgressPage() {
   const progress = await getStudentDegreeProgress(dashboard.studentId);
   const zeroGCapability = parseEnvironment(process.env).capabilities.find(
     ({ name }) => name === "zero-g",
+  )!;
+  const agentKitCapability = parseEnvironment(process.env).capabilities.find(
+    ({ name }) => name === "world-agentkit",
   )!;
 
   if (!progress) {
@@ -178,6 +182,7 @@ export default async function DegreeProgressPage() {
         </div>
 
         <div className="space-y-6">
+          <DegreePlanAgentCard capability={agentKitCapability} />
           <ProgressExplanationCard capability={zeroGCapability} />
           <Card className="h-fit rounded-sm shadow-none">
             <CardHeader>
