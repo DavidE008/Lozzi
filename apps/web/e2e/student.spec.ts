@@ -97,8 +97,8 @@ test("student searches registration rows and reviews the hosted schedule", async
   await page.getByRole("button", { name: "MATH 1314 Calculus I" }).click();
   await page.getByRole("button", { name: "Add MATH 1314" }).click();
   await expect(
-    page.getByText("Selected credits").locator("xpath=.."),
-  ).toContainText("3");
+    page.getByText("Total planned credits").locator("xpath=.."),
+  ).toContainText("3 / 18");
   await page.getByRole("button", { name: "Remove from plan" }).click();
 
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
