@@ -27,7 +27,9 @@
   `0xA8619B20cd66BBf9c3684EfE7D0B099DfE98AD5f`.
 - A real Proof-of-Human credential, a consenting document-backed adult
   credential, Sandbox access, and anonymized tester feedback.
-- Ethereum Sepolia ENS parent name and authorized adapter key.
+- Approved Ethereum Sepolia ENS parent, 2-of-3 Safe ownership, verified adapter
+  deployment, KMS-backed issuance address, independent read RPC, and renewal
+  owner. Raw production private keys are not an acceptable prerequisite.
 - 0G Compute Router credentials and billing configuration.
 - WalletConnect project ID.
 - World Chain Sepolia RPC URL, funded institutional signer, verification API

@@ -176,22 +176,59 @@ select is(
   'World nullifier remains an exact numeric value'
 );
 
+do $$
+declare
+  operation_id uuid;
+begin
+  perform public.reserve_ens_issuance(
+    '13000000-0000-4000-8000-000000000101',
+    '81000000-0000-4000-8000-000000000001',
+    '82000000-0000-4000-8000-000000000003',
+    decode(repeat('31', 32), 'hex'),
+    'calm-river-42.lozzi-sepolia.eth',
+    decode(repeat('33', 32), 'hex'),
+    'lozzi-sepolia.eth',
+    decode(repeat('34', 32), 'hex'),
+    decode(repeat('11', 20), 'hex'),
+    decode(repeat('44', 20), 'hex'),
+    now()
+  );
+  select id
+  into operation_id
+  from public.ens_identities
+  where request_id = '82000000-0000-4000-8000-000000000003';
+  perform public.begin_ens_issuance_submission(
+    operation_id,
+    '82000000-0000-4000-8000-000000000003'
+  );
+  perform public.mark_ens_issuance_submitted(
+    operation_id,
+    '82000000-0000-4000-8000-000000000003',
+    decode(repeat('55', 32), 'hex'),
+    now()
+  );
+end;
+$$;
+
 select is(
   (
-    public.record_ens_identity(
-      '13000000-0000-4000-8000-000000000101',
-      '81000000-0000-4000-8000-000000000001',
-      'aisha.lozzi-sepolia.eth',
-      decode(repeat('33', 32), 'hex'),
-      'lozzi-sepolia.eth',
-      decode(repeat('11', 20), 'hex'),
-      decode(repeat('44', 20), 'hex'),
+    public.finalize_ens_issuance(
+      (
+        select id
+        from public.ens_identities
+        where request_id = '82000000-0000-4000-8000-000000000003'
+      ),
+      '82000000-0000-4000-8000-000000000003',
       decode(repeat('55', 32), 'hex'),
-      '82000000-0000-4000-8000-000000000003'
+      decode(repeat('44', 20), 'hex'),
+      decode(repeat('11', 20), 'hex'),
+      123456,
+      3,
+      now()
     )->>'status'
   ),
   'active',
-  'trusted server records a resolved ENS subname'
+  'trusted server finalizes a durable ENS subname'
 );
 
 select is(
@@ -200,7 +237,7 @@ select is(
     from public.ens_identities
     where student_id = '13000000-0000-4000-8000-000000000101'
   ),
-  'aisha.lozzi-sepolia.eth',
+  'calm-river-42.lozzi-sepolia.eth',
   'ENS identity stores only the selected public pseudonym'
 );
 
@@ -447,7 +484,9 @@ select ok(
     from public.audit_events
     where action in (
       'world.verification.record',
-      'ens.identity.record',
+      'ens.issuance.reserve',
+      'ens.issuance.submit',
+      'ens.issuance.confirm',
       'zero-g.object.record',
       'zero-g.progress.complete'
     )

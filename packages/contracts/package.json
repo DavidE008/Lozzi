@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "compile": "solcjs --base-path . --include-path node_modules --bin src/InstitutionRegistry.sol src/AcademicRecordRegistry.sol -o cache/solc",
+    "compile": "solcjs --base-path . --include-path node_modules --bin src/InstitutionRegistry.sol src/AcademicRecordRegistry.sol src/InstitutionalEnsRegistrar.sol -o cache/solc",
     "test": "forge test -vvv"
   },
   "dependencies": {

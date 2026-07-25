@@ -1,25 +1,23 @@
-import { randomUUID } from "node:crypto";
-
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getAuthenticatedUser } from "@/lib/auth";
-import { getEnsConfig } from "@/lib/integrations/config";
-import { createEnsNameProvider } from "@/lib/integrations/ens";
+import { issueEnsAlias } from "@/lib/integrations/ens-issuance";
 import { classifyPartnerError } from "@/lib/integrations/errors";
-import {
-  recordCapabilityState,
-  recordEnsIdentity,
-} from "@/lib/integrations/partner-records";
+import { recordCapabilityState } from "@/lib/integrations/partner-records";
 import { logEvent } from "@/lib/logging";
 import { getInstitutionAccessForUser } from "@/lib/repositories/access";
 import { getVerifiedStudentWallet } from "@/lib/repositories/partner-status";
 import { getDashboardForUser } from "@/lib/repositories/student";
 import { assertSameOrigin } from "@/lib/security/origin";
 
-const requestSchema = z.object({
-  label: z.string().trim().min(1).max(63),
-});
+const requestSchema = z
+  .object({
+    consent: z.literal(true),
+    label: z.string().trim().min(1).max(32),
+    requestId: z.uuid(),
+  })
+  .strict();
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -49,37 +47,41 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    const { label } = requestSchema.parse(await request.json());
-    const config = getEnsConfig();
-    const idempotencyKey = randomUUID();
-    const result = await createEnsNameProvider().issueSubname({
-      idempotencyKey,
-      label,
-      walletAddress: wallet.address,
-    });
-    await recordEnsIdentity({
-      idempotencyKey,
-      name: result.name,
-      parentName: config.parentName,
+    const input = requestSchema.parse(await request.json());
+    const result = await issueEnsAlias({
+      consentedAt: new Date().toISOString(),
+      label: input.label,
+      requestId: input.requestId,
       studentId: dashboard.studentId,
       studentWalletId: wallet.id,
-      transactionHash: result.transactionHash,
       walletAddress: wallet.address,
     });
-    await recordCapabilityState({
-      detail: "A Sepolia ENS subname was issued and resolved successfully.",
-      errorCategory: null,
-      evidenceReference: result.transactionHash ?? null,
-      institutionId: access.institutionId,
-      provider: "ens",
-      state: "available",
-    });
 
-    return NextResponse.json({
-      name: result.name,
-      status: "active",
-      transactionHash: result.transactionHash,
-    });
+    if (result.status === "active") {
+      await recordCapabilityState({
+        detail: "A Sepolia ENS subname was issued and resolved successfully.",
+        errorCategory: null,
+        evidenceReference: result.transactionHash,
+        institutionId: access.institutionId,
+        provider: "ens",
+        state: "available",
+      });
+    }
+
+    return NextResponse.json(
+      {
+        name: result.name,
+        operationId: result.operationId,
+        status: result.status,
+        transactionHash: result.transactionHash,
+      },
+      {
+        status:
+          result.status === "submitting" || result.status === "submitted"
+            ? 202
+            : 200,
+      },
+    );
   } catch (error) {
     const classified = classifyPartnerError(error);
     logEvent("warn", "ens_subname_issue_failed", {
@@ -87,7 +89,16 @@ export async function POST(request: Request): Promise<Response> {
     });
     return NextResponse.json(
       { error: classified.publicMessage },
-      { status: classified.category === "configuration" ? 503 : 400 },
+      {
+        status:
+          classified.category === "configuration"
+            ? 503
+            : classified.category === "replay"
+              ? 409
+              : classified.category === "rate-limited"
+                ? 429
+                : 400,
+      },
     );
   }
 }

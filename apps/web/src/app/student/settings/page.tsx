@@ -102,6 +102,7 @@ export default async function SettingsPage() {
         <EnsIdentityCard
           capability={ensCapability}
           currentName={partnerStatus?.ens_name ?? null}
+          currentStatus={partnerStatus?.ens_status ?? null}
           parentName={process.env.NEXT_PUBLIC_ENS_PARENT ?? null}
           walletAddress={verifiedWallet?.address ?? null}
         />

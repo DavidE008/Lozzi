@@ -14,6 +14,7 @@ describe("EnsIdentityCard", () => {
           detail: "Configured",
         }}
         currentName={null}
+        currentStatus={null}
         parentName="lozzi-sepolia.eth"
         walletAddress={null}
       />,
@@ -21,8 +22,8 @@ describe("EnsIdentityCard", () => {
 
     expect(screen.getByText("Wallet required")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Claim subname" }),
-    ).toBeDisabled();
+      screen.getByRole("button", { name: "Connect and verify wallet" }),
+    ).toBeEnabled();
     expect(
       screen.getByText(/never written to ENS text records/u),
     ).toBeInTheDocument();
@@ -38,6 +39,7 @@ describe("EnsIdentityCard", () => {
           detail: "Configured",
         }}
         currentName="aisha.lozzi-sepolia.eth"
+        currentStatus="active"
         parentName="lozzi-sepolia.eth"
         walletAddress={`0x${"11".repeat(20)}`}
       />,

@@ -19,6 +19,7 @@ export {
   type EnvironmentCapabilities,
   type PublicEnvironment,
 } from "./environment";
+export { createGeneratedEnsAlias, isGeneratedEnsAlias } from "./ens-aliases";
 export {
   createWorldSignal,
   ensResolutionSchema,

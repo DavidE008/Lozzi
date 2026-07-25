@@ -5,12 +5,8 @@ import {
   SepoliaEnsNameProvider,
 } from "./ens";
 
-const environment = {
-  NEXT_PUBLIC_ENS_PARENT: "lozzi-sepolia.eth",
-  ENS_REGISTRAR_ADDRESS: `0x${"22".repeat(20)}`,
-  ENS_SEPOLIA_RPC_URL: "https://rpc.example",
-  ENS_SIGNER_PRIVATE_KEY: `0x${"11".repeat(32)}`,
-};
+const transactionHash = `0x${"33".repeat(32)}` as const;
+const walletAddress = `0x${"55".repeat(20)}` as const;
 
 describe("Sepolia ENS provider", () => {
   it("normalizes and bounds the selected subname label", () => {
@@ -19,19 +15,24 @@ describe("Sepolia ENS provider", () => {
     );
     expect(() =>
       buildEnsSubname("student.aisha", "lozzi-sepolia.eth"),
-    ).toThrow(/one ENS label/u);
+    ).toThrow(/ENS label using/u);
   });
 
-  it("requires the issued name to resolve to the verified wallet", async () => {
-    Object.entries(environment).forEach(([name, value]) =>
-      vi.stubEnv(name, value),
-    );
+  it("submits and confirms an idempotent issuance", async () => {
     const driver = {
-      issue: vi.fn().mockResolvedValue({
-        hash: `0x${"33".repeat(32)}`,
-        resolvedAddress: `0x${"44".repeat(20)}`,
+      confirm: vi.fn().mockResolvedValue({
+        confirmationCount: 3,
+        confirmedAt: "2026-07-25T12:00:00.000Z",
+        confirmedBlockNumber: BigInt(1),
+        resolvedAddress: walletAddress,
+        resolverAddress: `0x${"66".repeat(20)}`,
       }),
+      findSubmission: vi.fn().mockResolvedValue(null),
       reverseResolve: vi.fn(),
+      submit: vi.fn().mockResolvedValue({
+        name: "aisha.lozzi-sepolia.eth",
+        transactionHash,
+      }),
     };
     const provider = new SepoliaEnsNameProvider(driver);
 
@@ -39,24 +40,35 @@ describe("Sepolia ENS provider", () => {
       provider.issueSubname({
         idempotencyKey: "synthetic-idempotency",
         label: "aisha",
-        walletAddress: `0x${"55".repeat(20)}`,
+        walletAddress,
       }),
-    ).rejects.toMatchObject({ category: "integrity" });
+    ).resolves.toEqual({
+      name: "aisha.lozzi-sepolia.eth",
+      transactionHash,
+    });
+    expect(driver.submit).toHaveBeenCalledWith({
+      label: "aisha",
+      requestKey: expect.stringMatching(/^0x[0-9a-f]{64}$/u),
+      walletAddress,
+    });
+    expect(driver.confirm).toHaveBeenCalledWith({
+      name: "aisha.lozzi-sepolia.eth",
+      requestKey: expect.stringMatching(/^0x[0-9a-f]{64}$/u),
+      transactionHash,
+      walletAddress,
+    });
   });
 
   it("returns a scoped reverse-resolution result", async () => {
-    Object.entries(environment).forEach(([name, value]) =>
-      vi.stubEnv(name, value),
-    );
     const driver = {
-      issue: vi.fn(),
+      confirm: vi.fn(),
+      findSubmission: vi.fn(),
       reverseResolve: vi.fn().mockResolvedValue("Aisha.LOZZI-SEPOLIA.eth"),
+      submit: vi.fn(),
     };
     const provider = new SepoliaEnsNameProvider(driver);
 
-    await expect(
-      provider.resolveAddress(`0x${"55".repeat(20)}`),
-    ).resolves.toMatchObject({
+    await expect(provider.resolveAddress(walletAddress)).resolves.toMatchObject({
       name: "aisha.lozzi-sepolia.eth",
       network: "ethereum-sepolia",
     });

@@ -25,7 +25,8 @@ select is(
         'grade_records', 'academic_record_versions', 'record_documents',
         'degree_audit_snapshots', 'advisor_assignments', 'advisor_notes',
         'student_holds', 'record_share_grants', 'record_share_access_logs',
-        'ens_identities', 'world_verifications', 'zero_g_objects', 'ai_inference_runs',
+        'ens_identities', 'wallet_link_challenges', 'world_verifications',
+        'zero_g_objects', 'ai_inference_runs',
         'blockchain_anchors', 'integration_capabilities', 'audit_events',
         'idempotency_keys', 'outbox_events'
       )

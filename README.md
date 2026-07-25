@@ -80,6 +80,8 @@ the complete acceptance record and remaining partner credentials.
 - [Synthetic test and demo accounts](docs/testing/test-accounts.md)
 - [World real-configuration runbook](docs/integrations/world-real-configuration.md)
 - [World prize evidence](docs/integrations/world-prize-evidence.md)
+- [ENS real-integration plan](docs/integrations/ens-real-integration-plan.md)
+- [ENS operator runbook](docs/integrations/ens-operator-runbook.md)
 
 World integration code is present, but Portal beta access, runtime secrets,
 production device evidence, and AgentBook registration are still deliberately

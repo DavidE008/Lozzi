@@ -42,17 +42,21 @@ describe("development-only partner mock cards", () => {
       <EnsIdentityCard
         capability={mockCapability("ens", "ENS subnames")}
         currentName={null}
+        currentStatus={null}
         parentName={null}
         walletAddress={null}
       />,
     );
 
-    fireEvent.change(screen.getByLabelText("Choose a public label"), {
-      target: { value: "aisha" },
-    });
+    fireEvent.click(screen.getByRole("button", { name: "Generate alias" }));
+    const generatedAlias = (
+      screen.getByLabelText("Generated public alias") as HTMLInputElement
+    ).value;
     fireEvent.click(screen.getByRole("button", { name: "Create mock name" }));
 
-    expect(screen.getByText("aisha.mock.lozzi.test")).toBeInTheDocument();
+    expect(
+      screen.getByText(`${generatedAlias}.mock.lozzi.test`),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         "No ENS name, transaction, or wallet resolution was created.",

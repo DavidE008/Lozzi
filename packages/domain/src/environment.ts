@@ -49,6 +49,13 @@ export const parseEnvironment = (
     env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
   const mockRequested = source.LOZZI_PARTNER_MOCKS === "1";
+  const ensSignerConfigured =
+    source.ENS_SIGNER_PROVIDER === "json-rpc"
+      ? configured(source.ENS_SIGNER_ADDRESS, source.ENS_SIGNER_RPC_URL)
+      : source.ENS_SIGNER_PROVIDER === "local-private-key" &&
+          env.NODE_ENV !== "production"
+        ? configured(source.ENS_SIGNER_PRIVATE_KEY)
+        : false;
 
   return {
     env,
@@ -92,14 +99,21 @@ export const parseEnvironment = (
       resolveCapability({
         configured: configured(
           env.NEXT_PUBLIC_ENS_PARENT,
-          source.ENS_SEPOLIA_RPC_URL,
+          source.ENS_PARENT_SAFE_ADDRESS,
+          source.ENS_PARENT_SAFE_OWNERS,
+          source.ENS_PARENT_SAFE_THRESHOLD,
           source.ENS_REGISTRAR_ADDRESS,
-          source.ENS_SIGNER_PRIVATE_KEY,
+          source.ENS_REGISTRAR_CODE_HASH,
+          source.ENS_REGISTRAR_DEPLOYMENT_BLOCK,
+          source.ENS_SEPOLIA_WRITE_RPC_URL,
+          source.ENS_SEPOLIA_READ_RPC_URL,
+          ensSignerConfigured ? "configured" : undefined,
+          source.ENS_RECONCILIATION_SECRET,
         ),
         detailWhenAvailable:
-          "Ethereum Sepolia ENS resolution and subname issuance are configured.",
+          "Durable Ethereum Sepolia ENS issuance and independent resolution are configured.",
         detailWhenMissing:
-          "Sepolia parent, RPC, registrar adapter, and signer are required.",
+          "Sepolia Safe, verified adapter, independent RPCs, and managed signer are required.",
         label: "ENS subnames",
         mockRequested,
         name: "ens",

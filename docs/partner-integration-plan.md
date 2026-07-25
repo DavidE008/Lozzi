@@ -23,3 +23,9 @@ The World Developer Portal API key is an operator-only Codex MCP credential and
 is never a Lozzi runtime variable. World ID environments are explicit:
 `staging` for simulator evidence, `sandbox` for Selfie Check, and `production`
 for real World App QA.
+
+Real ENS activation follows the
+[ENS integration plan](integrations/ens-real-integration-plan.md). In
+particular, a database `verified` wallet is insufficient until a live SIWE
+challenge has proved control, and the current raw-key adapter configuration is
+not a production signing design.
