@@ -153,7 +153,7 @@ export function RegistrarShell({
         </div>
       </aside>
 
-      <div className="lg:col-start-2">
+      <div className="min-w-0 lg:col-start-2">
         <header className="bg-background/95 sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 backdrop-blur sm:px-6 lg:h-[4.75rem] lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <Sheet
