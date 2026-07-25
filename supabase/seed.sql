@@ -529,6 +529,21 @@ values (
   '00000000-0000-4000-8000-000000000201'
 );
 
+insert into public.section_instructors (
+  id,
+  institution_id,
+  section_id,
+  staff_role_assignment_id,
+  is_primary
+)
+values (
+  '61000000-0000-4000-8000-000000000099',
+  '10000000-0000-4000-8000-000000000001',
+  '60000000-0000-4000-8000-000000000099',
+  '12000000-0000-4000-8000-000000000202',
+  true
+);
+
 insert into public.enrollments (
   id,
   institution_id,
@@ -587,9 +602,15 @@ insert into public.grade_submissions (
   state,
   grade_code,
   grade_points,
+  participation_score,
+  assignment_average,
+  final_exam_score,
+  total_score,
   submitted_at,
   approved_at,
   published_at,
+  approved_by,
+  published_by,
   created_by,
   updated_by
 )
@@ -601,9 +622,15 @@ values (
   'published',
   'A',
   4,
+  10,
+  94,
+  94,
+  94.60,
   '2026-05-20 13:00:00+00',
   '2026-05-21 10:00:00+00',
   '2026-05-21 11:00:00+00',
+  '00000000-0000-4000-8000-000000000201',
+  '00000000-0000-4000-8000-000000000201',
   '00000000-0000-4000-8000-000000000202',
   '00000000-0000-4000-8000-000000000201'
 );
@@ -616,8 +643,13 @@ insert into public.grade_submissions (
   state,
   grade_code,
   grade_points,
+  participation_score,
+  assignment_average,
+  final_exam_score,
+  total_score,
   submitted_at,
   approved_at,
+  approved_by,
   created_by,
   updated_by
 )
@@ -629,10 +661,46 @@ values (
   'approved',
   'B',
   3,
+  10,
+  84,
+  84,
+  85.60,
   '2026-05-22 09:20:00+00',
   '2026-05-22 11:00:00+00',
+  '00000000-0000-4000-8000-000000000201',
   '00000000-0000-4000-8000-000000000202',
   '00000000-0000-4000-8000-000000000201'
+);
+
+insert into public.grade_submissions (
+  id,
+  institution_id,
+  enrollment_id,
+  submitted_by,
+  state,
+  grade_code,
+  grade_points,
+  participation_score,
+  assignment_average,
+  final_exam_score,
+  total_score,
+  created_by,
+  updated_by
+)
+values (
+  '71000000-0000-4000-8000-000000000201',
+  '10000000-0000-4000-8000-000000000001',
+  '70000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000202',
+  'draft',
+  'B+',
+  3.30,
+  9,
+  88,
+  90,
+  89.20,
+  '00000000-0000-4000-8000-000000000202',
+  '00000000-0000-4000-8000-000000000202'
 );
 
 insert into public.grade_records (
