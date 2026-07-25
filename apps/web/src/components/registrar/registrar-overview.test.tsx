@@ -49,7 +49,7 @@ describe("RegistrarOverview", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Publish record" }),
+      screen.getByRole("button", { name: "Publish record" }),
     ).toHaveAttribute("href", "/registrar/records");
     expect(screen.getByRole("button", { name: /View all/u })).toHaveAttribute(
       "href",
