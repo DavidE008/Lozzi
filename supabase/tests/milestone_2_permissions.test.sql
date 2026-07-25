@@ -175,13 +175,13 @@ select is(
     select records_awaiting_publication
     from public.registrar_workspace_summary
   ),
-  1,
-  'the registrar summary reports one approved unpublished record'
+  0,
+  'the registrar summary excludes records already normalized as published'
 );
 select is(
   (select count(*)::bigint from public.registrar_attention_queue),
-  1::bigint,
-  'the registrar sees the single synthetic review item'
+  0::bigint,
+  'the registrar review queue starts empty before the instructor submits'
 );
 select is(
   (select count(*)::bigint from public.registrar_student_directory),

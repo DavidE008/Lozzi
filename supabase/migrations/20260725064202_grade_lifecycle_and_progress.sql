@@ -58,6 +58,17 @@ where state in ('submitted', 'approved', 'published')
     or (state = 'published' and published_by is null)
   );
 
+update public.grade_submissions submission
+set
+  state = 'published',
+  published_at = record.published_at,
+  published_by = record.created_by,
+  updated_at = greatest(submission.updated_at, record.published_at),
+  updated_by = record.created_by
+from public.grade_records record
+where record.grade_submission_id = submission.id
+  and submission.state = 'approved';
+
 alter table public.grade_submissions
   add constraint grade_submissions_participation_score_check
     check (participation_score between 0 and 10),
