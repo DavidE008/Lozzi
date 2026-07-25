@@ -13,7 +13,7 @@
     "audit": "pnpm audit --audit-level=high",
     "build": "pnpm --filter @lozzi/web build",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "contracts:test": "forge test --root packages/contracts -vvv",
+    "contracts:test": "node scripts/check-contract-privacy.mjs && forge test --root packages/contracts -vvv",
     "db:test": "supabase test db",
     "dev": "pnpm --filter @lozzi/web dev",
     "format": "prettier --write .",
