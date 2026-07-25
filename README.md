@@ -72,6 +72,7 @@ the complete acceptance record and remaining partner credentials.
 - [Milestone 2 acceptance evidence](docs/verification/milestone-2.md)
 - [Milestone 3 product scope](docs/product/milestone-3.md)
 - [Milestone 3 registration design contract](docs/design/registration-contract.md)
+- [Milestone 3 acceptance evidence](docs/verification/milestone-3.md)
 - [Synthetic test and demo accounts](docs/testing/test-accounts.md)
 
 World, ENS, 0G, WalletConnect, and World Chain deployment are deliberately
