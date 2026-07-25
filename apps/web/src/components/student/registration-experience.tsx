@@ -112,6 +112,7 @@ function CourseRow({
         onClick={onExpand}
         aria-expanded={expanded}
         aria-controls={`course-${course.id}`}
+        aria-label={`${course.code} ${course.title}`}
       >
         <span className="text-lozzi-navy font-semibold">{course.code}</span>
         <span className="min-w-0">
