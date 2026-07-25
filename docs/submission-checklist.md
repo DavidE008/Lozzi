@@ -12,14 +12,15 @@
 - [ ] Final dashboard screenshot compared with the approved concept across
       layout, copy, typography, color, spacing, icons, responsiveness, and
       state behavior.
+- [x] World Developer Portal app/RP inventory verified, production and staging
+      registrations confirmed, and all three actions created in both
+      environments.
 - [ ] No contract deployment or live-partner claim.
 
 ## Still-required credentials for later milestones
 
 - Recoverable World RP signing key for `rp_27a81819333b3230`, stored only in
   ignored local server configuration.
-- Callable World Developer Portal MCP access to verify the supplied legacy app
-  and RP, create/confirm all three actions, and poll registered environments.
 - Confirmed Selfie Check and Identity Check beta access.
 - A 32-byte AgentKit human-ID HMAC key and configurable World Chain mainnet RPC.
 - Explicit approval and World App QR completion for AgentBook registration of

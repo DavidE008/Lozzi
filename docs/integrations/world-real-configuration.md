@@ -122,15 +122,21 @@ and one `degree-plan:propose` use.
 
 ## Current provisioning status
 
-- Portal operator key: rotated locally by the operator.
-- Portal MCP visibility in this Codex session: unavailable; connector restart
-  or exposure is still required before administration can be verified.
-- Legacy app ID supplied by the operator:
+- Portal operator key: rotated locally and authenticated through the Portal
+  MCP on 2026-07-25.
+- Lozzi app: verified as the active production external/cloud app
   `app_406624a7ab8b70f37f662453518dda71`.
-- RP ID supplied by the operator: `rp_27a81819333b3230`.
-- Existing Lozzi app/RP inspection: pending callable Portal MCP.
-- Selfie Check access: not yet confirmed.
-- Identity Check access: not yet confirmed.
-- Staging/production actions: not yet confirmed.
+- Managed RP: `rp_27a81819333b3230`, with production and staging both
+  initialized onchain and reporting `registered`.
+- RP signer address:
+  `0x8214b721F6CCAC0359Ec4eC12C480dB2e96Aa3ed`. Its private key is not
+  recoverable from the Portal or ignored local storage. No signer rotation was
+  performed; rotation still requires explicit operator approval.
+- Actions: all three identifiers were created and read back in both staging
+  and production on 2026-07-25.
+- Selfie Check access: not yet confirmed. The current Portal MCP inventory does
+  not expose partner entitlement state.
+- Identity Check preview access: not yet confirmed. The current Portal MCP
+  inventory does not expose preview entitlement state.
 - AgentBook keystore: generated locally and ignored.
 - AgentBook registration: deliberately paused before the World App QR.
