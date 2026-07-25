@@ -13,6 +13,13 @@ import {
 } from "@/lib/repositories/partner-status";
 import { getDashboardForUser } from "@/lib/repositories/student";
 
+const capabilityStatusLabel = {
+  available: "Available",
+  failed: "Unavailable",
+  "mock-development": "Development mock",
+  "not-configured": "Not configured",
+} as const;
+
 export default async function SettingsPage() {
   const user = await getAuthenticatedUser();
   if (!user) redirect("/auth");
@@ -81,9 +88,7 @@ export default async function SettingsPage() {
                       : "text-muted-foreground"
                   }
                 >
-                  {capability.status === "available"
-                    ? "Available"
-                    : "Not configured"}
+                  {capabilityStatusLabel[capability.status]}
                 </Badge>
               </div>
             ))}
