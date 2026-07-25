@@ -151,6 +151,9 @@ export const recordWorldVerification = async (
     readonly studentId: string;
   },
 ): Promise<void> => {
+  if (!input.signalHash) {
+    throw new TypeError("The legacy World recorder requires a signal hash");
+  }
   const client = createServiceClient() as unknown as PartnerRpcClient;
   const { error } = await client.rpc("record_world_verification", {
     p_action_id: input.action,

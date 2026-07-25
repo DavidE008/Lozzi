@@ -7,6 +7,8 @@ import {
   normalizeWorldNullifier,
   progressExplanationSchema,
   PROGRESS_EXPLANATION_DISCLAIMER,
+  WORLD_PURPOSES,
+  worldPurposeRequestSchema,
 } from "./partners";
 
 describe("partner integration domain", () => {
@@ -18,6 +20,53 @@ describe("partner integration domain", () => {
     expect(first).toBe(second);
     expect(first).not.toBe(other);
     expect(first).toMatch(/^0x[0-9a-f]{64}$/u);
+  });
+
+  it("binds sensitive World signals to the purpose and share draft", () => {
+    const userId = "11111111-1111-4111-8111-111111111111";
+    const firstDraft = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const secondDraft = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+
+    expect(createWorldSignal(userId, "share-liveness", firstDraft)).not.toBe(
+      createWorldSignal(userId, "share-liveness", secondDraft),
+    );
+    expect(createWorldSignal(userId, "share-liveness", firstDraft)).not.toBe(
+      createWorldSignal(userId, "adult-share-consent", firstDraft),
+    );
+  });
+
+  it("defines a closed least-disclosure World purpose mapping", () => {
+    expect(WORLD_PURPOSES).toEqual({
+      "account-humanity": expect.objectContaining({
+        action: "lozzi-student-verification",
+        preset: "proof-of-human",
+        requireUserPresence: false,
+      }),
+      "share-liveness": expect.objectContaining({
+        action: "lozzi-sensitive-share-selfie-check",
+        preset: "selfie-check-legacy",
+        requireSubject: true,
+      }),
+      "adult-share-consent": expect.objectContaining({
+        action: "lozzi-adult-share-consent",
+        allowLegacyProofs: false,
+        identityAttestationRequired: true,
+        preset: "identity-check",
+      }),
+    });
+  });
+
+  it("requires share purposes to identify a share draft", () => {
+    expect(
+      worldPurposeRequestSchema.safeParse({ purpose: "share-liveness" })
+        .success,
+    ).toBe(false);
+    expect(
+      worldPurposeRequestSchema.safeParse({
+        purpose: "account-humanity",
+        subjectId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      }).success,
+    ).toBe(false);
   });
 
   it("normalizes a World nullifier as a decimal integer", () => {

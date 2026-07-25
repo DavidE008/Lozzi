@@ -2,7 +2,61 @@ import { keccak256, stringToHex } from "viem";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
-export const WORLD_ACTION = "lozzi-student-verification";
+export const worldPurposeSchema = z.enum([
+  "account-humanity",
+  "share-liveness",
+  "adult-share-consent",
+]);
+
+export type WorldPurpose = z.infer<typeof worldPurposeSchema>;
+
+export const WORLD_PURPOSES = {
+  "account-humanity": {
+    action: "lozzi-student-verification",
+    allowLegacyProofs: true,
+    identityAttestationRequired: false,
+    preset: "proof-of-human",
+    protocol: "3-or-4",
+    requireSubject: false,
+    requireUserPresence: false,
+    signalRequired: true,
+  },
+  "share-liveness": {
+    action: "lozzi-sensitive-share-selfie-check",
+    allowLegacyProofs: true,
+    identityAttestationRequired: false,
+    preset: "selfie-check-legacy",
+    protocol: "3",
+    requireSubject: true,
+    requireUserPresence: false,
+    signalRequired: true,
+  },
+  "adult-share-consent": {
+    action: "lozzi-adult-share-consent",
+    allowLegacyProofs: false,
+    identityAttestationRequired: true,
+    preset: "identity-check",
+    protocol: "4",
+    requireSubject: true,
+    requireUserPresence: false,
+    signalRequired: false,
+  },
+} as const satisfies Record<
+  WorldPurpose,
+  {
+    readonly action: string;
+    readonly allowLegacyProofs: boolean;
+    readonly identityAttestationRequired: boolean;
+    readonly preset:
+      "proof-of-human" | "selfie-check-legacy" | "identity-check";
+    readonly protocol: "3" | "4" | "3-or-4";
+    readonly requireSubject: boolean;
+    readonly requireUserPresence: boolean;
+    readonly signalRequired: boolean;
+  }
+>;
+
+export const WORLD_ACTION = WORLD_PURPOSES["account-humanity"].action;
 export const PROGRESS_EXPLANATION_DISCLAIMER =
   "Advisory explanation only. Official requirements are determined by the institution.";
 
@@ -44,16 +98,28 @@ export const worldRpContextSchema = z
 
 export type WorldRpContext = z.infer<typeof worldRpContextSchema>;
 
-export const worldCredentialTypeSchema = z.enum(["proof_of_human", "orb"]);
+export const worldCredentialTypeSchema = z.enum([
+  "proof_of_human",
+  "orb",
+  "selfie",
+  "passport",
+  "mnc",
+]);
 
 export type WorldCredentialType = z.infer<typeof worldCredentialTypeSchema>;
 
 export const worldVerificationSignalSchema = z
   .object({
-    action: z.literal(WORLD_ACTION),
+    action: z.string().min(1).max(255),
+    challengeId: z.uuid().nullable(),
     credentialType: worldCredentialTypeSchema,
+    identityAttested: z.boolean(),
     nullifierDecimal: z.string().regex(/^(0|[1-9][0-9]*)$/u),
-    signalHash: bytes32Schema,
+    presenceStatus: z.enum(["completed", "not-requested"]),
+    protocolVersion: z.enum(["3.0", "4.0"]),
+    purpose: worldPurposeSchema,
+    signalHash: bytes32Schema.nullable(),
+    subjectId: z.uuid().nullable(),
     verifiedAt: z.iso.datetime(),
   })
   .strict();
@@ -62,13 +128,46 @@ export type WorldVerificationSignal = z.infer<
   typeof worldVerificationSignalSchema
 >;
 
+export const worldPurposeRequestSchema = z
+  .object({
+    purpose: worldPurposeSchema,
+    subjectId: z.uuid().optional(),
+  })
+  .strict()
+  .superRefine(({ purpose, subjectId }, context) => {
+    const definition = WORLD_PURPOSES[purpose];
+    if (definition.requireSubject && !subjectId) {
+      context.addIssue({
+        code: "custom",
+        message: `World purpose ${purpose} requires a subject`,
+        path: ["subjectId"],
+      });
+    }
+    if (!definition.requireSubject && subjectId) {
+      context.addIssue({
+        code: "custom",
+        message: `World purpose ${purpose} does not accept a subject`,
+        path: ["subjectId"],
+      });
+    }
+  });
+
+export type WorldPurposeRequest = z.infer<typeof worldPurposeRequestSchema>;
+
 export const createWorldSignal = (
   authenticatedUserId: string,
-  action = WORLD_ACTION,
+  purpose: WorldPurpose = "account-humanity",
+  subjectId?: string,
 ): `0x${string}` =>
   keccak256(
     stringToHex(
-      ["LOZZI_WORLD_SIGNAL_V1", action, authenticatedUserId].join("\u0000"),
+      [
+        "LOZZI_WORLD_SIGNAL_V2",
+        purpose,
+        WORLD_PURPOSES[purpose].action,
+        authenticatedUserId,
+        subjectId ?? "",
+      ].join("\u0000"),
     ),
   );
 
