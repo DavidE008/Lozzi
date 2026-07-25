@@ -452,10 +452,8 @@ select is(
 );
 
 select lives_ok(
-  $test$
-    do $body$
-    begin
-      perform public.create_degree_plan_delegation(
+  $$
+    select public.create_degree_plan_delegation(
       '13000000-0000-4000-8000-000000000101',
       decode(repeat('31', 32), 'hex'),
       now() + interval '30 minutes',
@@ -573,8 +571,10 @@ select throws_ok(
 );
 
 select lives_ok(
-  $$
-    select public.create_degree_plan_delegation(
+  $test$
+    do $body$
+    begin
+      perform public.create_degree_plan_delegation(
       '13000000-0000-4000-8000-000000000101',
       decode(repeat('32', 32), 'hex'),
       now() + interval '30 minutes',
