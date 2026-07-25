@@ -167,8 +167,8 @@ select is(
 );
 select is(
   (select course_section_count from public.registrar_workspace_summary),
-  2,
-  'the registrar summary reports two synthetic course sections'
+  7,
+  'the registrar summary reports all current synthetic course sections'
 );
 select is(
   (
