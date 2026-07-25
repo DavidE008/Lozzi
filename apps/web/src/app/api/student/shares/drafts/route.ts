@@ -36,6 +36,10 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
     const input = createDraftSchema.parse(await request.json());
+    const idempotencyHeader = request.headers.get("idempotency-key");
+    const idempotencyKey = idempotencyHeader
+      ? z.uuid().parse(idempotencyHeader)
+      : randomUUID();
     const recordVersionId = await getCurrentAcademicRecordVersionId(
       dashboard.studentId,
     );
@@ -49,7 +53,7 @@ export async function POST(request: Request): Promise<Response> {
     const result = await createSensitiveShareDraft({
       academicRecordVersionId: recordVersionId,
       grantExpiresAt: new Date(Date.now() + 30 * 60 * 1_000).toISOString(),
-      idempotencyKey: randomUUID(),
+      idempotencyKey,
       recipientLabel: input.recipientLabel,
       scopes: ["program", "degree-progress", "record-summary", "full-record"],
       studentId: dashboard.studentId,
