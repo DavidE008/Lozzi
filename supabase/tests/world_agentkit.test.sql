@@ -290,13 +290,18 @@ select lives_ok(
 
 create temporary table world_share_test_context as
 select
-  max(id) filter (
+  (
+    select id
+    from public.record_share_drafts
     where idempotency_key = '83000000-0000-4000-8000-000000000001'
+    limit 1
   ) as first_draft_id,
-  max(id) filter (
+  (
+    select id
+    from public.record_share_drafts
     where idempotency_key = '83000000-0000-4000-8000-000000000002'
-  ) as second_draft_id
-from public.record_share_drafts;
+    limit 1
+  ) as second_draft_id;
 
 select lives_ok(
   $test$
