@@ -882,6 +882,52 @@ begin
 end;
 $$;
 
+create function public.get_advisor_degree_plan_proposals()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'proposalId', proposal.id,
+        'studentDisplayName', profile.display_name,
+        'studentNumber', student.student_number,
+        'summary', proposal.summary,
+        'status', proposal.status,
+        'submittedAt', proposal.submitted_at,
+        'reviewNote', proposal.review_note,
+        'reviewedAt', proposal.reviewed_at,
+        'items', (
+          select coalesce(
+            jsonb_agg(
+              jsonb_build_object(
+                'courseCode', item.course_code,
+                'sortOrder', item.sort_order
+              )
+              order by item.sort_order
+            ),
+            '[]'::jsonb
+          )
+          from public.degree_plan_proposal_items item
+          where item.proposal_id = proposal.id
+        )
+      )
+      order by proposal.submitted_at desc
+    ),
+    '[]'::jsonb
+  )
+  from public.degree_plan_proposals proposal
+  join public.students student
+    on student.id = proposal.student_id
+  join public.profiles profile
+    on profile.id = student.user_id
+  where auth.uid() is not null
+    and lozzi_private.is_assigned_advisor(proposal.student_id)
+$$;
+
 revoke all on function public.create_degree_plan_delegation(
   uuid,
   bytea,
@@ -914,6 +960,8 @@ revoke all on function public.review_degree_plan_proposal(
   text,
   text
 ) from public, anon;
+revoke all on function public.get_advisor_degree_plan_proposals()
+  from public, anon;
 
 grant execute on function public.create_degree_plan_delegation(
   uuid,
@@ -947,3 +995,5 @@ grant execute on function public.review_degree_plan_proposal(
   text,
   text
 ) to authenticated, service_role;
+grant execute on function public.get_advisor_degree_plan_proposals()
+  to authenticated, service_role;

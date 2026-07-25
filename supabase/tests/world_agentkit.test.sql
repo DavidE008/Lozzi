@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = extensions, public;
 
-select plan(44);
+select plan(46);
 
 select has_table(
   'public',
@@ -650,6 +650,14 @@ select throws_ok(
   'Invalid AgentKit authorization',
   'delegation scope is bound to the intended resource'
 );
+select ok(
+  has_function_privilege(
+    'authenticated',
+    'public.get_advisor_degree_plan_proposals()',
+    'execute'
+  ),
+  'authenticated advisors can execute the RLS-backed review queue'
+);
 
 reset role;
 set local role authenticated;
@@ -691,6 +699,12 @@ select throws_ok(
 );
 
 set local "request.jwt.claim.sub" = '00000000-0000-4000-8000-000000000204';
+
+select is(
+  jsonb_array_length(public.get_advisor_degree_plan_proposals()),
+  1,
+  'assigned advisor queue returns only the assigned student proposal'
+);
 
 select is(
   (
