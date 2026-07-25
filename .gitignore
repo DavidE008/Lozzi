@@ -1,0 +1,17 @@
+node_modules/
+.next/
+coverage/
+playwright-report/
+test-results/
+out/
+cache/
+broadcast/
+lib/
+.env
+.env.*
+!.env.example
+*.local
+*.log
+.DS_Store
+supabase/.branches/
+supabase/.temp/
