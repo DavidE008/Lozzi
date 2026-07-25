@@ -11,7 +11,13 @@ type JsonValue =
   | { readonly [key: string]: JsonValue };
 
 export interface CommitmentInput {
-  readonly domain: "academic-record" | "share-grant" | "student";
+  readonly domain:
+    | "academic-record"
+    | "ai-request"
+    | "ai-response"
+    | "private-object"
+    | "share-grant"
+    | "student";
   readonly institutionId: string;
   readonly salt: `0x${string}`;
   readonly payload: JsonValue;

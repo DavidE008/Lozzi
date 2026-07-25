@@ -3,9 +3,22 @@ import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EnsIdentityCard } from "@/components/student/ens-identity-card";
+import { WorldVerificationCard } from "@/components/student/world-verification-card";
 import { PageHeading } from "@/components/student/page-heading";
 import { getAuthenticatedUser } from "@/lib/auth";
+import {
+  getStudentPartnerStatus,
+  getVerifiedStudentWallet,
+} from "@/lib/repositories/partner-status";
 import { getDashboardForUser } from "@/lib/repositories/student";
+
+const capabilityStatusLabel = {
+  available: "Available",
+  failed: "Unavailable",
+  "mock-development": "Development mock",
+  "not-configured": "Not configured",
+} as const;
 
 export default async function SettingsPage() {
   const user = await getAuthenticatedUser();
@@ -13,6 +26,12 @@ export default async function SettingsPage() {
   const dashboard = await getDashboardForUser(user.id);
   if (!dashboard) redirect("/onboarding");
   const { capabilities } = parseEnvironment(process.env);
+  const [partnerStatus, verifiedWallet] = await Promise.all([
+    getStudentPartnerStatus(dashboard.studentId),
+    getVerifiedStudentWallet(dashboard.studentId),
+  ]);
+  const worldCapability = capabilities.find(({ name }) => name === "world")!;
+  const ensCapability = capabilities.find(({ name }) => name === "ens")!;
 
   return (
     <>
@@ -69,14 +88,23 @@ export default async function SettingsPage() {
                       : "text-muted-foreground"
                   }
                 >
-                  {capability.status === "available"
-                    ? "Available"
-                    : "Not configured"}
+                  {capabilityStatusLabel[capability.status]}
                 </Badge>
               </div>
             ))}
           </CardContent>
         </Card>
+        <WorldVerificationCard
+          capability={worldCapability}
+          credentialType={partnerStatus?.world_credential_type ?? null}
+          verifiedAt={partnerStatus?.world_verified_at ?? null}
+        />
+        <EnsIdentityCard
+          capability={ensCapability}
+          currentName={partnerStatus?.ens_name ?? null}
+          parentName={process.env.NEXT_PUBLIC_ENS_PARENT ?? null}
+          walletAddress={verifiedWallet?.address ?? null}
+        />
       </div>
     </>
   );

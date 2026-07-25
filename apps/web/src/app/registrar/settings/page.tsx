@@ -13,6 +13,13 @@ import {
 } from "@/lib/repositories/registrar-administration";
 import { getRegistrarWorkspaceForUser } from "@/lib/repositories/registrar";
 
+const capabilityStatusLabel = {
+  available: "Available",
+  failed: "Unavailable",
+  "mock-development": "Development mock",
+  "not-configured": "Not configured",
+} as const;
+
 export default async function RegistrarSettingsPage() {
   const user = await getAuthenticatedUser();
   if (!user) redirect("/auth");
@@ -65,9 +72,7 @@ export default async function RegistrarSettingsPage() {
                       : "text-muted-foreground text-[10px]"
                   }
                 >
-                  {capability.status === "available"
-                    ? "Available"
-                    : "Not configured"}
+                  {capabilityStatusLabel[capability.status]}
                 </Badge>
               </div>
             </div>

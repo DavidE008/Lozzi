@@ -1,4 +1,4 @@
-# Milestones 0–4 project plan
+# Milestones 0–5 project plan
 
 | Gate | Deliverable                 | Exit evidence                                                |
 | ---- | --------------------------- | ------------------------------------------------------------ |
@@ -25,15 +25,23 @@
 | M4.4 | Progress calculation        | Deterministic GPA, earned credits, and degree-audit results  |
 | M4.5 | Role products               | Instructor entry, registrar review, student record/progress  |
 | M4.6 | Acceptance                  | Lifecycle tests, browser QA, design comparison, and green PR |
+| M5.1 | Partner trust boundaries    | Current docs, typed adapters, server-only secret boundaries  |
+| M5.2 | World verification          | RP-signed requests, server proof verification, replay denial |
+| M5.3 | ENS identity                | Resolution, normalized names, Sepolia subname adapter state  |
+| M5.4 | Private 0G storage          | Envelope encryption, ciphertext upload, integrity metadata   |
+| M5.5 | Private 0G inference        | Deterministic input, validated explanation, committed output |
+| M5.6 | Integration operations      | Capability health, PII-free audits, visible failure states   |
+| M5.7 | Acceptance                  | Provider tests, hosted policies, browser QA, and green PR    |
 
-Milestones 0–1 were delivered through `codex/milestones-0-1`, and Milestone 2
-through `codex/milestone-2`. Milestones 3 and 4 use small, independently
-reviewable commits on `codex/milestone-3` and `codex/milestone-4`. A gate is
-complete only when its executable checks pass; documentation never substitutes
-for a failing control.
+Milestones 0–1 were delivered through `codex/milestones-0-1`, Milestone 2
+through `codex/milestone-2`, Milestone 3 through `codex/milestone-3`, and
+Milestone 4 through `codex/milestone-4`. Milestone 5 uses small, independently
+reviewable commits on `codex/milestone-5`. A gate is complete only when its
+executable checks pass; documentation never substitutes for a failing control.
 
-Milestone 4 implementation is complete when the grade lifecycle, record
-correction history, deterministic progress calculations, role-specific product
-surfaces, and every local and hosted verification gate pass. Final acceptance
-is recorded only after the Milestone 4 pull request is green and merged to
-`main`.
+Milestone 5 implementation is complete when the production provider paths,
+strict failure handling, database authorization, and user-facing capability
+states pass every local and hosted verification gate. A provider is counted as
+live only after an authenticated call succeeds against the intended partner
+environment. Missing external credentials are reported as an acceptance
+blocker, never replaced with a production success claim.

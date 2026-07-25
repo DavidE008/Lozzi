@@ -25,3 +25,48 @@ export const createCapability = (
   label: string,
   detail: string,
 ): CapabilityState => ({ name, status, label, detail });
+
+export interface CapabilityInputs {
+  readonly configured: boolean;
+  readonly detailWhenAvailable: string;
+  readonly detailWhenMissing: string;
+  readonly failedDetail?: string;
+  readonly label: string;
+  readonly mockRequested?: boolean;
+  readonly name: CapabilityName;
+  readonly nodeEnvironment: "development" | "test" | "production";
+  readonly providerFailed?: boolean;
+}
+
+export const resolveCapability = ({
+  configured,
+  detailWhenAvailable,
+  detailWhenMissing,
+  failedDetail,
+  label,
+  mockRequested = false,
+  name,
+  nodeEnvironment,
+  providerFailed = false,
+}: CapabilityInputs): CapabilityState => {
+  if (providerFailed && configured) {
+    return createCapability(
+      name,
+      "failed",
+      label,
+      failedDetail ?? "The configured provider is unavailable.",
+    );
+  }
+  if (configured) {
+    return createCapability(name, "available", label, detailWhenAvailable);
+  }
+  if (mockRequested && nodeEnvironment === "development") {
+    return createCapability(
+      name,
+      "mock-development",
+      label,
+      "Development mock — no live partner call.",
+    );
+  }
+  return createCapability(name, "not-configured", label, detailWhenMissing);
+};

@@ -47,7 +47,9 @@ export default async function StudentSchedulePage() {
             Review registered sections and withdrawal availability.
           </p>
         </div>
-        <Button render={<Link href="/student/register" />}>Find classes</Button>
+        <Button nativeButton={false} render={<Link href="/student/register" />}>
+          Find classes
+        </Button>
       </div>
 
       {enrollments.length > 0 ? (
@@ -87,7 +89,10 @@ export default async function StudentSchedulePage() {
                   ))
                 ) : (
                   <p className="flex items-center gap-2">
-                    <CalendarDays className="text-lozzi-teal size-3.5" />
+                    <CalendarDays
+                      className="text-lozzi-teal size-3.5"
+                      aria-hidden="true"
+                    />
                     Schedule to be announced
                   </p>
                 )}
@@ -108,7 +113,10 @@ export default async function StudentSchedulePage() {
         </section>
       ) : (
         <section className="mt-7 border bg-white px-6 py-16 text-center">
-          <CalendarDays className="text-lozzi-teal mx-auto size-8" />
+          <CalendarDays
+            className="text-lozzi-teal mx-auto size-8"
+            aria-hidden="true"
+          />
           <h2 className="font-heading mt-4 text-2xl font-semibold">
             No registered courses
           </h2>

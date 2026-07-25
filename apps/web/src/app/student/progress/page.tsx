@@ -1,10 +1,12 @@
+import { parseEnvironment } from "@lozzi/domain";
 import { CheckCircle2, Circle, Clock3 } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { PageHeading } from "@/components/student/page-heading";
+import { ProgressExplanationCard } from "@/components/student/progress-explanation-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { PageHeading } from "@/components/student/page-heading";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { getStudentDegreeProgress } from "@/lib/repositories/grades";
 import { getDashboardForUser } from "@/lib/repositories/student";
@@ -34,6 +36,9 @@ export default async function DegreeProgressPage() {
   const dashboard = await getDashboardForUser(user.id);
   if (!dashboard) redirect("/onboarding");
   const progress = await getStudentDegreeProgress(dashboard.studentId);
+  const zeroGCapability = parseEnvironment(process.env).capabilities.find(
+    ({ name }) => name === "zero-g",
+  )!;
 
   if (!progress) {
     return (
@@ -172,18 +177,21 @@ export default async function DegreeProgressPage() {
           ))}
         </div>
 
-        <Card className="border-lozzi-gold/30 bg-lozzi-gold/5 h-fit rounded-sm shadow-none">
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">
-              Planning note
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-muted-foreground text-sm leading-6">
-            Degree audits are advisory. Your registrar confirms final graduation
-            eligibility. This snapshot updates only after an official record is
-            published.
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <ProgressExplanationCard capability={zeroGCapability} />
+          <Card className="h-fit rounded-sm shadow-none">
+            <CardHeader>
+              <CardTitle className="font-heading text-lg">
+                Planning note
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-muted-foreground text-sm leading-6">
+              Degree audits are advisory. Your registrar confirms final
+              graduation eligibility. This snapshot updates only after an
+              official record is published.
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   );
