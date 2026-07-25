@@ -102,6 +102,7 @@ export type Database = {
           created_by: string | null
           deactivated_at: string | null
           ends_on: string
+          grades_due_at: string | null
           id: string
           institution_id: string
           max_credits: number
@@ -113,6 +114,7 @@ export type Database = {
           status: string
           updated_at: string
           updated_by: string | null
+          withdrawal_deadline: string | null
         }
         Insert: {
           add_drop_deadline?: string | null
@@ -121,6 +123,7 @@ export type Database = {
           created_by?: string | null
           deactivated_at?: string | null
           ends_on: string
+          grades_due_at?: string | null
           id?: string
           institution_id: string
           max_credits?: number
@@ -132,6 +135,7 @@ export type Database = {
           status?: string
           updated_at?: string
           updated_by?: string | null
+          withdrawal_deadline?: string | null
         }
         Update: {
           add_drop_deadline?: string | null
@@ -140,6 +144,7 @@ export type Database = {
           created_by?: string | null
           deactivated_at?: string | null
           ends_on?: string
+          grades_due_at?: string | null
           id?: string
           institution_id?: string
           max_credits?: number
@@ -151,6 +156,7 @@ export type Database = {
           status?: string
           updated_at?: string
           updated_by?: string | null
+          withdrawal_deadline?: string | null
         }
         Relationships: [
           {
@@ -491,32 +497,41 @@ export type Database = {
         Row: {
           course_id: string
           created_at: string
+          created_by: string | null
+          deactivated_at: string | null
           id: string
           institution_id: string
           kind: string
           minimum_grade_points: number
           prerequisite_course_id: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           course_id: string
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
           id?: string
           institution_id: string
           kind?: string
           minimum_grade_points?: number
           prerequisite_course_id: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           course_id?: string
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
           id?: string
           institution_id?: string
           kind?: string
           minimum_grade_points?: number
           prerequisite_course_id?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -1384,6 +1399,7 @@ export type Database = {
           course_id: string | null
           created_at: string
           created_by: string | null
+          deactivated_at: string | null
           id: string
           institution_id: string
           minimum_credits: number
@@ -1398,6 +1414,7 @@ export type Database = {
           course_id?: string | null
           created_at?: string
           created_by?: string | null
+          deactivated_at?: string | null
           id?: string
           institution_id: string
           minimum_credits?: number
@@ -1412,6 +1429,7 @@ export type Database = {
           course_id?: string | null
           created_at?: string
           created_by?: string | null
+          deactivated_at?: string | null
           id?: string
           institution_id?: string
           minimum_credits?: number
@@ -1764,30 +1782,39 @@ export type Database = {
       section_instructors: {
         Row: {
           created_at: string
+          created_by: string | null
+          deactivated_at: string | null
           id: string
           institution_id: string
           is_primary: boolean
           section_id: string
           staff_role_assignment_id: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
           id?: string
           institution_id: string
           is_primary?: boolean
           section_id: string
           staff_role_assignment_id: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
           id?: string
           institution_id?: string
           is_primary?: boolean
           section_id?: string
           staff_role_assignment_id?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -1823,6 +1850,8 @@ export type Database = {
       section_meetings: {
         Row: {
           created_at: string
+          created_by: string | null
+          deactivated_at: string | null
           ends_at: string
           ends_on: string | null
           id: string
@@ -1832,10 +1861,13 @@ export type Database = {
           starts_at: string
           starts_on: string | null
           updated_at: string
+          updated_by: string | null
           weekday: number
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
           ends_at: string
           ends_on?: string | null
           id?: string
@@ -1845,10 +1877,13 @@ export type Database = {
           starts_at: string
           starts_on?: string | null
           updated_at?: string
+          updated_by?: string | null
           weekday: number
         }
         Update: {
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
           ends_at?: string
           ends_on?: string | null
           id?: string
@@ -1858,6 +1893,7 @@ export type Database = {
           starts_at?: string
           starts_on?: string | null
           updated_at?: string
+          updated_by?: string | null
           weekday?: number
         }
         Relationships: [
