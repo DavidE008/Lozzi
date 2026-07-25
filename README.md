@@ -1,10 +1,10 @@
 # Lozzi
 
 Lozzi is a privacy-first, verifiable Student Information System for colleges
-and universities. Milestones 0–2 establish the product, security, data,
+and universities. Milestones 0–3 establish the product, security, data,
 contract, CI, authenticated student dashboard, and institution-scoped
-registrar foundations without deploying contracts or claiming live partner
-integrations.
+registrar foundations plus deterministic student registration, without
+deploying contracts or claiming live partner integrations.
 
 ## Synthetic student demo
 
@@ -16,6 +16,11 @@ The public demo account is intentionally restricted to one synthetic student:
 Never use real student information in this environment. The account can view
 only Aisha Rahman's seeded Northstar University record and cannot mutate
 academic records.
+
+The complete synthetic role/account matrix for development, testing, and
+eventual demos is in
+[docs/testing/test-accounts.md](docs/testing/test-accounts.md). Those
+credentials are deliberately non-production and must never be reused.
 
 ## Requirements
 
@@ -65,6 +70,10 @@ the complete acceptance record and remaining partner credentials.
 - [Milestones 0–1 acceptance evidence](docs/verification/acceptance.md)
 - [Registrar fidelity review](docs/design/registrar-fidelity-review.md)
 - [Milestone 2 acceptance evidence](docs/verification/milestone-2.md)
+- [Milestone 3 product scope](docs/product/milestone-3.md)
+- [Milestone 3 registration design contract](docs/design/registration-contract.md)
+- [Milestone 3 acceptance evidence](docs/verification/milestone-3.md)
+- [Synthetic test and demo accounts](docs/testing/test-accounts.md)
 
 World, ENS, 0G, WalletConnect, and World Chain deployment are deliberately
 unconfigured. The app reports that state honestly, and no registry has been

@@ -1,4 +1,4 @@
-# Milestones 0–2 project plan
+# Milestones 0–3 project plan
 
 | Gate | Deliverable                 | Exit evidence                                                |
 | ---- | --------------------------- | ------------------------------------------------------------ |
@@ -14,12 +14,18 @@
 | M2.2 | Academic structure          | Validated institution, catalog, term, and section management |
 | M2.3 | Registrar product           | Approved workspace and working management destinations       |
 | M2.4 | Acceptance                  | Browser QA, design comparison, advisors, green PR            |
+| M3.1 | Registration domain         | Deterministic eligibility decisions and unit tests           |
+| M3.2 | Registration data boundary  | Atomic, idempotent registration and withdrawal RPCs          |
+| M3.3 | Student registration        | Catalog, plan, submission, schedule, and honest states       |
+| M3.4 | Registrar oversight         | Institution-scoped, read-only registration activity          |
+| M3.5 | Acceptance                  | Concurrency, browser QA, design comparison, and green PR     |
 
-Milestones 0–1 were delivered through `codex/milestones-0-1`. Milestone 2 uses
-small, independently reviewable commits on `codex/milestone-2`. A gate is
-complete only when its executable checks pass; documentation never substitutes
-for a failing control.
+Milestones 0–1 were delivered through `codex/milestones-0-1`, and Milestone 2
+through `codex/milestone-2`. Milestone 3 uses small, independently reviewable
+commits on `codex/milestone-3`. A gate is complete only when its executable
+checks pass; documentation never substitutes for a failing control.
 
-Milestone 2 implementation and local acceptance are complete. Final acceptance
-is recorded only after pull request 2 passes every GitHub quality gate and is
+Milestone 3 implementation is complete when the student registration workflow,
+the registrar oversight view, and every local and hosted verification gate
+pass. Final acceptance is recorded only after pull request 3 is green and
 merged to `main`.

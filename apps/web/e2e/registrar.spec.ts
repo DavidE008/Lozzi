@@ -41,6 +41,7 @@ test("registrar sees hosted rows and every navigation destination", async ({
     ["Catalog", "Catalog"],
     ["Terms", "Terms"],
     ["Sections", "Sections"],
+    ["Registration", "Student registration activity"],
     ["Records", "Publication queue"],
     ["Audit", "Institution audit"],
     ["Settings", "Settings"],

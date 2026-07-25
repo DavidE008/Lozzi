@@ -569,6 +569,7 @@ export type Database = {
           id: string
           institution_id: string
           location: string | null
+          restriction_rules: Json
           section_code: string
           status: string
           term_id: string
@@ -586,6 +587,7 @@ export type Database = {
           id?: string
           institution_id: string
           location?: string | null
+          restriction_rules?: Json
           section_code: string
           status?: string
           term_id: string
@@ -603,6 +605,7 @@ export type Database = {
           id?: string
           institution_id?: string
           location?: string | null
+          restriction_rules?: Json
           section_code?: string
           status?: string
           term_id?: string
@@ -1779,6 +1782,74 @@ export type Database = {
           },
         ]
       }
+      registration_requests: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          idempotency_key: string
+          institution_id: string
+          requested_section_ids: string[]
+          result: Json
+          status: string
+          student_id: string
+          term_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          idempotency_key: string
+          institution_id: string
+          requested_section_ids: string[]
+          result: Json
+          status: string
+          student_id: string
+          term_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          idempotency_key?: string
+          institution_id?: string
+          requested_section_ids?: string[]
+          result?: Json
+          status?: string
+          student_id?: string
+          term_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_requests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registration_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_dashboard_summary"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "registration_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registration_requests_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "academic_terms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       section_instructors: {
         Row: {
           created_at: string
@@ -2453,6 +2524,41 @@ export type Database = {
         }
         Relationships: []
       }
+      registrar_registration_activity: {
+        Row: {
+          created_at: string | null
+          institution_id: string | null
+          request_id: string | null
+          section_count: number | null
+          status: string | null
+          student_display_name: string | null
+          student_id: string | null
+          term_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_requests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registration_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_dashboard_summary"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "registration_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registrar_section_directory: {
         Row: {
           capacity: number | null
@@ -2575,7 +2681,47 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      check_registration_eligibility: {
+        Args: { requested_section_ids?: string[]; section_id: string }
+        Returns: Json
+      }
+      get_registration_catalog: {
+        Args: { p_term_id?: string }
+        Returns: {
+          add_drop_deadline: string
+          available_seats: number
+          capacity: number
+          course_code: string
+          course_id: string
+          course_title: string
+          credit_hours: number
+          delivery_mode: string
+          eligibility: Json
+          enrolled_count: number
+          enrollment_id: string
+          enrollment_status: string
+          institution_id: string
+          instructor: string
+          location: string
+          meetings: Json
+          prerequisites: Json
+          registration_closes_at: string
+          section_code: string
+          section_id: string
+          section_status: string
+          student_id: string
+          term_id: string
+          term_name: string
+        }[]
+      }
+      register_for_sections: {
+        Args: { p_idempotency_key: string; p_section_ids: string[] }
+        Returns: Json
+      }
+      withdraw_from_section: {
+        Args: { p_enrollment_id: string; p_idempotency_key: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

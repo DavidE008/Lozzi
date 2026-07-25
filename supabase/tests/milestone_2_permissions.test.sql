@@ -167,8 +167,8 @@ select is(
 );
 select is(
   (select course_section_count from public.registrar_workspace_summary),
-  2,
-  'the registrar summary reports two synthetic course sections'
+  6,
+  'the registrar summary reports all current synthetic course sections'
 );
 select is(
   (
@@ -190,8 +190,8 @@ select is(
 );
 select is(
   (select count(*)::bigint from public.registrar_section_directory),
-  2::bigint,
-  'the registrar section directory exposes both seeded sections'
+  7::bigint,
+  'the registrar section directory exposes all seeded sections'
 );
 
 select lives_ok(

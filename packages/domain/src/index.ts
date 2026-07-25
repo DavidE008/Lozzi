@@ -53,3 +53,15 @@ export {
   type RegistrarWorkspace,
   type RegistrarWorkspaceRepository,
 } from "./registrar";
+export {
+  EnrollmentEligibilityService,
+  evaluateEnrollmentEligibility,
+  type EnrollmentEligibility,
+  type EnrollmentEligibilityInput,
+  type RegistrationBlockingCode,
+  type RegistrationMeeting,
+  type RegistrationReason,
+  type RegistrationRequirement,
+  type RegistrationWarningCode,
+  type SectionRestrictionInput,
+} from "./registration";

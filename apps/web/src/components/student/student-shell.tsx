@@ -4,7 +4,9 @@ import { brandConfig } from "@lozzi/domain";
 import { LozziCrest } from "@lozzi/ui";
 import {
   BookOpen,
+  CalendarDays,
   CircleGauge,
+  Clock3,
   FileBadge,
   GraduationCap,
   LogOut,
@@ -31,9 +33,11 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { href: "/student", label: "Overview", icon: CircleGauge },
-  { href: "/student/record", label: "Academic record", icon: FileBadge },
-  { href: "/student/progress", label: "Degree progress", icon: GraduationCap },
-  { href: "/student/shares", label: "Verified shares", icon: Share2 },
+  { href: "/student/register", label: "Registration", icon: CalendarDays },
+  { href: "/student/schedule", label: "Schedule", icon: Clock3 },
+  { href: "/student/record", label: "Record", icon: FileBadge },
+  { href: "/student/progress", label: "Progress", icon: GraduationCap },
+  { href: "/student/shares", label: "Shares", icon: Share2 },
   { href: "/student/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -88,25 +92,60 @@ export function StudentShell({
   readonly institutionName: string;
 }) {
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const pathname = usePathname();
+  const usesRegistrationCanvas = pathname === "/student/register";
 
   return (
-    <div className="bg-background min-h-screen lg:grid lg:grid-cols-[15rem_1fr]">
-      <aside className="bg-lozzi-navy fixed inset-y-0 left-0 z-30 hidden w-60 flex-col text-white lg:flex">
-        <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
-          <LozziCrest className="text-lozzi-navy h-11 w-10 drop-shadow-[0_0_0.5px_white]" />
+    <div
+      className={cn(
+        "bg-background min-h-screen lg:grid",
+        usesRegistrationCanvas
+          ? "lg:grid-cols-[12.75rem_1fr]"
+          : "lg:grid-cols-[15rem_1fr]",
+      )}
+    >
+      <aside
+        className={cn(
+          "bg-lozzi-navy fixed inset-y-0 left-0 z-30 hidden flex-col text-white lg:flex",
+          usesRegistrationCanvas ? "w-[12.75rem]" : "w-60",
+        )}
+      >
+        <div
+          className={cn(
+            "flex items-center gap-3 border-b border-white/10 px-6",
+            usesRegistrationCanvas
+              ? "h-[12.5rem] flex-col justify-center"
+              : "h-20",
+          )}
+        >
+          <LozziCrest
+            className={cn(
+              "text-lozzi-navy drop-shadow-[0_0_0.5px_white]",
+              usesRegistrationCanvas ? "h-20 w-[4.5rem]" : "h-11 w-10",
+            )}
+          />
           <div>
-            <p className="font-heading text-2xl leading-none font-semibold">
+            <p
+              className={cn(
+                "font-heading leading-none font-semibold",
+                usesRegistrationCanvas ? "text-center text-4xl" : "text-2xl",
+              )}
+            >
               {brandConfig.name}
             </p>
-            <p className="mt-1 text-[10px] tracking-wider text-white/45 uppercase">
-              Student portal
-            </p>
+            {!usesRegistrationCanvas ? (
+              <p className="mt-1 text-[10px] tracking-wider text-white/45 uppercase">
+                Student portal
+              </p>
+            ) : null}
           </div>
         </div>
-        <div className="px-4 py-7">
-          <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-white/35 uppercase">
-            My academics
-          </p>
+        <div className={cn("px-4", usesRegistrationCanvas ? "py-3" : "py-7")}>
+          {!usesRegistrationCanvas ? (
+            <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-white/35 uppercase">
+              My academics
+            </p>
+          ) : null}
           <Navigation />
         </div>
         <div className="mt-auto border-t border-white/10 p-4">
@@ -180,9 +219,20 @@ export function StudentShell({
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <BookOpen className="text-lozzi-teal size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Fall 2026</span>
+            <span className="text-border hidden sm:inline">/</span>
+            <span className="text-foreground hidden font-medium sm:inline">
+              {displayName}
+            </span>
           </div>
         </header>
-        <main className="px-4 py-7 sm:px-6 lg:px-10 lg:py-9">{children}</main>
+        <main
+          className={cn(
+            "px-4 py-7 sm:px-6 lg:py-9",
+            usesRegistrationCanvas ? "lg:px-11" : "lg:px-10",
+          )}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

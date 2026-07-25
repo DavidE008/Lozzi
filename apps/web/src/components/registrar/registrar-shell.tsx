@@ -5,6 +5,7 @@ import { LozziCrest } from "@lozzi/ui";
 import {
   BookOpen,
   CalendarDays,
+  ClipboardList,
   FileCheck2,
   GraduationCap,
   History,
@@ -38,6 +39,11 @@ const primaryNavigation = [
   { href: "/registrar/catalog", label: "Catalog", icon: BookOpen },
   { href: "/registrar/terms", label: "Terms", icon: CalendarDays },
   { href: "/registrar/sections", label: "Sections", icon: GraduationCap },
+  {
+    href: "/registrar/registration",
+    label: "Registration",
+    icon: ClipboardList,
+  },
   { href: "/registrar/records", label: "Records", icon: FileCheck2 },
   { href: "/registrar/audit", label: "Audit", icon: History },
 ] as const;
