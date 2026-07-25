@@ -1,26 +1,17 @@
 "use client";
 
-import {
-  IDKitRequestWidget,
-  proofOfHuman,
-  type IDKitResult,
-  type RpContext,
-} from "@worldcoin/idkit";
+import type { IDKitResult } from "@worldcoin/idkit";
 import type { CapabilityState } from "@lozzi/domain";
 import { LoaderCircle, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
+import {
+  WorldIdFlowDialog,
+  type WorldIdFlowRequest,
+} from "@/components/student/world-id-flow-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface WorldRequest {
-  readonly action: string;
-  readonly appId: `app_${string}`;
-  readonly environment: "production" | "staging";
-  readonly rpContext: RpContext;
-  readonly signal: string;
-}
 
 interface WorldVerificationCardProps {
   readonly capability: CapabilityState;
@@ -44,7 +35,7 @@ export function WorldVerificationCard({
   credentialType,
   verifiedAt,
 }: WorldVerificationCardProps) {
-  const [request, setRequest] = useState<WorldRequest | null>(null);
+  const [request, setRequest] = useState<WorldIdFlowRequest | null>(null);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [successAt, setSuccessAt] = useState<string | null>(verifiedAt);
@@ -68,7 +59,7 @@ export function WorldVerificationCard({
         headers: { "content-type": "application/json" },
       });
       if (!response.ok) throw new Error("World verification is unavailable.");
-      const payload = (await response.json()) as WorldRequest;
+      const payload = (await response.json()) as WorldIdFlowRequest;
       setRequest(payload);
       setOpen(true);
     } catch {
@@ -204,18 +195,12 @@ export function WorldVerificationCard({
         ) : null}
       </CardContent>
       {request ? (
-        <IDKitRequestWidget
+        <WorldIdFlowDialog
           open={open}
+          request={request}
           onOpenChange={setOpen}
-          app_id={request.appId}
-          action={request.action}
-          rp_context={request.rpContext}
-          environment={request.environment}
-          allow_legacy_proofs
-          preset={proofOfHuman({ signal: request.signal })}
-          handleVerify={verify}
-          onSuccess={() => setOpen(false)}
-          onError={() => {
+          onVerify={verify}
+          onFlowError={() => {
             setPending(false);
             setError("World verification was not completed.");
           }}
