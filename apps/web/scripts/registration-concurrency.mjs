@@ -3,11 +3,19 @@ import { randomUUID } from "node:crypto";
 
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.API_URL;
-const supabaseAnonKey = process.env.ANON_KEY;
+const readSupabaseEnvironment = (name) => {
+  const rawValue = process.env[name];
+  assert(rawValue, `${name} is required.`);
 
-assert(supabaseUrl, "API_URL is required.");
-assert(supabaseAnonKey, "ANON_KEY is required.");
+  const hasWrappingQuotes =
+    (rawValue.startsWith('"') && rawValue.endsWith('"')) ||
+    (rawValue.startsWith("'") && rawValue.endsWith("'"));
+
+  return hasWrappingQuotes ? rawValue.slice(1, -1) : rawValue;
+};
+
+const supabaseUrl = readSupabaseEnvironment("API_URL");
+const supabaseAnonKey = readSupabaseEnvironment("ANON_KEY");
 
 const createStudentClient = async (email, password) => {
   const client = createClient(supabaseUrl, supabaseAnonKey, {
