@@ -73,3 +73,21 @@ export const getRoleHomeForUser = async (userId: string) => {
   const access = await getInstitutionAccessForUser(userId);
   return roleHomePath(access?.roles ?? []);
 };
+
+export const getProfileForUser = cache(async (userId: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("display_name, initials")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    logEvent("error", "profile_access_failed", { category: error.code });
+    throw new Error("The staff profile could not be loaded.");
+  }
+
+  return data
+    ? { displayName: data.display_name, initials: data.initials }
+    : null;
+});
