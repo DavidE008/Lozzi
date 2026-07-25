@@ -1,0 +1,11 @@
+title = "Lozzi secret-scanning policy"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Supabase publishable keys are intentionally public browser identifiers."
+regexTarget = "line"
+regexes = [
+  '''NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:\s*"sb_publishable_[A-Za-z0-9_-]+"''',
+]

@@ -1,0 +1,6 @@
+.next
+coverage
+out
+lib
+pnpm-lock.yaml
+docs/design/concepts/*.png
