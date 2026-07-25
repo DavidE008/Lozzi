@@ -13,8 +13,12 @@ describe("registrar role helpers", () => {
     expect(roleHomePath(["student"])).toBe("/student");
   });
 
+  it("routes an instructor to the instructor workspace", () => {
+    expect(roleHomePath(["instructor"])).toBe("/instructor");
+  });
+
   it("keeps unsupported role homes in the honest onboarding state", () => {
-    expect(roleHomePath(["instructor"])).toBe("/onboarding");
+    expect(roleHomePath(["advisor"])).toBe("/onboarding");
     expect(roleHomePath([])).toBe("/onboarding");
   });
 });
