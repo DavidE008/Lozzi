@@ -13,6 +13,7 @@ overrides:
 allowBuilds:
   bufferutil: false
   es5-ext: false
+  keccak: false
   sharp: true
   unrs-resolver: true
   utf-8-validate: false
