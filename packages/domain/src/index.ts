@@ -2,6 +2,8 @@ export { brandConfig } from "./brand";
 export {
   capabilityStatusSchema,
   createCapability,
+  resolveCapability,
+  type CapabilityInputs,
   type CapabilityName,
   type CapabilityState,
   type CapabilityStatus,
@@ -17,6 +19,29 @@ export {
   type EnvironmentCapabilities,
   type PublicEnvironment,
 } from "./environment";
+export {
+  createWorldSignal,
+  ensResolutionSchema,
+  integrationFailureCategorySchema,
+  normalizeEnsName,
+  normalizeWorldNullifier,
+  privateObjectMetadataSchema,
+  progressExplanationInputSchema,
+  progressExplanationSchema,
+  PROGRESS_EXPLANATION_DISCLAIMER,
+  WORLD_ACTION,
+  worldCredentialTypeSchema,
+  worldRpContextSchema,
+  worldVerificationSignalSchema,
+  type EnsResolution,
+  type IntegrationFailureCategory,
+  type PrivateObjectMetadata,
+  type ProgressExplanation,
+  type ProgressExplanationInput,
+  type WorldCredentialType,
+  type WorldRpContext,
+  type WorldVerificationSignal,
+} from "./partners";
 export {
   buildAcademicRecordCommitmentPayload,
   calculateDegreeAudit,
@@ -53,8 +78,8 @@ export type {
   PrivateInferenceProvider,
   PrivateStorageProvider,
   VerificationProvider,
-  VerificationSignal,
   WalletProvider,
+  WorldVerificationRequest,
 } from "./integrations";
 export {
   hasRegistrarAccess,
