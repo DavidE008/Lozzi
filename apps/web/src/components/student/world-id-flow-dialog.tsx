@@ -54,7 +54,7 @@ export function WorldIdFlowDialog({
   });
   const [hostStatus, setHostStatus] = useState<HostStatus>("idle");
   const lastResult = useRef<IDKitResult | null>(null);
-  const lastErrorCode = useRef(flow.errorCode);
+  const lastErrorCode = useRef<typeof flow.errorCode>(null);
   const openFlow = flow.open;
   const resetFlow = flow.reset;
 
