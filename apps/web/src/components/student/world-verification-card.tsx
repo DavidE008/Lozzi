@@ -32,8 +32,8 @@ const statusLabel = (
   capability: CapabilityState,
   verifiedAt: string | null,
 ) => {
-  if (verifiedAt) return "Verified";
   if (capability.status === "mock-development") return "Development mock";
+  if (verifiedAt) return "Verified";
   if (capability.status === "failed") return "Unavailable";
   if (capability.status === "available") return "Ready";
   return "Not configured";
@@ -48,12 +48,20 @@ export function WorldVerificationCard({
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [successAt, setSuccessAt] = useState<string | null>(verifiedAt);
+  const [mockUsed, setMockUsed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const available = capability.status === "available";
+  const mockDevelopment = capability.status === "mock-development";
 
   const beginVerification = async () => {
     setPending(true);
     setError(null);
+    if (mockDevelopment) {
+      setMockUsed(true);
+      setSuccessAt(new Date().toISOString());
+      setPending(false);
+      return;
+    }
     try {
       const response = await fetch("/api/integrations/world/request", {
         method: "POST",
@@ -133,13 +141,23 @@ export function WorldVerificationCard({
           <div className="text-sm">
             {successAt ? (
               <>
-                <p className="font-medium">Verification is active</p>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  {credentialType === "proof_of_human"
-                    ? "Proof of Human"
-                    : "Legacy Orb proof"}{" "}
-                  · {new Date(successAt).toLocaleDateString("en-GB")}
+                <p className="font-medium">
+                  {mockUsed
+                    ? "Development mock completed"
+                    : "Verification is active"}
                 </p>
+                {mockUsed ? (
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    No World proof or provider call was made.
+                  </p>
+                ) : (
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {credentialType === "proof_of_human"
+                      ? "Proof of Human"
+                      : "Legacy Orb proof"}{" "}
+                    · {new Date(successAt).toLocaleDateString("en-GB")}
+                  </p>
+                )}
               </>
             ) : (
               <>
@@ -152,7 +170,9 @@ export function WorldVerificationCard({
           </div>
           <Button
             type="button"
-            disabled={!available || pending || Boolean(successAt)}
+            disabled={
+              (!available && !mockDevelopment) || pending || Boolean(successAt)
+            }
             onClick={beginVerification}
             className="sm:min-w-40"
           >
@@ -165,7 +185,13 @@ export function WorldVerificationCard({
                 Verifying…
               </>
             ) : successAt ? (
-              "Verified"
+              mockUsed ? (
+                "Mock complete"
+              ) : (
+                "Verified"
+              )
+            ) : mockDevelopment ? (
+              "Run mock verification"
             ) : (
               "Verify with World"
             )}

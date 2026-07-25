@@ -28,13 +28,21 @@ export function EnsIdentityCard({
   const [label, setLabel] = useState("");
   const [name, setName] = useState(currentName);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
+  const [mockUsed, setMockUsed] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const available = capability.status === "available";
+  const mockDevelopment = capability.status === "mock-development";
 
   const issue = async () => {
     setPending(true);
     setError(null);
+    if (mockDevelopment) {
+      setName(`${label.trim().toLowerCase()}.mock.lozzi.test`);
+      setMockUsed(true);
+      setPending(false);
+      return;
+    }
     try {
       const response = await fetch("/api/integrations/ens/issue", {
         method: "POST",
@@ -89,12 +97,16 @@ export function EnsIdentityCard({
           }
         >
           {name
-            ? "Active"
+            ? mockUsed
+              ? "Development mock"
+              : "Active"
             : available
               ? walletAddress
                 ? "Ready"
                 : "Wallet required"
-              : "Not configured"}
+              : mockDevelopment
+                ? "Development mock"
+                : "Not configured"}
         </Badge>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -103,7 +115,9 @@ export function EnsIdentityCard({
             <div>
               <p className="font-medium">{name}</p>
               <p className="text-muted-foreground mt-1 text-xs">
-                Resolves to your verified Sepolia wallet.
+                {mockUsed
+                  ? "No ENS name, transaction, or wallet resolution was created."
+                  : "Resolves to your verified Sepolia wallet."}
               </p>
             </div>
             {transactionHash ? (
@@ -129,16 +143,25 @@ export function EnsIdentityCard({
                   id="ens-label"
                   value={label}
                   onChange={(event) => setLabel(event.target.value)}
-                  disabled={!available || !walletAddress || pending}
+                  disabled={
+                    (!available && !mockDevelopment) ||
+                    (!walletAddress && !mockDevelopment) ||
+                    pending
+                  }
                   placeholder="aisha"
                   className="rounded-r-none"
                 />
                 <span className="border-input bg-muted text-muted-foreground flex h-9 items-center border border-l-0 px-3 text-xs">
-                  .{parentName ?? "parent.eth"}
+                  .
+                  {mockDevelopment
+                    ? "mock.lozzi.test"
+                    : (parentName ?? "parent.eth")}
                 </span>
               </div>
               <p className="text-muted-foreground text-xs">
-                {walletAddress ? (
+                {mockDevelopment ? (
+                  "Development mock — no ENS provider call will be made."
+                ) : walletAddress ? (
                   <a
                     href={`https://sepolia.etherscan.io/address/${walletAddress}`}
                     target="_blank"
@@ -157,7 +180,10 @@ export function EnsIdentityCard({
               type="button"
               onClick={issue}
               disabled={
-                !available || !walletAddress || !label.trim() || pending
+                (!available && !mockDevelopment) ||
+                (!walletAddress && !mockDevelopment) ||
+                !label.trim() ||
+                pending
               }
               className="sm:min-w-36"
             >
@@ -169,6 +195,8 @@ export function EnsIdentityCard({
                   />
                   Confirming…
                 </>
+              ) : mockDevelopment ? (
+                "Create mock name"
               ) : (
                 "Claim subname"
               )}
