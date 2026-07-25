@@ -5,6 +5,10 @@
 - World ID 4.x RP requests are signed on the server and bound to the signed-in
   Supabase user. Exact completed proof payloads are verified server-side; only
   normalized credential evidence is persisted.
+- The browser uses IDKit's headless request flow inside a Lozzi-owned,
+  keyboard-accessible QR dialog. The official bridge origin is added to
+  `connect-src` only when the complete server credential set exists; remote
+  widget styles and fonts are not allowed through the nonce CSP.
 - Ethereum Sepolia ENS names are normalized, issued through the selected
   institutional adapter, gas-capped, confirmed, and resolved back to the
   student's verified wallet.
@@ -26,7 +30,7 @@ Run from repository root:
 ```text
 pnpm lint             passed
 pnpm typecheck         passed
-pnpm test              28 domain + 50 web tests passed
+pnpm test              28 domain + 59 web tests passed
 pnpm build             passed, including all four partner API routes
 pnpm audit:dependencies passed, no known vulnerabilities
 ```

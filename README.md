@@ -75,6 +75,7 @@ the complete acceptance record and remaining partner credentials.
 - [Milestone 3 acceptance evidence](docs/verification/milestone-3.md)
 - [Milestone 4 acceptance evidence](docs/verification/milestone-4.md)
 - [Milestone 5 partner scope](docs/product/milestone-5.md)
+- [Milestone 5 fidelity review](docs/design/milestone-5-fidelity-review.md)
 - [Milestone 5 acceptance evidence](docs/verification/milestone-5.md)
 - [Synthetic test and demo accounts](docs/testing/test-accounts.md)
 

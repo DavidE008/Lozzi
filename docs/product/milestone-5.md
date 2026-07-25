@@ -13,6 +13,9 @@ advisory explanations only.
 ### World ID 4.0
 
 - Use the current IDKit 4.x request flow.
+- Render the headless IDKit flow through Lozzi's accessible QR dialog so the
+  nonce CSP stays strict; allow the official World bridge connection only when
+  the complete credential set is configured.
 - Generate the relying-party signature on the server with the RP signing key.
 - Bind the action to the authenticated Lozzi user through a non-public signal.
 - Forward the completed IDKit payload unchanged to
