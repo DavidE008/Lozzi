@@ -25,6 +25,7 @@ were applied in order:
 4. `fix_registration_term_resolution`
 5. `scope_registrar_summary_to_current_term`
 6. `registration_request_fk_indexes`
+7. `qualify_registration_enrollment_conflict`
 
 The hosted probes confirm:
 
@@ -33,6 +34,8 @@ The hosted probes confirm:
 - The active registration catalog exposes exactly six Fall 2026 offerings.
 - The corrected registration function resolves a UUID term without relying on
   a nonexistent PostgreSQL `min(uuid)` aggregate.
+- Enrollment upserts name their unique constraint explicitly, eliminating the
+  PL/pgSQL variable/column ambiguity proven by the registration test.
 - The registrar summary and registration activity views use
   `security_invoker`.
 - Registration request foreign keys have complete covering indexes.
@@ -78,7 +81,8 @@ guidance](https://supabase.com/docs/guides/auth/password-security#password-stren
 - The approved registration concept and final browser capture were compared in
   the same full-view and focused-region inputs. The iteration history and
   passing result are recorded in [design-qa.md](../../design-qa.md).
-- GitHub Actions Quality run 27 is the authoritative Docker/pgTAP,
+- [GitHub Actions Quality run 32](https://github.com/DavidE008/Lozzi/actions/runs/30146711121)
+  is the authoritative Docker/pgTAP,
   final-seat-concurrency, Playwright, Foundry, frozen-install, format, build,
   audit, and secret-scanning record.
 
