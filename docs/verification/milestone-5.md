@@ -52,6 +52,23 @@ even though Milestone 5 does not deploy or modify a live contract.
 
 ## Live acceptance state
 
+The two Milestone 5 migrations were applied to hosted project
+`mmyndcqtovqxyoucrfdb` as:
+
+- `20260725144658_milestone_5_integration_lifecycle`
+- `20260725144705_partner_service_transactions`
+
+Hosted checks confirm RLS is enabled on World, ENS, student-wallet, 0G object,
+AI run, and capability tables. The six trusted partner functions pin an empty
+`search_path`, deny execution to `anon` and `authenticated`, and grant execution
+only to `service_role`. The student partner-summary view uses
+`security_invoker`, denies anonymous reads, and is available to authenticated
+users subject to underlying RLS.
+
+World, ENS, 0G object, and AI run row counts remain zero. This is expected: the
+hosted environment does not contain live partner credentials, so no fixture is
+represented as provider evidence.
+
 The hosted environment does not contain World, ENS, 0G, WalletConnect, or
 World Chain signing/deployment credentials. Those capabilities must therefore
 render **Not configured** and no live partner success is claimed.
@@ -72,5 +89,11 @@ WalletConnect and World Chain Sepolia deployment remain Milestone 6.
 
 Docker is unavailable in the current Windows workspace, so local Supabase reset
 and pgTAP execution are delegated to the required GitHub Actions container job.
-Hosted migration state and Supabase security/performance advisors must be
-recorded before the pull request is marked ready.
+
+Hosted advisors report no new Milestone 5 security finding. Existing warnings
+identify the authenticated, authorization-checking registration and grade
+functions from Milestones 3–4, plus project-level leaked-password protection;
+those are unchanged by this milestone. Performance notices are informational
+unused-index findings expected in the low-volume synthetic tenant. Foreign-key,
+replay, lifecycle, and lookup indexes are retained for correctness and expected
+production access paths.
