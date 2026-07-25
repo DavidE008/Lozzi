@@ -29,6 +29,16 @@ describe("grade repository mapping", () => {
     expect(mapInstructorSections([section])).toEqual([section]);
   });
 
+  it("repairs legacy schedule typography at the read boundary", () => {
+    const legacySchedule =
+      "Mon 10:00 AM\u00e2\u20ac\u201c11:15 AM \u00c2\u00b7 Wed 10:00 AM\u00e2\u20ac\u201c11:15 AM";
+
+    expect(
+      mapInstructorSections([{ ...section, schedule: legacySchedule }])[0]
+        ?.schedule,
+    ).toBe("Mon 10:00 AM–11:15 AM · Wed 10:00 AM–11:15 AM");
+  });
+
   it("maps a complete gradebook row and derives the lifecycle", () => {
     const result = mapInstructorGradebook(section, [
       {

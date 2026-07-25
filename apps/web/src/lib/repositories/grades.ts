@@ -179,6 +179,11 @@ interface GradesQueryClient {
 const queryClient = async () =>
   (await createClient()) as unknown as GradesQueryClient;
 
+const normalizeScheduleTypography = (value: string) =>
+  value
+    .replaceAll("\u00e2\u20ac\u201c", "\u2013")
+    .replaceAll("\u00c2\u00b7", "\u00b7");
+
 const reportReadError = (event: string, error: QueryResult["error"]) => {
   logEvent("error", event, { category: error?.code ?? "unknown" });
 };
@@ -186,13 +191,29 @@ const reportReadError = (event: string, error: QueryResult["error"]) => {
 export const mapInstructorSections = (
   source: unknown,
 ): readonly InstructorSection[] =>
-  z.array(instructorSectionRowSchema).parse(source);
+  z
+    .array(instructorSectionRowSchema)
+    .parse(source)
+    .map((section) => ({
+      ...section,
+      schedule: normalizeScheduleTypography(section.schedule),
+    }));
 
 export const mapInstructorGradebook = (
   section: InstructorSection,
   source: unknown,
 ): InstructorGradebook => {
-  const rows = z.array(gradebookRowSchema).parse(source);
+  const normalizedSection = {
+    ...section,
+    schedule: normalizeScheduleTypography(section.schedule),
+  };
+  const rows = z
+    .array(gradebookRowSchema)
+    .parse(source)
+    .map((row) => ({
+      ...row,
+      schedule: normalizeScheduleTypography(row.schedule),
+    }));
   const lifecycleState =
     rows.find(({ lifecycle_state }) => lifecycle_state === "draft")
       ?.lifecycle_state ??
@@ -201,9 +222,9 @@ export const mapInstructorGradebook = (
     rows.find(({ lifecycle_state }) => lifecycle_state === "approved")
       ?.lifecycle_state ??
     rows[0]?.lifecycle_state ??
-    section.lifecycle_state;
+    normalizedSection.lifecycle_state;
 
-  return { section, rows, lifecycleState };
+  return { section: normalizedSection, rows, lifecycleState };
 };
 
 export const mapStudentAcademicRecords = (
