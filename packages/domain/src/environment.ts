@@ -68,6 +68,22 @@ export const parseEnvironment = (
         name: "world",
         nodeEnvironment: env.NODE_ENV,
       }),
+      resolveCapability({
+        configured: configured(
+          source.NEXT_PUBLIC_APP_URL,
+          source.WORLD_CHAIN_MAINNET_RPC_URL,
+          source.AGENTKIT_AGENT_ADDRESS,
+          source.AGENTKIT_HUMAN_ID_HMAC_KEY,
+          source.SUPABASE_SERVICE_ROLE_KEY,
+        ),
+        detailWhenAvailable:
+          "AgentKit delegation, canonical AgentBook lookup, and persistent usage controls are configured.",
+        detailWhenMissing:
+          "App URL, World Chain mainnet RPC, agent address, HMAC key, and service database access are required.",
+        label: "World AgentKit",
+        name: "world-agentkit",
+        nodeEnvironment: env.NODE_ENV,
+      }),
       optionalState(
         Boolean(env.WORLD_CHAIN_RPC_URL),
         "world-chain",

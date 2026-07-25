@@ -28,6 +28,33 @@ describe("environment capability detection", () => {
     ).toBe("not-configured");
   });
 
+  it("requires every server boundary before enabling AgentKit", () => {
+    const incomplete = parseEnvironment({
+      AGENTKIT_AGENT_ADDRESS: `0x${"11".repeat(20)}`,
+      AGENTKIT_HUMAN_ID_HMAC_KEY: "local-hmac-key",
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      NODE_ENV: "production",
+      WORLD_CHAIN_MAINNET_RPC_URL: "https://worldchain.example",
+    });
+    expect(
+      incomplete.capabilities.find(({ name }) => name === "world-agentkit")
+        ?.status,
+    ).toBe("not-configured");
+
+    const complete = parseEnvironment({
+      AGENTKIT_AGENT_ADDRESS: `0x${"11".repeat(20)}`,
+      AGENTKIT_HUMAN_ID_HMAC_KEY: "local-hmac-key",
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      NODE_ENV: "production",
+      SUPABASE_SERVICE_ROLE_KEY: "server-secret",
+      WORLD_CHAIN_MAINNET_RPC_URL: "https://worldchain.example",
+    });
+    expect(
+      complete.capabilities.find(({ name }) => name === "world-agentkit")
+        ?.status,
+    ).toBe("available");
+  });
+
   it("requires the complete encrypted 0G path", () => {
     const result = parseEnvironment({
       NODE_ENV: "production",
