@@ -649,7 +649,7 @@ create function public.submit_degree_plan_proposal(
   p_student_id uuid,
   p_human_id_commitment bytea,
   p_summary text,
-  p_course_ids uuid[]
+  p_course_codes text[]
 )
 returns jsonb
 language plpgsql
@@ -660,14 +660,23 @@ as $$
 declare
   delegation_row public.agent_delegations%rowtype;
   proposal_id uuid;
-  requested_course_id uuid;
   requested_course_code text;
+  requested_course_id uuid;
   requested_sort_order integer := 0;
 begin
   if p_summary is null
     or char_length(trim(p_summary)) not between 1 and 1200
-    or p_course_ids is null
-    or cardinality(p_course_ids) not between 1 and 12
+    or p_course_codes is null
+    or cardinality(p_course_codes) not between 1 and 12
+    or exists (
+      select 1
+      from unnest(p_course_codes) as code
+      where char_length(trim(code)) not between 1 and 40
+    )
+    or cardinality(p_course_codes) <> (
+      select count(distinct trim(code))
+      from unnest(p_course_codes) as code
+    )
   then
     raise exception using
       errcode = '22023',
@@ -689,11 +698,20 @@ begin
       message = 'Degree-plan proposal delegation not found';
   end if;
 
-  foreach requested_course_id in array p_course_ids loop
-    if not lozzi_private.is_course_eligible_for_student(
+  foreach requested_course_code in array p_course_codes loop
+    select course.id
+    into requested_course_id
+    from public.courses course
+    where course.institution_id = delegation_row.institution_id
+      and course.code = trim(requested_course_code)
+      and course.deactivated_at is null;
+
+    if requested_course_id is null
+      or not lozzi_private.is_course_eligible_for_student(
       p_student_id,
       requested_course_id
-    ) then
+      )
+    then
       raise exception using
         errcode = '22023',
         message = 'Proposal contains an ineligible course';
@@ -716,13 +734,13 @@ begin
   )
   returning id into proposal_id;
 
-  foreach requested_course_id in array p_course_ids loop
+  foreach requested_course_code in array p_course_codes loop
     requested_sort_order := requested_sort_order + 1;
-    select course.code
-    into requested_course_code
+    select course.id
+    into requested_course_id
     from public.courses course
-    where course.id = requested_course_id
-      and course.institution_id = delegation_row.institution_id
+    where course.institution_id = delegation_row.institution_id
+      and course.code = trim(requested_course_code)
       and course.deactivated_at is null;
 
     insert into public.degree_plan_proposal_items (
@@ -736,7 +754,7 @@ begin
       delegation_row.institution_id,
       proposal_id,
       requested_course_id,
-      requested_course_code,
+      trim(requested_course_code),
       requested_sort_order
     );
   end loop;
@@ -756,7 +774,7 @@ begin
     proposal_id,
     'success',
     jsonb_build_object(
-      'courseCount', cardinality(p_course_ids),
+      'courseCount', cardinality(p_course_codes),
       'reviewRequired', true
     )
   );
@@ -889,7 +907,7 @@ revoke all on function public.submit_degree_plan_proposal(
   uuid,
   bytea,
   text,
-  uuid[]
+  text[]
 ) from public, anon, authenticated;
 revoke all on function public.review_degree_plan_proposal(
   uuid,
@@ -922,7 +940,7 @@ grant execute on function public.submit_degree_plan_proposal(
   uuid,
   bytea,
   text,
-  uuid[]
+  text[]
 ) to service_role;
 grant execute on function public.review_degree_plan_proposal(
   uuid,

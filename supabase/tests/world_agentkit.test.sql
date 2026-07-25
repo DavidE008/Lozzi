@@ -522,7 +522,7 @@ select is(
       '13000000-0000-4000-8000-000000000101',
       decode(repeat('41', 32), 'hex'),
       'Consider Calculus I next; an assigned advisor must review this proposal.',
-      array['50000000-0000-4000-8000-000000000004']::uuid[]
+      array['MATH 1314']::text[]
     )->>'status'
   ),
   'pending',
