@@ -98,6 +98,25 @@ export interface RegistrarMembership {
   readonly deactivatedAt: string | null;
 }
 
+export interface RegistrarSectionInstructor {
+  readonly id: string;
+  readonly sectionId: string;
+  readonly staffRoleAssignmentId: string;
+  readonly displayName: string;
+  readonly isPrimary: boolean;
+}
+
+export interface RegistrarSectionMeeting {
+  readonly id: string;
+  readonly sectionId: string;
+  readonly weekday: number;
+  readonly startsAt: string;
+  readonly endsAt: string;
+  readonly location: string | null;
+  readonly startsOn: string | null;
+  readonly endsOn: string | null;
+}
+
 export const getRegistrarCatalog = cache(
   async (institutionId: string): Promise<RegistrarCatalog> => {
     const supabase = await createClient();
@@ -371,5 +390,66 @@ export const getRegistrarMemberships = cache(
         deactivatedAt: row.deactivated_at,
       };
     });
+  },
+);
+
+export const getRegistrarSectionResources = cache(
+  async (
+    institutionId: string,
+  ): Promise<{
+    readonly instructors: readonly RegistrarSectionInstructor[];
+    readonly meetings: readonly RegistrarSectionMeeting[];
+  }> => {
+    const supabase = await createClient();
+    const [instructorResult, meetingResult, staff] = await Promise.all([
+      supabase
+        .from("section_instructors")
+        .select("id, section_id, staff_role_assignment_id, is_primary")
+        .eq("institution_id", institutionId)
+        .is("deactivated_at", null),
+      supabase
+        .from("section_meetings")
+        .select(
+          "id, section_id, weekday, starts_at, ends_at, location, starts_on, ends_on",
+        )
+        .eq("institution_id", institutionId)
+        .is("deactivated_at", null)
+        .order("weekday")
+        .order("starts_at"),
+      getRegistrarStaff(institutionId),
+    ]);
+
+    const firstError = instructorResult.error ?? meetingResult.error;
+    if (firstError) {
+      fail(
+        "registrar_section_resources_failed",
+        firstError.code,
+        "Section resources could not be loaded.",
+      );
+    }
+
+    const staffNames = new Map(
+      staff.map((item) => [item.assignmentId, item.displayName]),
+    );
+    return {
+      instructors: (instructorResult.data ?? []).map((row) => ({
+        id: row.id,
+        sectionId: row.section_id,
+        staffRoleAssignmentId: row.staff_role_assignment_id,
+        displayName:
+          staffNames.get(row.staff_role_assignment_id) ?? "Staff member",
+        isPrimary: row.is_primary,
+      })),
+      meetings: (meetingResult.data ?? []).map((row) => ({
+        id: row.id,
+        sectionId: row.section_id,
+        weekday: row.weekday,
+        startsAt: row.starts_at,
+        endsAt: row.ends_at,
+        location: row.location,
+        startsOn: row.starts_on,
+        endsOn: row.ends_on,
+      })),
+    };
   },
 );
