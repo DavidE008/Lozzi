@@ -13,6 +13,7 @@ describe("0G private storage provider", () => {
         institutionId: "10000000-0000-4000-8000-000000000001",
         keyWrappingMasterKey: randomBytes(32).toString("base64"),
         objectType: "degree-audit-context",
+        ownerId: "20000000-0000-4000-8000-000000000001",
       },
     );
     const driver = {
@@ -48,6 +49,7 @@ describe("0G private storage provider", () => {
         institutionId: "10000000-0000-4000-8000-000000000001",
         keyWrappingMasterKey: randomBytes(32).toString("base64"),
         objectType: "degree-audit-context",
+        ownerId: "20000000-0000-4000-8000-000000000001",
       },
     );
     const driver = { uploadAndVerify: vi.fn() };

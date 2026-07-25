@@ -112,6 +112,7 @@ export const runProgressExplanationWorkflow = async (
     institutionId: input.institutionId,
     keyWrappingMasterKey: dependencies.keyWrappingMasterKey,
     objectType: "degree-audit-context",
+    ownerId: input.studentId,
   });
   const inputUpload = await dependencies.storage.putEncryptedObject({
     ciphertext: encryptedInput.bytes,
@@ -153,6 +154,7 @@ export const runProgressExplanationWorkflow = async (
       institutionId: input.institutionId,
       keyWrappingMasterKey: dependencies.keyWrappingMasterKey,
       objectType: "progress-explanation",
+      ownerId: input.studentId,
     });
     const outputUpload = await dependencies.storage.putEncryptedObject({
       ciphertext: encryptedOutput.bytes,

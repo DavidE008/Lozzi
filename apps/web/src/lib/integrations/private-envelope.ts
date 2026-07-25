@@ -2,6 +2,7 @@ import {
   createCipheriv,
   createDecipheriv,
   createHash,
+  createHmac,
   randomBytes,
 } from "node:crypto";
 
@@ -61,6 +62,7 @@ export const encryptPrivateJson = (
     readonly institutionId: string;
     readonly keyWrappingMasterKey: string;
     readonly objectType: PrivateObjectMetadata["objectType"];
+    readonly ownerId: string;
   },
 ): EncryptedPrivateObject => {
   const wrappingKey = Buffer.from(input.keyWrappingMasterKey, "base64");
@@ -71,11 +73,20 @@ export const encryptPrivateJson = (
   const objectKey = randomBytes(32);
   const iv = randomBytes(12);
   const keyWrapIv = randomBytes(12);
+  const ownerContext = createHmac("sha256", wrappingKey)
+    .update(
+      ["LOZZI_PRIVATE_OBJECT_OWNER_V1", input.institutionId, input.ownerId].join(
+        "\u0000",
+      ),
+      "utf8",
+    )
+    .digest("hex");
   const aad = Buffer.from(
     [
       "LOZZI_PRIVATE_OBJECT_V1",
       input.institutionId,
       input.objectType,
+      ownerContext,
     ].join("\u0000"),
     "utf8",
   );
