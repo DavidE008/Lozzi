@@ -15,6 +15,10 @@ const rules = [
     pattern: /-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/u,
   },
   {
+    label: "World Developer API key",
+    pattern: /api_[A-Za-z0-9_-]{40,}/u,
+  },
+  {
     label: "generic secret assignment",
     pattern: /(?:secret|private_key)\s*=\s*["'][^"'$<]{16,}["']/iu,
   },

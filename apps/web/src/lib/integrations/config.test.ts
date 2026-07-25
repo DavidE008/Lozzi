@@ -31,6 +31,17 @@ describe("partner server configuration", () => {
     });
   });
 
+  it("accepts the isolated Selfie Sandbox environment", () => {
+    const config = getWorldConfig({
+      NEXT_PUBLIC_WORLD_APP_ID: "app_example",
+      WORLD_ID_ENVIRONMENT: "sandbox",
+      WORLD_RP_ID: "rp_example",
+      WORLD_RP_SIGNING_KEY: `0x${"22".repeat(32)}`,
+    });
+
+    expect(config.environment).toBe("sandbox");
+  });
+
   it("requires a checksummed-length ENS registrar and signer", () => {
     expect(() =>
       getEnsConfig({

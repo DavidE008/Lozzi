@@ -14,7 +14,7 @@ const addressSchema = z
 const worldConfigSchema = z
   .object({
     appId: z.string().regex(/^app_[A-Za-z0-9_]+$/u),
-    environment: z.enum(["production", "staging"]),
+    environment: z.enum(["production", "sandbox", "staging"]),
     rpId: z.string().regex(/^rp_[A-Za-z0-9_]+$/u),
     signingKey: privateKeySchema,
   })

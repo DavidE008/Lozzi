@@ -1,0 +1,89 @@
+# World real configuration
+
+This runbook separates World Developer Portal administration from the Lozzi
+runtime. The Portal key is an operator credential and must never be made
+available to the application, browser, deployment platform, CI, or repository.
+
+## Credential boundaries
+
+| Value                               | Consumer                    | Storage boundary                                      |
+| ----------------------------------- | --------------------------- | ----------------------------------------------------- |
+| World Developer API key             | Codex Portal MCP only       | Codex MCP configuration after local rotation          |
+| `NEXT_PUBLIC_WORLD_APP_ID`          | Browser and server          | Local runtime configuration                           |
+| `WORLD_RP_ID`                       | Server only                 | Ignored `apps/web/.env.local`                         |
+| `WORLD_RP_SIGNING_KEY`              | Server only                 | Ignored `apps/web/.env.local`; recoverable secret     |
+| `WORLD_ID_ENVIRONMENT`              | Browser response and server | `staging`, `sandbox`, or `production`                 |
+| `SUPABASE_SERVICE_ROLE_KEY`         | Server only                 | Ignored `apps/web/.env.local`; never sent to a client |
+| `AGENTKIT_HUMAN_ID_HMAC_KEY`        | Server only                 | Ignored local secret storage; 32 random bytes         |
+| Demo-agent private key and password | Agent demo client only      | Encrypted keystore outside the repository             |
+
+The World Developer key that appeared in chat is considered compromised. It
+must be revoked in the Developer Portal. Do not test it, copy it into a shell
+history, or reuse it.
+
+After rotating it locally, connect the replacement without putting the value in
+this repository:
+
+```powershell
+codex mcp add world-developer-portal --env WORLD_DEVELOPER_API_KEY='<ROTATED_KEY>' -- npx -y mcp-remote https://developer.world.org/api/mcp --transport http-only --header 'Authorization:Bearer ${WORLD_DEVELOPER_API_KEY}'
+```
+
+Restart Codex after adding the MCP. Report only that it is connected; do not
+paste the replacement key into chat.
+
+## Portal inventory and provisioning
+
+Use the Portal MCP to inspect the current team before creating anything:
+
+1. Reuse a matching production external/cloud app named **Lozzi** when one
+   exists.
+2. Inspect its managed World ID 4.0 relying party and both environments.
+3. If the relying-party signing key is not recoverable from ignored local
+   storage, stop before rotation and obtain explicit approval.
+4. Otherwise, create the app and relying party and immediately place the
+   one-time signing key in ignored local secret storage.
+5. Create the following action identifiers in staging and production:
+
+| Purpose                  | Action identifier                    |
+| ------------------------ | ------------------------------------ |
+| Account humanity         | `lozzi-student-verification`         |
+| Sensitive-share liveness | `lozzi-sensitive-share-selfie-check` |
+| Adult self-consent       | `lozzi-adult-share-consent`          |
+
+Poll until the intended relying-party environments report `registered`.
+Confirm Selfie Check partner access and Identity Check preview access instead
+of substituting a weaker credential when either capability is unavailable.
+
+## Test environment matrix
+
+| Environment  | Intended evidence                                                |
+| ------------ | ---------------------------------------------------------------- |
+| `staging`    | Proof of Human with the World simulator                          |
+| `sandbox`    | Selfie Check hot/cold paths in the dedicated Sandbox application |
+| `production` | Real World App Proof of Human and minimum-age Identity Check     |
+
+Sandbox and staging evidence must never be presented as production
+verification. Production device testing happens locally before any hosted
+deployment.
+
+## AgentBook boundary
+
+The degree-planning agent uses World AgentKit's canonical AgentBook on World
+Chain mainnet (`eip155:480`). This does not change Lozzi's future registry
+contract target of World Chain Sepolia (`4801`).
+
+The demo-agent address is public, zero-value, and has no custody or academic
+write authority. Its private key is created in an encrypted local keystore and
+is never stored in an environment variable. Before registration, show the
+checksummed address, chain ID `480`, registration purpose, and relay behavior
+and wait for explicit approval of the World App QR. Verify the final transaction
+through a separately configured RPC read.
+
+## Current provisioning status
+
+- Portal MCP connection: pending rotated local credential and Codex restart.
+- Existing Lozzi app/RP inspection: pending MCP connection.
+- Selfie Check access: not yet confirmed.
+- Identity Check access: not yet confirmed.
+- Staging/production actions: not yet confirmed.
+- AgentBook registration: deliberately not started.

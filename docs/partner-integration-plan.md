@@ -6,7 +6,8 @@ visibly labeled and cannot run in production.
 
 | Partner             | Milestone 5 boundary                               | Live evidence requirement                           |
 | ------------------- | -------------------------------------------------- | --------------------------------------------------- |
-| World               | IDKit 4.x RP signing and server proof verification | Successful proof plus replay-denial database test   |
+| World               | Purpose-bound IDKit 4.x and legacy Selfie step-ups | Successful proof plus challenge/replay-denial tests |
+| World AgentKit      | Scoped degree-plan agent and advisor proposal      | AgentBook read, bounded usage, reviewed proposal    |
 | World Chain Sepolia | Chain metadata only, ID 4801                       | Remains Milestone 6                                 |
 | ENS                 | Resolution plus Ethereum Sepolia subname adapter   | Successful lookup; issuance only with parent access |
 | 0G Storage          | Server-only encrypted-object adapter               | Ciphertext upload and verified root hash            |
@@ -17,3 +18,8 @@ No browser bundle imports RP signing keys, deployment keys, a 0G Direct SDK,
 storage or ENS signer material, wrapping keys, service-role keys, or Router API
 keys. Partner failure never blocks the core SIS dashboard. Development mocks
 are visibly labeled and cannot produce a production success state.
+
+The World Developer Portal API key is an operator-only Codex MCP credential and
+is never a Lozzi runtime variable. World ID environments are explicit:
+`staging` for simulator evidence, `sandbox` for Selfie Check, and `production`
+for real World App QA.
