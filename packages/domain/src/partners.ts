@@ -44,12 +44,7 @@ export const worldRpContextSchema = z
 
 export type WorldRpContext = z.infer<typeof worldRpContextSchema>;
 
-export const worldCredentialTypeSchema = z.enum([
-  "proof_of_human",
-  "nfc",
-  "selfie",
-  "orb",
-]);
+export const worldCredentialTypeSchema = z.enum(["proof_of_human", "orb"]);
 
 export type WorldCredentialType = z.infer<typeof worldCredentialTypeSchema>;
 

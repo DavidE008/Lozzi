@@ -26,7 +26,7 @@ begin
     or p_nullifier >= 115792089237316195423570985008687907853269984665640564039457584007913129639936
     or p_signal_hash is null
     or octet_length(p_signal_hash) <> 32
-    or p_credential_type not in ('proof_of_human', 'nfc', 'selfie', 'orb')
+    or p_credential_type not in ('proof_of_human', 'orb')
     or p_verified_at is null
     or p_verified_at > now() + interval '1 minute'
     or p_verified_at < now() - interval '10 minutes'

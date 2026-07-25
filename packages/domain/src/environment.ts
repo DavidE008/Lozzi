@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { createCapability, type CapabilityState } from "./capabilities";
+import {
+  createCapability,
+  resolveCapability,
+  type CapabilityState,
+} from "./capabilities";
 
 const publicEnvironmentSchema = z.object({
   NODE_ENV: z
@@ -34,6 +38,9 @@ const optionalState = (
     present ? "Configured" : "Not configured",
   );
 
+const configured = (...values: readonly (string | undefined)[]): boolean =>
+  values.every((value) => Boolean(value?.trim()));
+
 export const parseEnvironment = (
   source: Readonly<Record<string, string | undefined>>,
 ): EnvironmentCapabilities => {
@@ -41,27 +48,66 @@ export const parseEnvironment = (
   const supabaseConfigured = Boolean(
     env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
+  const mockRequested = source.LOZZI_PARTNER_MOCKS === "1";
 
   return {
     env,
     capabilities: [
       optionalState(supabaseConfigured, "supabase", "Supabase"),
-      optionalState(
-        Boolean(env.NEXT_PUBLIC_WORLD_APP_ID),
-        "world",
-        "World verification",
-      ),
+      resolveCapability({
+        configured: configured(
+          env.NEXT_PUBLIC_WORLD_APP_ID,
+          source.WORLD_RP_ID,
+          source.WORLD_RP_SIGNING_KEY,
+        ),
+        detailWhenAvailable: "World ID 4.x server verification is configured.",
+        detailWhenMissing:
+          "World app, relying-party ID, and signing key are required.",
+        label: "World verification",
+        mockRequested,
+        name: "world",
+        nodeEnvironment: env.NODE_ENV,
+      }),
       optionalState(
         Boolean(env.WORLD_CHAIN_RPC_URL),
         "world-chain",
         "World Chain Sepolia",
       ),
-      optionalState(Boolean(env.NEXT_PUBLIC_ENS_PARENT), "ens", "ENS subnames"),
-      optionalState(
-        Boolean(env.ZERO_G_ROUTER_URL),
-        "zero-g",
-        "0G Compute Router",
-      ),
+      resolveCapability({
+        configured: configured(
+          env.NEXT_PUBLIC_ENS_PARENT,
+          source.ENS_SEPOLIA_RPC_URL,
+          source.ENS_REGISTRAR_ADDRESS,
+          source.ENS_SIGNER_PRIVATE_KEY,
+        ),
+        detailWhenAvailable:
+          "Ethereum Sepolia ENS resolution and subname issuance are configured.",
+        detailWhenMissing:
+          "Sepolia parent, RPC, registrar adapter, and signer are required.",
+        label: "ENS subnames",
+        mockRequested,
+        name: "ens",
+        nodeEnvironment: env.NODE_ENV,
+      }),
+      resolveCapability({
+        configured: configured(
+          env.ZERO_G_ROUTER_URL,
+          source.ZERO_G_COMPUTE_API_KEY,
+          source.ZERO_G_COMPUTE_MODEL,
+          source.ZERO_G_RPC_URL,
+          source.ZERO_G_INDEXER_RPC_URL,
+          source.ZERO_G_STORAGE_PRIVATE_KEY,
+          source.KEY_WRAPPING_MASTER_KEY,
+        ),
+        detailWhenAvailable:
+          "Encrypted 0G Storage and server-side Compute Router are configured.",
+        detailWhenMissing:
+          "0G Router, storage signer, indexer, and key-wrapper credentials are required.",
+        label: "0G private compute",
+        mockRequested,
+        name: "zero-g",
+        nodeEnvironment: env.NODE_ENV,
+      }),
       optionalState(
         Boolean(env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID),
         "walletconnect",

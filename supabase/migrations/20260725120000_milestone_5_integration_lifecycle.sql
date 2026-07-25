@@ -15,7 +15,7 @@ alter table public.world_verifications
     )
   ),
   add constraint world_verifications_credential_type_check
-  check (credential_type in ('proof_of_human', 'nfc', 'selfie', 'orb')),
+  check (credential_type in ('proof_of_human', 'orb')),
   add constraint world_verifications_error_category_check
   check (
     error_category is null
