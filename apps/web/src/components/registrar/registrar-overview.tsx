@@ -56,7 +56,7 @@ export function RegistrarOverview({
     {
       label: "Records awaiting publication",
       value: workspace.recordsAwaitingPublication.toLocaleString("en-GB"),
-      detail: "Approved for later publication",
+      detail: "Ready for registrar review",
       icon: FileCheck2,
     },
   ] as const;
@@ -72,7 +72,10 @@ export function RegistrarOverview({
             Oversee academic records and manage registration operations.
           </p>
         </div>
-        <Button disabled title="Record publication begins in Milestone 4">
+        <Button
+          nativeButton={false}
+          render={<Link href="/registrar/records" />}
+        >
           <FileCheck2 aria-hidden="true" />
           Publish record
         </Button>
@@ -112,7 +115,7 @@ export function RegistrarOverview({
                 Records requiring attention
               </CardTitle>
               <p className="text-muted-foreground mt-1 text-xs">
-                Approved submissions awaiting a later publication workflow.
+                Submitted and approved outcomes ready for registrar action.
               </p>
             </div>
             <Button

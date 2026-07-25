@@ -39,7 +39,7 @@ const workspace = {
 afterEach(cleanup);
 
 describe("RegistrarOverview", () => {
-  it("renders the scoped summary and keeps future publication disabled", () => {
+  it("renders the scoped summary and links to record publication", () => {
     render(<RegistrarOverview workspace={workspace} />);
 
     expect(
@@ -49,8 +49,8 @@ describe("RegistrarOverview", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Publish record" }),
-    ).toBeDisabled();
+      screen.getByRole("link", { name: "Publish record" }),
+    ).toHaveAttribute("href", "/registrar/records");
     expect(screen.getByRole("button", { name: /View all/u })).toHaveAttribute(
       "href",
       "/registrar/records",
