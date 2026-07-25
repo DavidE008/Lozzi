@@ -185,6 +185,8 @@ alter table public.world_verifications
     )
   );
 
+alter table public.world_verifications
+  drop constraint if exists world_verifications_action_id_nullifier_hash_key;
 drop index if exists public.world_verifications_action_nullifier_idx;
 create unique index world_verifications_account_nullifier_idx
   on public.world_verifications (action_id, nullifier)

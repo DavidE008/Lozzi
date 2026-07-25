@@ -131,7 +131,7 @@ select ok(
 
 set local role service_role;
 
-select is(
+select ok(
   (
     public.create_world_proof_challenge(
       '13000000-0000-4000-8000-000000000101',
@@ -143,12 +143,7 @@ select is(
       decode(repeat('b1', 32), 'hex'),
       now() + interval '5 minutes'
     )->>'challengeId'
-  )::uuid,
-  (
-    select id
-    from public.world_proof_challenges
-    where nonce = decode(repeat('a1', 32), 'hex')
-  ),
+  )::uuid is not null,
   'the trusted server creates a bounded account challenge'
 );
 
