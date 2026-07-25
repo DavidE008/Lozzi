@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GradePublicationManager } from "./grade-publication-manager";
 
@@ -12,6 +12,8 @@ vi.mock("@/app/registrar/records/actions", () => ({
   publishGradeSubmission: vi.fn(),
   startRegistrarGradeCorrection: vi.fn(),
 }));
+
+afterEach(cleanup);
 
 const queue = [
   {
