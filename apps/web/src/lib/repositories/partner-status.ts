@@ -25,6 +25,14 @@ const partnerStatusSchema = z
 
 export type StudentPartnerStatus = z.infer<typeof partnerStatusSchema>;
 
+export const hasVerifiedWorldAccount = (
+  status: StudentPartnerStatus | null,
+): boolean =>
+  status?.world_status === "verified" &&
+  status.world_verified_at !== null &&
+  (status.world_credential_type === "proof_of_human" ||
+    status.world_credential_type === "orb");
+
 interface PartnerSummaryClient {
   from(table: "student_partner_summary"): {
     select(columns: "*"): {

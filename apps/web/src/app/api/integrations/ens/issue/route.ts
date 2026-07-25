@@ -7,7 +7,11 @@ import { classifyPartnerError } from "@/lib/integrations/errors";
 import { recordCapabilityState } from "@/lib/integrations/partner-records";
 import { logEvent } from "@/lib/logging";
 import { getInstitutionAccessForUser } from "@/lib/repositories/access";
-import { getVerifiedStudentWallet } from "@/lib/repositories/partner-status";
+import {
+  getStudentPartnerStatus,
+  getVerifiedStudentWallet,
+  hasVerifiedWorldAccount,
+} from "@/lib/repositories/partner-status";
 import { getDashboardForUser } from "@/lib/repositories/student";
 import { assertSameOrigin } from "@/lib/security/origin";
 
@@ -39,7 +43,16 @@ export async function POST(request: Request): Promise<Response> {
         { status: 403 },
       );
     }
-    const wallet = await getVerifiedStudentWallet(dashboard.studentId);
+    const [identityStatus, wallet] = await Promise.all([
+      getStudentPartnerStatus(dashboard.studentId),
+      getVerifiedStudentWallet(dashboard.studentId),
+    ]);
+    if (!hasVerifiedWorldAccount(identityStatus)) {
+      return NextResponse.json(
+        { error: "Verify your personhood before requesting an identity." },
+        { status: 409 },
+      );
+    }
     if (!wallet) {
       return NextResponse.json(
         { error: "A verified Ethereum Sepolia wallet is required." },

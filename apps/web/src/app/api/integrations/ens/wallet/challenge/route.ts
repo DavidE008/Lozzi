@@ -5,6 +5,10 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { createWalletLinkChallenge } from "@/lib/integrations/ens-wallet";
 import { classifyPartnerError } from "@/lib/integrations/errors";
 import { logEvent } from "@/lib/logging";
+import {
+  getStudentPartnerStatus,
+  hasVerifiedWorldAccount,
+} from "@/lib/repositories/partner-status";
 import { getDashboardForUser } from "@/lib/repositories/student";
 import { assertSameOrigin } from "@/lib/security/origin";
 
@@ -29,6 +33,13 @@ export async function POST(request: Request): Promise<Response> {
       return NextResponse.json(
         { error: "Student profile required." },
         { status: 403 },
+      );
+    }
+    const identityStatus = await getStudentPartnerStatus(dashboard.studentId);
+    if (!hasVerifiedWorldAccount(identityStatus)) {
+      return NextResponse.json(
+        { error: "Verify your personhood before linking a wallet." },
+        { status: 409 },
       );
     }
 

@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = extensions, public;
 
-select plan(46);
+select plan(48);
 
 select has_table(
   'public',
@@ -431,6 +431,26 @@ select is(
   ),
   4::bigint,
   'each share-purpose pair records exactly one successful step-up'
+);
+
+select is(
+  (
+    select world_credential_type
+    from public.student_partner_summary
+    where student_id = '13000000-0000-4000-8000-000000000101'
+  ),
+  'proof_of_human',
+  'the identity summary never substitutes a purpose-specific World credential'
+);
+
+select is(
+  (
+    select world_status
+    from public.student_partner_summary
+    where student_id = '13000000-0000-4000-8000-000000000101'
+  ),
+  'verified',
+  'the identity summary reports the account-humanity milestone'
 );
 
 select is(
