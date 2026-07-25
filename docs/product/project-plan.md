@@ -1,4 +1,4 @@
-# Milestones 0–3 project plan
+# Milestones 0–4 project plan
 
 | Gate | Deliverable                 | Exit evidence                                                |
 | ---- | --------------------------- | ------------------------------------------------------------ |
@@ -19,13 +19,21 @@
 | M3.3 | Student registration        | Catalog, plan, submission, schedule, and honest states       |
 | M3.4 | Registrar oversight         | Institution-scoped, read-only registration activity          |
 | M3.5 | Acceptance                  | Concurrency, browser QA, design comparison, and green PR     |
+| M4.1 | Grade authorization         | Assigned-section roster boundary and denial tests            |
+| M4.2 | Grade lifecycle             | Draft, submit, approve, and publish transactions             |
+| M4.3 | Record versioning           | Linked corrections, current pointers, and immutable history  |
+| M4.4 | Progress calculation        | Deterministic GPA, earned credits, and degree-audit results  |
+| M4.5 | Role products               | Instructor entry, registrar review, student record/progress  |
+| M4.6 | Acceptance                  | Lifecycle tests, browser QA, design comparison, and green PR |
 
 Milestones 0–1 were delivered through `codex/milestones-0-1`, and Milestone 2
-through `codex/milestone-2`. Milestone 3 uses small, independently reviewable
-commits on `codex/milestone-3`. A gate is complete only when its executable
-checks pass; documentation never substitutes for a failing control.
+through `codex/milestone-2`. Milestones 3 and 4 use small, independently
+reviewable commits on `codex/milestone-3` and `codex/milestone-4`. A gate is
+complete only when its executable checks pass; documentation never substitutes
+for a failing control.
 
-Milestone 3 implementation is complete when the student registration workflow,
-the registrar oversight view, and every local and hosted verification gate
-pass. Final acceptance is recorded only after pull request 3 is green and
-merged to `main`.
+Milestone 4 implementation is complete when the grade lifecycle, record
+correction history, deterministic progress calculations, role-specific product
+surfaces, and every local and hosted verification gate pass. Final acceptance
+is recorded only after the Milestone 4 pull request is green and merged to
+`main`.
