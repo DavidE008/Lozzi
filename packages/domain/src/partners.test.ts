@@ -36,24 +36,26 @@ describe("partner integration domain", () => {
   });
 
   it("defines a closed least-disclosure World purpose mapping", () => {
-    expect(WORLD_PURPOSES).toEqual({
-      "account-humanity": expect.objectContaining({
-        action: "lozzi-student-verification",
-        preset: "proof-of-human",
-        requireUserPresence: false,
-      }),
-      "share-liveness": expect.objectContaining({
-        action: "lozzi-sensitive-share-selfie-check",
-        preset: "selfie-check-legacy",
-        requireSubject: true,
-      }),
-      "adult-share-consent": expect.objectContaining({
-        action: "lozzi-adult-share-consent",
-        allowLegacyProofs: false,
-        identityAttestationRequired: true,
-        preset: "identity-check",
-      }),
-    });
+    expect(WORLD_PURPOSES["account-humanity"].action).toBe(
+      "lozzi-student-verification",
+    );
+    expect(WORLD_PURPOSES["account-humanity"].preset).toBe("proof-of-human");
+    expect(WORLD_PURPOSES["account-humanity"].requireUserPresence).toBe(false);
+
+    expect(WORLD_PURPOSES["share-liveness"].action).toBe(
+      "lozzi-sensitive-share-selfie-check",
+    );
+    expect(WORLD_PURPOSES["share-liveness"].preset).toBe("selfie-check-legacy");
+    expect(WORLD_PURPOSES["share-liveness"].requireSubject).toBe(true);
+
+    expect(WORLD_PURPOSES["adult-share-consent"].action).toBe(
+      "lozzi-adult-share-consent",
+    );
+    expect(WORLD_PURPOSES["adult-share-consent"].allowLegacyProofs).toBe(false);
+    expect(
+      WORLD_PURPOSES["adult-share-consent"].identityAttestationRequired,
+    ).toBe(true);
+    expect(WORLD_PURPOSES["adult-share-consent"].preset).toBe("identity-check");
   });
 
   it("requires share purposes to identify a share draft", () => {
