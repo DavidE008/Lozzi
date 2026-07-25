@@ -258,6 +258,20 @@ using (
   )
 );
 
+drop policy student_wallets_authorized_select
+  on public.student_wallets;
+create policy student_wallets_authorized_select
+on public.student_wallets for select to authenticated
+using (
+  (select lozzi_private.is_student_self(student_id))
+  or (
+    select lozzi_private.has_membership(
+      institution_id,
+      array['registrar', 'institution_admin']
+    )
+  )
+);
+
 drop policy ens_identities_authorized_select
   on public.ens_identities;
 create policy ens_identities_authorized_select
