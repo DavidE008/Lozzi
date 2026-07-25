@@ -67,7 +67,9 @@ export async function proxy(request: NextRequest) {
 
     const { data } = await supabase.auth.getClaims();
     const authenticated = Boolean(data?.claims?.sub);
-    const protectedRoute = request.nextUrl.pathname.startsWith("/student");
+    const protectedRoute =
+      request.nextUrl.pathname.startsWith("/student") ||
+      request.nextUrl.pathname.startsWith("/registrar");
 
     if (protectedRoute && !authenticated) {
       const signInUrl = request.nextUrl.clone();
@@ -75,10 +77,10 @@ export async function proxy(request: NextRequest) {
       signInUrl.searchParams.set("next", request.nextUrl.pathname);
       response = NextResponse.redirect(signInUrl);
     } else if (request.nextUrl.pathname === "/auth" && authenticated) {
-      const studentUrl = request.nextUrl.clone();
-      studentUrl.pathname = "/student";
-      studentUrl.search = "";
-      response = NextResponse.redirect(studentUrl);
+      const homeUrl = request.nextUrl.clone();
+      homeUrl.pathname = "/";
+      homeUrl.search = "";
+      response = NextResponse.redirect(homeUrl);
     }
   }
 

@@ -40,7 +40,7 @@ export function SignInForm() {
         setServerError(result.error);
         return;
       }
-      router.push("/student");
+      router.push("/");
       router.refresh();
     });
   });
