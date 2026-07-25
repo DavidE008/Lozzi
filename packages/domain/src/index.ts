@@ -17,6 +17,23 @@ export {
   type EnvironmentCapabilities,
   type PublicEnvironment,
 } from "./environment";
+export {
+  buildAcademicRecordCommitmentPayload,
+  calculateDegreeAudit,
+  calculateGpa,
+  calculateGrade,
+  gradeComponentsSchema,
+  type AcademicRecordCommitmentInput,
+  type DegreeAuditInput,
+  type DegreeAuditResult,
+  type GradeCalculation,
+  type GradeComponents,
+  type GradeCorrectionReason,
+  type GradeLifecycleState,
+  type GradeWorkflowRepository,
+  type ProgramRequirement,
+  type PublishedGrade,
+} from "./grades";
 export type {
   AcademicRecordRepository,
   AuditRepository,
