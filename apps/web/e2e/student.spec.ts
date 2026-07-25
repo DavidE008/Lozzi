@@ -42,7 +42,8 @@ test("student signs in, sees hosted rows, navigates, and signs out", async ({
     page.getByRole("heading", { name: "Academic record" }),
   ).toBeVisible();
   await expect(page.getByText("CS 1301")).toBeVisible();
-  await expect(page.getByText("Verified", { exact: true })).toBeVisible();
+  await expect(page.getByText("Official · v1")).toBeVisible();
+  await expect(page.getByText("not configured")).toBeVisible();
 
   await Promise.all([
     page.waitForURL(/\/student\/progress$/u),
@@ -51,6 +52,9 @@ test("student signs in, sees hosted rows, navigates, and signs out", async ({
   await expect(
     page.getByRole("heading", { name: "Degree progress" }),
   ).toBeVisible();
+  await expect(page.getByText("GPA 4.00")).toBeVisible();
+  await expect(page.getByText("CS 1301")).toBeVisible();
+  await expect(page.getByText("Complete", { exact: true })).toBeVisible();
 
   await Promise.all([
     page.waitForURL(/\/student\/shares$/u),
