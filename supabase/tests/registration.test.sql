@@ -1,6 +1,26 @@
 begin;
 
-select plan(17);
+select plan(20);
+
+select has_view(
+  'public',
+  'registrar_registration_activity',
+  'registrar registration activity view exists'
+);
+
+select ok(
+  'security_invoker=true' = any (
+    select option_value
+    from pg_options_to_table(
+      (
+        select reloptions
+        from pg_class
+        where oid = 'public.registrar_registration_activity'::regclass
+      )
+    )
+  ),
+  'registrar registration activity uses security_invoker'
+);
 
 set local role authenticated;
 set local "request.jwt.claim.sub" = '00000000-0000-4000-8000-000000000101';
@@ -162,6 +182,16 @@ select is(
 );
 
 set local "request.jwt.claim.sub" = '00000000-0000-4000-8000-000000000201';
+
+select is(
+  (
+    select count(*)::bigint
+    from public.registrar_registration_activity
+    where student_id = '13000000-0000-4000-8000-000000000102'
+  ),
+  2::bigint,
+  'the registrar sees institution-scoped registration outcomes'
+);
 
 select throws_ok(
   $$ select public.get_registration_catalog() $$,
