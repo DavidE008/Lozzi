@@ -3,6 +3,9 @@
 This runbook separates World Developer Portal administration from the Lozzi
 runtime. The Portal key is an operator credential and must never be made
 available to the application, browser, deployment platform, CI, or repository.
+The student-facing relationship to wallet verification and ENS issuance is
+documented in the
+[World + ENS identity journey](world-ens-identity-journey.md).
 
 ## Credential boundaries
 

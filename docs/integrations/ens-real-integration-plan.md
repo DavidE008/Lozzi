@@ -1,8 +1,8 @@
 # ENS real-integration plan
 
-Status: Phase 1 implemented locally; deployment preparation is in progress. No
-name registration, Safe creation, contract deployment, approval, funding, or
-live transaction has been performed.
+Status: Phase 1 implemented and verified locally; deployment preparation
+remains gated. No name registration, Safe creation, contract deployment,
+approval, funding, or live transaction has been performed.
 
 This plan turns the existing Sepolia ENS boundary into an operable integration
 without weakening Lozzi's privacy or availability guarantees. The target result
@@ -32,6 +32,8 @@ The repository now has:
   Safe-clearing revocation states;
 - authenticated same-origin student routes and a separately authenticated
   internal reconciliation route;
+- a hard server-side prerequisite that only the `account-humanity` World
+  purpose can unlock wallet challenge, wallet verification, and issuance;
 - unit, fuzz, TypeScript, React, and pgTAP test sources plus a read-only
   deployment verifier;
 - non-blocking capability states when ENS is unavailable.
@@ -42,11 +44,11 @@ Real activation remains blocked by these operational gates:
    budget, RPC providers, and managed signer operator have not been approved.
 2. The parent, Safe, adapter, approval, deployment block, and code hash do not
    exist yet and therefore cannot populate runtime configuration.
-3. Foundry is unavailable in the current workstation environment, so the
-   authored Solidity unit/fuzz suite and Sepolia-fork simulation have not run.
-   `solcjs` compilation succeeds, but that is not a substitute for the gate.
-4. Local pgTAP execution is blocked until Docker/Supabase services are
-   available; the database lifecycle test is authored but not yet executed.
+3. The full local Forge regression gate passed 26 tests across 3 suites with no
+   failures or skips. A Sepolia-fork provisioning rehearsal still requires the
+   approved parent/Safe/deployment inputs and has not run.
+4. A clean local Supabase reset applied the complete migration chain, and all
+   234 pgTAP tests passed. Hosted Supabase was not changed.
 5. The Safe revocation transaction template, renewal owner, alerting, and
    reconciliation schedule still require operator assignment and rehearsal.
 6. Forward issuance intentionally does not set a wallet's ENS primary/reverse
@@ -135,6 +137,7 @@ sequenceDiagram
     participant Read as Independent read RPC
 
     Student->>Web: Sign SIWE wallet-link challenge
+    Web->>DB: Confirm account-humanity World verification
     Web->>DB: Verify and store wallet link
     Student->>Web: Consent to public alias and choose label
     Web->>DB: Reserve stable issuance operation
@@ -304,8 +307,10 @@ abuse, and transfer decisions and is outside v1.
 - [x] Update the UI with public-link consent, institutional-revocation language,
       generated labels, pending/retry states, and a clear statement that no
       primary name is set.
-- [ ] Execute the Solidity suite, invariant coverage, and Sepolia-fork tests
-      against the real deployed ENS interfaces.
+- [x] Execute the local Solidity suite: 26 tests across 3 suites, with no
+      failures or skips.
+- [ ] Execute the Sepolia-fork provisioning rehearsal against approved parent,
+      Safe, and deployment inputs.
 
 ### Phase 2: security and deployment preparation
 
@@ -363,3 +368,6 @@ The integration is `available` only when all of the following are recorded:
 
 Until then, the UI and capability record must remain `not-configured` or
 `failed`; a simulated row or transaction preview is not live evidence.
+
+The product-level sequence, privacy boundary, and demo/live semantics are in the
+[World + ENS identity journey](world-ens-identity-journey.md).

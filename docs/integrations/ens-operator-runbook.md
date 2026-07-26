@@ -7,7 +7,8 @@ explicit approval immediately before execution.
 
 This runbook activates the locally implemented ENS integration without treating
 testnet infrastructure as authoritative SIS state. It does not authorize
-mainnet activity.
+mainnet activity. The student flow and World prerequisite are documented in the
+[World + ENS identity journey](world-ens-identity-journey.md).
 
 ## Required decisions
 
