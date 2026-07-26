@@ -1,7 +1,13 @@
-import type {
+import {
+  sensitiveShareChainStatusSchema,
+  shareDisclosureScopeSchema,
+  type
   DashboardActivity,
+  type
   DashboardCourse,
+  type
   StudentDashboard,
+  type
   StudentDashboardRepository,
 } from "@lozzi/domain";
 import { cache } from "react";
@@ -162,14 +168,25 @@ export const getShareRows = async (studentId: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("record_share_grants")
-    .select("id, recipient_label, scopes, status, expires_at, revoked_at")
+    .select(
+      "id, recipient_label, scopes, status, expires_at, revoked_at, chain_status",
+    )
     .eq("student_id", studentId)
     .order("created_at", { ascending: false });
 
   if (error) {
+    logEvent("error", "student_share_history_failed", {
+      category: error.code ?? "unknown",
+    });
     throw new Error("Share history could not be loaded.");
   }
-  return data ?? [];
+  return (data ?? []).map((share) => ({
+    ...share,
+    chain_status: sensitiveShareChainStatusSchema.parse(share.chain_status),
+    scopes: share.scopes.map((scope) =>
+      shareDisclosureScopeSchema.parse(scope),
+    ),
+  }));
 };
 
 export const getCurrentAcademicRecordVersionId = async (

@@ -55,6 +55,11 @@ export {
   type WorldVerificationSignal,
 } from "./partners";
 export {
+  publicVerifierRequestSchema,
+  publicVerifierResultSchema,
+  type PublicVerifierResult,
+} from "./public-verifier";
+export {
   academicRecordAnchorRequestedV1Schema,
   outboxEventSchema,
   outboxEventTypeSchema,
@@ -68,6 +73,15 @@ export {
   type ShareGrantCreateRequestedV1,
   type ShareGrantRevokeRequestedV1,
 } from "./outbox-events";
+export {
+  sensitiveShareChainStatusSchema,
+  sensitiveShareDraftInputSchema,
+  sensitiveShareDurationMinutesSchema,
+  sensitiveShareRevocationResultSchema,
+  type SensitiveShareChainStatus,
+  type SensitiveShareDraftInput,
+  type SensitiveShareRevocationResult,
+} from "./sharing";
 export {
   buildAcademicRecordCommitmentPayload,
   calculateDegreeAudit,

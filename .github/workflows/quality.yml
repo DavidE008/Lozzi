@@ -38,8 +38,6 @@ jobs:
       - run: pnpm build
       - run: pnpm audit:dependencies
       - run: pnpm secrets:scan
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
 
   database:
     name: Database
@@ -59,9 +57,20 @@ jobs:
       - run: pnpm exec supabase db reset
       - run: pnpm exec supabase test db
       - name: Export local Supabase environment
-        run: pnpm exec supabase status -o env >> "$GITHUB_ENV"
+        run: |
+          eval "$(pnpm exec supabase status -o env)"
+          {
+            printf 'API_URL=%s\n' "$API_URL"
+            printf 'ANON_KEY=%s\n' "$ANON_KEY"
+            printf 'SERVICE_ROLE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLISHABLE_KEY"
+            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
       - name: Test final-seat concurrency
         run: pnpm --filter @lozzi/web exec node scripts/registration-concurrency.mjs
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
       - run: pnpm exec supabase db lint --local --level warning
 
   contracts:

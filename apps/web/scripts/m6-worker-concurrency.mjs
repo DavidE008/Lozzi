@@ -35,7 +35,7 @@ const apiUrl = localEnvironment.API_URL;
 const publishableKey =
   localEnvironment.PUBLISHABLE_KEY ?? localEnvironment.ANON_KEY;
 const serviceKey =
-  localEnvironment.SECRET_KEY ?? localEnvironment.SERVICE_ROLE_KEY;
+  localEnvironment.SERVICE_ROLE_KEY ?? localEnvironment.SECRET_KEY;
 
 if (!apiUrl || !publishableKey || !serviceKey) {
   throw new Error("Local Supabase status did not return the required keys.");

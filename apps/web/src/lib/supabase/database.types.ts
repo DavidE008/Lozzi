@@ -1811,9 +1811,11 @@ export type Database = {
       record_share_grants: {
         Row: {
           academic_record_version_id: string
+          chain_status: string
           commitment_environment: string | null
           created_at: string
           created_by: string
+          disclosure_payload: Json
           expires_at: string
           grant_commitment: string
           id: string
@@ -1834,9 +1836,11 @@ export type Database = {
         }
         Insert: {
           academic_record_version_id: string
+          chain_status?: string
           commitment_environment?: string | null
           created_at?: string
           created_by: string
+          disclosure_payload?: Json
           expires_at: string
           grant_commitment: string
           id?: string
@@ -1857,9 +1861,11 @@ export type Database = {
         }
         Update: {
           academic_record_version_id?: string
+          chain_status?: string
           commitment_environment?: string | null
           created_at?: string
           created_by?: string
+          disclosure_payload?: Json
           expires_at?: string
           grant_commitment?: string
           id?: string
@@ -2944,6 +2950,17 @@ export type Database = {
         }
         Returns: Json
       }
+      create_minimum_scope_share_draft: {
+        Args: {
+          p_academic_record_version_id: string
+          p_grant_duration_minutes: number
+          p_idempotency_key: string
+          p_recipient_label: string
+          p_scopes: string[]
+          p_student_id: string
+        }
+        Returns: Json
+      }
       approve_grade_submission: {
         Args: { p_grade_submission_id: string; p_idempotency_key: string }
         Returns: Json
@@ -2996,6 +3013,13 @@ export type Database = {
         Returns: Json
       }
       get_m6_outbox_metrics: { Args: never; Returns: Json }
+      verify_record_share: {
+        Args: {
+          p_request_fingerprint_hash: string
+          p_token_hash: string
+        }
+        Returns: Json
+      }
       get_registration_catalog: {
         Args: { p_term_id?: string }
         Returns: {

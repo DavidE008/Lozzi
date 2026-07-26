@@ -127,33 +127,42 @@ describe("Supabase outbox repository", () => {
   });
 
   it("returns structured metrics and does not expose RPC error messages", async () => {
+    const rpc = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: {
+          expiredLeases: 1,
+          generatedAt: "2026-07-26T01:00:00+00:00",
+          manualRetryEligible: 2,
+          oldestReadyAt: null,
+          receiptStateCounts: { confirmation_pending: 1 },
+          shareAccessResultCounts: { denied_revoked: 2 },
+          shareLifecycleCounts: { revoked: 1 },
+          shareReconciliationCounts: { revocation_pending: 1 },
+          staleReconciliationCounts: { revocation_pending: 1 },
+          statusCounts: { pending: 3 },
+          verifierAttemptOutcomeCounts: { invalid: 20 },
+          verifierRateLimitedFingerprints: 1,
+        },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: null,
+        error: {
+          code: "XX000",
+          message: "bearer token and raw RPC body",
+        },
+      });
     const repository = new SupabaseOutboxRepository({
-      rpc: vi
-        .fn()
-        .mockResolvedValueOnce({
-          data: {
-            expiredLeases: 1,
-            generatedAt: "2026-07-26T01:00:00.000Z",
-            manualRetryEligible: 2,
-            oldestReadyAt: null,
-            receiptStateCounts: { confirmation_pending: 1 },
-            statusCounts: { pending: 3 },
-          },
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: null,
-          error: {
-            code: "XX000",
-            message: "bearer token and raw RPC body",
-          },
-        }),
+      rpc,
     });
 
     await expect(repository.metrics()).resolves.toMatchObject({
       expiredLeases: 1,
+      shareLifecycleCounts: { revoked: 1 },
       statusCounts: { pending: 3 },
     });
+    expect(rpc).toHaveBeenCalledWith("get_m6_operational_metrics");
     const failure = repository.metrics();
     await expect(failure).rejects.toThrow(
       "Outbox metrics read failed (XX000).",

@@ -2,7 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { IDKitResult } from "@worldcoin/idkit";
-import type { CapabilityState } from "@lozzi/domain";
+import {
+  sensitiveShareDraftInputSchema,
+  type CapabilityState,
+  type SensitiveShareDraftInput,
+  type ShareDisclosureScope,
+} from "@lozzi/domain";
 import {
   Check,
   CheckCircle2,
@@ -13,7 +18,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import {
   WorldIdFlowDialog,
@@ -30,11 +34,7 @@ interface SensitiveShareWizardProps {
   readonly worldCapability: CapabilityState;
 }
 
-const formSchema = z.object({
-  recipientLabel: z.string().trim().min(2).max(120),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = SensitiveShareDraftInput;
 type Phase =
   | "details"
   | "adult-consent"
@@ -51,10 +51,38 @@ interface Draft {
 }
 
 interface Activation {
+  readonly chainStatus: "local_private";
   readonly expiresAt: string;
   readonly shareGrantId: string;
   readonly shareToken: string;
 }
+
+const scopeOptions: ReadonlyArray<{
+  readonly description: string;
+  readonly label: string;
+  readonly value: ShareDisclosureScope;
+}> = [
+  {
+    description: "Your institution and enrolled programme.",
+    label: "Programme",
+    value: "program",
+  },
+  {
+    description: "Credits earned and progress toward completion.",
+    label: "Degree progress",
+    value: "degree-progress",
+  },
+  {
+    description: "A summary of the current academic record version.",
+    label: "Record summary",
+    value: "record-summary",
+  },
+  {
+    description: "Course and grade history in the current record version.",
+    label: "Full record",
+    value: "full-record",
+  },
+];
 
 const progressByPhase: Readonly<Record<Phase, number>> = {
   details: 0,
@@ -91,8 +119,12 @@ export function SensitiveShareWizard({
   const [copied, setCopied] = useState(false);
   const worldAvailable = worldCapability.status === "available";
   const form = useForm<FormValues>({
-    defaultValues: { recipientLabel: "" },
-    resolver: zodResolver(formSchema),
+    defaultValues: {
+      expiryMinutes: 30,
+      recipientLabel: "",
+      scopes: [],
+    },
+    resolver: zodResolver(sensitiveShareDraftInputSchema),
   });
 
   const requestAssistance = async (draftId = draft?.draftId) => {
@@ -241,8 +273,8 @@ export function SensitiveShareWizard({
             Create protected access
           </CardTitle>
           <p className="mt-2 max-w-2xl text-sm text-white/70">
-            A 30-minute, scoped record share requires adult self-consent and a
-            fresh presence check.
+            A 10 to 30-minute record share discloses only the sections you
+            select and requires adult self-consent plus a fresh presence check.
           </p>
         </div>
         <Badge className="mt-2 border-white/20 bg-white/5 text-white sm:mt-0">
@@ -276,6 +308,71 @@ export function SensitiveShareWizard({
                   private contact information.
                 </p>
               )}
+            </div>
+            <fieldset className="space-y-3">
+              <legend className="text-sm leading-none font-medium">
+                Information to disclose
+              </legend>
+              <p className="text-muted-foreground text-xs">
+                Nothing is selected by default. Choose only what this recipient
+                needs.
+              </p>
+              <div className="space-y-2">
+                {scopeOptions.map((option) => {
+                  const inputId = `share-scope-${option.value}`;
+                  const descriptionId = `share-scope-${option.value}-description`;
+                  return (
+                    <div
+                      key={option.value}
+                      className="hover:bg-muted/50 flex gap-3 border p-3"
+                    >
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        value={option.value}
+                        aria-label={option.label}
+                        aria-describedby={descriptionId}
+                        className="accent-lozzi-teal mt-0.5 size-4 shrink-0"
+                        {...form.register("scopes")}
+                      />
+                      <span>
+                        <Label
+                          htmlFor={inputId}
+                          className="block cursor-pointer text-sm font-medium"
+                        >
+                          {option.label}
+                        </Label>
+                        <span
+                          id={descriptionId}
+                          className="text-muted-foreground mt-0.5 block text-xs"
+                        >
+                          {option.description}
+                        </span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              {form.formState.errors.scopes ? (
+                <p role="alert" className="text-destructive text-xs">
+                  Select at least one section to share.
+                </p>
+              ) : null}
+            </fieldset>
+            <div className="space-y-2">
+              <Label htmlFor="share-expiry">Access duration</Label>
+              <select
+                id="share-expiry"
+                className="border-input bg-background h-9 w-full border px-3 text-sm"
+                {...form.register("expiryMinutes", { valueAsNumber: true })}
+              >
+                <option value={10}>10 minutes</option>
+                <option value={15}>15 minutes</option>
+                <option value={30}>30 minutes</option>
+              </select>
+              <p className="text-muted-foreground text-xs">
+                Access stops automatically at the selected time.
+              </p>
             </div>
             {!worldAvailable ? (
               <div className="border-lozzi-gold/30 bg-lozzi-gold/5 flex gap-3 border p-3 text-sm">
@@ -364,6 +461,12 @@ export function SensitiveShareWizard({
               }).format(new Date(activation.expiresAt))}
               .
             </p>
+            {activation.chainStatus === "local_private" ? (
+              <p className="mt-3 border border-sky-200 bg-sky-50 p-3 text-sm text-sky-950">
+                Verified privately in Lozzi. This share has no onchain
+                confirmation yet.
+              </p>
+            ) : null}
             <div className="bg-muted mt-4 flex items-center gap-2 border p-3">
               <code className="min-w-0 flex-1 truncate text-xs">
                 {activation.shareToken}

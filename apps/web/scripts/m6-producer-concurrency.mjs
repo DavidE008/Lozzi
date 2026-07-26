@@ -35,7 +35,7 @@ const apiUrl = localEnvironment.API_URL;
 const publishableKey =
   localEnvironment.PUBLISHABLE_KEY ?? localEnvironment.ANON_KEY;
 const serviceKey =
-  localEnvironment.SECRET_KEY ?? localEnvironment.SERVICE_ROLE_KEY;
+  localEnvironment.SERVICE_ROLE_KEY ?? localEnvironment.SECRET_KEY;
 
 if (!apiUrl || !publishableKey || !serviceKey) {
   throw new Error("Local Supabase status did not return the required keys.");
@@ -49,9 +49,6 @@ const student = createClient(apiUrl, publishableKey, {
 });
 
 const studentId = "13000000-0000-4000-8000-000000000101";
-const institutionId = "10000000-0000-4000-8000-000000000001";
-const studentUserId = "00000000-0000-4000-8000-000000000101";
-const draftId = randomUUID();
 const idempotencyKey = randomUUID();
 const tokenHash = `\\x${"d3".repeat(32)}`;
 const grantCommitment = `\\x${"d4".repeat(32)}`;
@@ -69,31 +66,41 @@ if (recordError || !recordVersion) {
 }
 
 const now = Date.now();
-const { error: draftError } = await service.from("record_share_drafts").insert({
-  id: draftId,
-  institution_id: institutionId,
-  student_id: studentId,
-  academic_record_version_id: recordVersion.id,
-  recipient_label: "Synthetic concurrency verifier",
-  scopes: ["record-summary"],
-  status: "ready",
-  draft_expires_at: new Date(now + 20 * 60_000).toISOString(),
-  grant_expires_at: new Date(now + 30 * 60_000).toISOString(),
-  adult_attested_at: new Date(now).toISOString(),
-  liveness_verified_at: new Date(now).toISOString(),
-  idempotency_key: idempotencyKey,
-  created_by: studentUserId,
-});
-if (draftError) {
-  throw new Error(`Concurrency fixture creation failed: ${draftError.code}`);
-}
-
 const { error: signInError } = await student.auth.signInWithPassword({
   email: "aisha.demo@lozzi.example",
   password: "Northstar-Demo-2026!",
 });
 if (signInError) {
   throw new Error(`Synthetic student sign-in failed: ${signInError.code}`);
+}
+
+const { data: draft, error: draftError } = await student.rpc(
+  "create_minimum_scope_share_draft",
+  {
+    p_academic_record_version_id: recordVersion.id,
+    p_grant_duration_minutes: 30,
+    p_idempotency_key: idempotencyKey,
+    p_recipient_label: "Synthetic concurrency verifier",
+    p_scopes: ["record-summary"],
+    p_student_id: studentId,
+  },
+);
+if (draftError || !draft?.draftId) {
+  throw new Error(`Concurrency fixture creation failed: ${draftError?.code}`);
+}
+const draftId = draft.draftId;
+const { error: readinessError } = await service
+  .from("record_share_drafts")
+  .update({
+    adult_attested_at: new Date(now).toISOString(),
+    liveness_verified_at: new Date(now).toISOString(),
+    status: "ready",
+  })
+  .eq("id", draftId);
+if (readinessError) {
+  throw new Error(
+    `Concurrency fixture readiness failed: ${readinessError.code}`,
+  );
 }
 
 const parameters = {
@@ -154,7 +161,72 @@ if (grantCount !== 1 || eventCount !== 1) {
   throw new Error("Concurrent activation duplicated domain or outbox state.");
 }
 
+const [firstRevocation, secondRevocation] = await Promise.all([
+  student.rpc("revoke_sensitive_share_with_outbox", {
+    p_correlation_id: randomUUID(),
+    p_idempotency_key: randomUUID(),
+    p_share_grant_id: grantId,
+    p_trace_id: randomUUID(),
+  }),
+  student.rpc("revoke_sensitive_share_with_outbox", {
+    p_correlation_id: randomUUID(),
+    p_idempotency_key: randomUUID(),
+    p_share_grant_id: grantId,
+    p_trace_id: randomUUID(),
+  }),
+]);
+
+if (firstRevocation.error || secondRevocation.error) {
+  throw new Error(
+    `Concurrent revocation failed: ${
+      firstRevocation.error?.code ?? secondRevocation.error?.code
+    }`,
+  );
+}
+
+const revocations = [firstRevocation.data, secondRevocation.data];
+if (
+  revocations.some((result) => result?.status !== "revoked") ||
+  revocations.filter((result) => result?.idempotentReplay === true).length !== 1
+) {
+  throw new Error(
+    "Concurrent revocation did not resolve as one write and one replay.",
+  );
+}
+
+const [
+  { count: revokedGrantCount },
+  { count: revocationEventCount },
+  { count: revocationAuditCount },
+] = await Promise.all([
+  service
+    .from("record_share_grants")
+    .select("id", { count: "exact", head: true })
+    .eq("id", grantId)
+    .eq("status", "revoked"),
+  service
+    .from("outbox_events")
+    .select("id", { count: "exact", head: true })
+    .eq("event_type", "share_grant.revoke.requested.v1")
+    .eq("aggregate_id", grantId),
+  service
+    .from("audit_events")
+    .select("id", { count: "exact", head: true })
+    .eq("action", "share.sensitive.revoke")
+    .eq("entity_id", grantId),
+]);
+
+if (
+  revokedGrantCount !== 1 ||
+  revocationEventCount !== 1 ||
+  revocationAuditCount !== 1
+) {
+  throw new Error(
+    "Concurrent revocation duplicated or omitted durable lifecycle state.",
+  );
+}
+
 await student.auth.signOut();
 process.stdout.write(
-  "Milestone 6 producer concurrency check passed: 1 grant, 1 logical event.\n",
+  "Milestone 6 producer concurrency check passed: 1 grant, 1 create event, 1 revocation event.\n",
 );

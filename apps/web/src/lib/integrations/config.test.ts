@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getAgentKitConfig,
   getEnsConfig,
+  getRegistryAdapterConfig,
   getWorldConfig,
   getZeroGStorageConfig,
   isEnsWalletLinkConfigured,
@@ -138,5 +139,45 @@ describe("partner server configuration", () => {
         KEY_WRAPPING_MASTER_KEY: Buffer.from("short").toString("base64"),
       }),
     ).toThrow(/0G Storage is not configured/u);
+  });
+
+  it("requires complete independent registry simulation configuration", () => {
+    expect(() =>
+      getRegistryAdapterConfig({
+        M6_REGISTRY_CHAIN_ID: "4801",
+        M6_REGISTRY_MODE: "simulation-only",
+      }),
+    ).toThrow(/Milestone 6 registry adapter is not configured/u);
+  });
+
+  it("parses a transaction-disabled registry target without signer secrets", () => {
+    const config = getRegistryAdapterConfig({
+      M6_ACADEMIC_RECORD_REGISTRY_ADDRESS: `0x${"11".repeat(20)}`,
+      M6_ACADEMIC_RECORD_REGISTRY_CODE_HASH: `0x${"12".repeat(32)}`,
+      M6_INSTITUTION_REGISTRY_ADDRESS: `0x${"13".repeat(20)}`,
+      M6_INSTITUTION_REGISTRY_CODE_HASH: `0x${"14".repeat(32)}`,
+      M6_REGISTRY_CHAIN_ID: "4801",
+      M6_REGISTRY_INDEPENDENT_RPC_URL: "https://independent.example",
+      M6_REGISTRY_MAX_GAS: "750000",
+      M6_REGISTRY_MODE: "transactions-disabled",
+      M6_REGISTRY_PRIMARY_RPC_URL: "https://primary.example",
+      M6_REGISTRY_RELAYER_ADDRESS: `0x${"15".repeat(20)}`,
+      UNRELATED_PRIVATE_KEY: `0x${"16".repeat(32)}`,
+    });
+
+    expect(config).toEqual({
+      academicRecordRegistryAddress: `0x${"11".repeat(20)}`,
+      academicRecordRegistryCodeHash: `0x${"12".repeat(32)}`,
+      chainId: 4801,
+      confirmations: 3,
+      independentRpcUrl: "https://independent.example",
+      institutionRegistryAddress: `0x${"13".repeat(20)}`,
+      institutionRegistryCodeHash: `0x${"14".repeat(32)}`,
+      maxGas: BigInt(750_000),
+      mode: "transactions-disabled",
+      primaryRpcUrl: "https://primary.example",
+      relayerAddress: `0x${"15".repeat(20)}`,
+    });
+    expect(config).not.toHaveProperty("privateKey");
   });
 });

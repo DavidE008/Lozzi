@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SensitiveShareWizard } from "./sensitive-share-wizard";
@@ -74,16 +80,22 @@ const response = (body: unknown, status = 200) =>
     status,
   });
 
-const submitRecipient = () => {
+const enterRecipient = () => {
   fireEvent.change(screen.getByLabelText("Recipient or purpose"), {
     target: { value: "Graduate admissions office" },
   });
+};
+
+const submitRecipient = () => {
+  enterRecipient();
+  fireEvent.click(screen.getByRole("checkbox", { name: "Record summary" }));
   fireEvent.click(
     screen.getByRole("button", { name: "Create protected share" }),
   );
 };
 
 afterEach(() => {
+  cleanup();
   vi.unstubAllGlobals();
 });
 
@@ -96,6 +108,7 @@ describe("SensitiveShareWizard", () => {
           draftExpiresAt: "2026-07-25T18:30:00.000Z",
           draftId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
           grantExpiresAt: "2026-07-25T18:30:00.000Z",
+          scopes: ["record-summary"],
         }),
       )
       .mockResolvedValueOnce(response(worldRequest("adult-share-consent")))
@@ -104,6 +117,7 @@ describe("SensitiveShareWizard", () => {
       .mockResolvedValueOnce(response({ verifiedAt: "2026-07-25T18:02:00Z" }))
       .mockResolvedValueOnce(
         response({
+          chainStatus: "local_private",
           expiresAt: "2026-07-25T18:30:00.000Z",
           shareGrantId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
           shareToken: "one-time-synthetic-token",
@@ -145,11 +159,21 @@ describe("SensitiveShareWizard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("one-time-synthetic-token")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(6);
+    expect(fetchMock.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({
+          expiryMinutes: 30,
+          recipientLabel: "Graduate admissions office",
+          scopes: ["record-summary"],
+        }),
+      }),
+    );
     expect(fetchMock.mock.calls[2]?.[1]).toEqual(
       expect.objectContaining({
         body: JSON.stringify({ proof: "exact" }),
       }),
     );
+    expect(screen.getByText(/has no onchain confirmation yet/u)).toBeVisible();
   });
 
   it("routes an unavailable private attestation to registrar assistance", async () => {
@@ -160,6 +184,7 @@ describe("SensitiveShareWizard", () => {
           draftExpiresAt: "2026-07-25T18:30:00.000Z",
           draftId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
           grantExpiresAt: "2026-07-25T18:30:00.000Z",
+          scopes: ["record-summary"],
         }),
       )
       .mockResolvedValueOnce(
@@ -200,11 +225,60 @@ describe("SensitiveShareWizard", () => {
       screen.getByRole("button", { name: "Create protected share" }),
     );
 
-    expect(
-      await screen.findByRole("alert", {
-        name: "",
-      }),
-    ).toHaveTextContent("Enter a recipient label");
+    expect(await screen.findByText(/Enter a recipient label/u)).toHaveAttribute(
+      "role",
+      "alert",
+    );
     await waitFor(() => expect(fetchMock).not.toHaveBeenCalled());
+  });
+
+  it("requires an explicit disclosure scope", async () => {
+    const fetchMock = vi.fn<typeof fetch>();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SensitiveShareWizard worldCapability={available} />);
+    enterRecipient();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Create protected share" }),
+    );
+
+    expect(
+      await screen.findByText("Select at least one section to share."),
+    ).toHaveAttribute("role", "alert");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("submits only the scopes and duration the student selected", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(
+      response({
+        draftExpiresAt: "2026-07-25T18:30:00.000Z",
+        draftId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+        grantExpiresAt: "2026-07-25T18:15:00.000Z",
+        scopes: ["program", "degree-progress"],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SensitiveShareWizard worldCapability={available} />);
+    enterRecipient();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Programme" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Degree progress" }));
+    fireEvent.change(screen.getByLabelText("Access duration"), {
+      target: { value: "15" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Create protected share" }),
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(fetchMock.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({
+          expiryMinutes: 15,
+          recipientLabel: "Graduate admissions office",
+          scopes: ["program", "degree-progress"],
+        }),
+      }),
+    );
   });
 });
