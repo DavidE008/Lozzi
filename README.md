@@ -1,10 +1,12 @@
 # Lozzi
 
 Lozzi is a privacy-first, verifiable Student Information System for colleges
-and universities. Milestones 0–5 establish the product, security, normalized
-data, contract, CI, authenticated role products, deterministic registration and
-grades, record versioning, degree progress, and optional partner boundaries.
-No contract is deployed and no unconfigured partner is presented as live.
+and universities. Milestones 0–7 establish the product, security, normalized
+data, contracts, CI, authenticated role products, deterministic registration
+and grades, record versioning, degree progress, World and ENS identity
+boundaries, anchoring and sharing lifecycles, and fail-closed deployment and
+submission evidence. No Lozzi contract or frontend is deployed and no
+unconfigured partner is presented as live.
 
 ## Synthetic student demo
 
@@ -53,11 +55,14 @@ pnpm build
 pnpm audit:dependencies
 pnpm contracts:test
 pnpm secrets:scan
+pnpm submission:status
 ```
 
 Run `supabase start && supabase db reset && supabase test db` when Docker is
 available. See [docs/submission-checklist.md](docs/submission-checklist.md) for
-the complete acceptance record and remaining partner credentials.
+the current readiness record. `pnpm submission:check` is the strict gate and
+intentionally exits non-zero until every deployment and submission blocker is
+resolved.
 
 ## Architecture and design evidence
 
@@ -77,6 +82,12 @@ the complete acceptance record and remaining partner credentials.
 - [Milestone 5 partner scope](docs/product/milestone-5.md)
 - [Milestone 5 fidelity review](docs/design/milestone-5-fidelity-review.md)
 - [Milestone 5 acceptance evidence](docs/verification/milestone-5.md)
+- [Milestone 6 product scope](docs/product/milestone-6.md)
+- [Milestone 6 acceptance evidence](docs/verification/milestone-6.md)
+- [Milestone 7 product scope](docs/product/milestone-7.md)
+- [Milestone 7 readiness evidence](docs/verification/milestone-7.md)
+- [Milestone 7 CROPS review](docs/architecture/milestone-7-crops-review.md)
+- [Milestone 7 deployment and submission packet](deployment/milestone-7/README.md)
 - [Synthetic test and demo accounts](docs/testing/test-accounts.md)
 - [World real-configuration runbook](docs/integrations/world-real-configuration.md)
 - [World prize evidence](docs/integrations/world-prize-evidence.md)
@@ -90,4 +101,6 @@ rotation, entitlement confirmation, and production-device evidence.
 The ENS implementation is locally verified, but no parent, Safe, registrar,
 approval, signer, or subname has been provisioned. 0G, WalletConnect, and World
 Chain registry work remains paused or unconfigured. The app reports those
-states honestly, and no Lozzi contract has been deployed.
+states honestly. The hosted Supabase project is ten migrations behind this
+repository, the connected Vercel team has no project, and no Lozzi contract has
+been deployed. See the submission checklist before making any live claim.
