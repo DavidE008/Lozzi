@@ -1,0 +1,2 @@
+# Historical synthetic private-key fixture; current tests build it at runtime.
+cd5e0451917c92dd381e4c62487921583903301f:apps/web/scripts/m7-submission-readiness.test.mjs:generic-api-key:56
