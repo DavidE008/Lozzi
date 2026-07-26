@@ -1,7 +1,7 @@
 {
   "schemaVersion": "lozzi.m7.submission-status.v1",
-  "reviewedAt": "2026-07-26T08:00:00Z",
-  "basisCommit": "1bbe600ebc24d4aa48fd623f94628aa7e15e12a8",
+  "reviewedAt": "2026-07-26T06:58:51Z",
+  "basisCommit": "cd5e0451917c92dd381e4c62487921583903301f",
   "target": {
     "event": null,
     "submissionPortal": null,
