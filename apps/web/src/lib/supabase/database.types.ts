@@ -1375,15 +1375,27 @@ export type Database = {
           aggregate_type: string
           attempts: number
           available_at: string
+          claim_owner: string | null
+          claim_phase: string | null
           completed_at: string | null
+          correlation_id: string
           created_at: string
+          dead_lettered_at: string | null
           event_type: string
+          first_attempt_at: string | null
           id: string
           idempotency_key: string
           institution_id: string
+          last_attempt_at: string | null
           last_error_category: string | null
+          last_error_code: string | null
+          lease_expires_at: string | null
           locked_at: string | null
+          manual_retry_count: number
+          manual_retry_eligible: boolean
+          max_attempts: number
           payload: Json
+          retry_generation: number
           schema_version: number
           status: string
           trace_id: string
@@ -1394,16 +1406,27 @@ export type Database = {
           aggregate_type: string
           attempts?: number
           available_at?: string
+          claim_owner?: string | null
+          claim_phase?: string | null
           completed_at?: string | null
           correlation_id?: string
           created_at?: string
+          dead_lettered_at?: string | null
           event_type: string
+          first_attempt_at?: string | null
           id?: string
           idempotency_key: string
           institution_id: string
+          last_attempt_at?: string | null
           last_error_category?: string | null
+          last_error_code?: string | null
+          lease_expires_at?: string | null
           locked_at?: string | null
+          manual_retry_count?: number
+          manual_retry_eligible?: boolean
+          max_attempts?: number
           payload: Json
+          retry_generation?: number
           schema_version?: number
           status?: string
           trace_id?: string
@@ -1414,16 +1437,27 @@ export type Database = {
           aggregate_type?: string
           attempts?: number
           available_at?: string
+          claim_owner?: string | null
+          claim_phase?: string | null
           completed_at?: string | null
           correlation_id?: string
           created_at?: string
+          dead_lettered_at?: string | null
           event_type?: string
+          first_attempt_at?: string | null
           id?: string
           idempotency_key?: string
           institution_id?: string
+          last_attempt_at?: string | null
           last_error_category?: string | null
+          last_error_code?: string | null
+          lease_expires_at?: string | null
           locked_at?: string | null
+          manual_retry_count?: number
+          manual_retry_eligible?: boolean
+          max_attempts?: number
           payload?: Json
+          retry_generation?: number
           schema_version?: number
           status?: string
           trace_id?: string
@@ -2918,6 +2952,50 @@ export type Database = {
         Args: { requested_section_ids?: string[]; section_id: string }
         Returns: Json
       }
+      claim_m6_outbox_events: {
+        Args: {
+          p_batch_size: number
+          p_lease_seconds: number
+          p_phase: string
+          p_worker_id: string
+        }
+        Returns: {
+          aggregate_id: string
+          aggregate_type: string
+          attempt_number: number
+          available_at: string
+          correlation_id: string
+          created_at: string
+          event_id: string
+          event_type: string
+          first_attempt_at: string
+          idempotency_key: string
+          institution_id: string
+          last_attempt_at: string
+          lease_expires_at: string
+          payload: Json
+          schema_version: number
+          trace_id: string
+        }[]
+      }
+      complete_m6_outbox_event: {
+        Args: {
+          p_attempt_number: number
+          p_chain_id: number
+          p_confirmation_count: number
+          p_error_code: string
+          p_event_id: string
+          p_expected_confirmations: number
+          p_outcome: string
+          p_provider_operation_id: string
+          p_receipt_state: string
+          p_retry_after_seconds: number
+          p_transaction_hash: string
+          p_worker_id: string
+        }
+        Returns: Json
+      }
+      get_m6_outbox_metrics: { Args: never; Returns: Json }
       get_registration_catalog: {
         Args: { p_term_id?: string }
         Returns: {
@@ -2947,6 +3025,10 @@ export type Database = {
           term_name: string
         }[]
       }
+      manual_retry_m6_outbox_event: {
+        Args: { p_event_id: string; p_reason_code: string }
+        Returns: Json
+      }
       publish_grade_submission_with_anchor: {
         Args: {
           p_commitment_environment: string
@@ -2966,6 +3048,15 @@ export type Database = {
       register_for_sections: {
         Args: { p_idempotency_key: string; p_section_ids: string[] }
         Returns: Json
+      }
+      renew_m6_outbox_lease: {
+        Args: {
+          p_attempt_number: number
+          p_event_id: string
+          p_lease_seconds: number
+          p_worker_id: string
+        }
+        Returns: string
       }
       save_grade_drafts: {
         Args: {

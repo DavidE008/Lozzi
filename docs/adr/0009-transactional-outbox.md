@@ -44,9 +44,39 @@ PostgreSQL. Missing or malformed commitment configuration fails closed.
 Outbox creation does not mean a blockchain transaction was prepared,
 submitted, or confirmed.
 
+The server-only worker foundation is disabled unless
+`M6_OUTBOX_WORKER_ENABLED=1` and a bounded worker ID, batch size, and lease
+duration are valid. Claims use `FOR UPDATE SKIP LOCKED`, a named owner, a
+five-to-300-second lease, and a batch ceiling of 50. A stale lease closes the
+prior private attempt record before another worker can reclaim it. A clean
+abort releases every already-claimed event into bounded retry rather than
+leaving an unbounded process loop.
+
+Submission and reconciliation are separate claim phases. Transaction
+submission can only move to reconciliation after a structured provider
+operation receipt is stored. Submitted events are never eligible for another
+submission claim. Completion is idempotent for the same worker, attempt, and
+outcome; a conflicting replay is rejected. Retry ceilings produce dead-letter
+state and require an explicit, audited manual retry. Manual retry increments a
+generation so immutable attempt history is retained while the bounded attempt
+number restarts.
+
+Attempt details and provider receipts live in `lozzi_private` tables that are
+not directly readable by application or service roles. Service-only
+security-definer RPCs expose bounded claims, completion, renewal, manual retry,
+and aggregate metrics. Error persistence is restricted to validated category
+and code values; raw exceptions, RPC bodies, bearer material, private records,
+and signatures are not persisted.
+
 ## Consequences
 
 The SIS transaction succeeds independently of a partner outage and can
 reconcile later. Workers require operational monitoring, retry ceilings, and
 dead-letter procedures. Milestones 0–1 define the schema and interfaces but
 do not run a relayer or claim a partner success.
+
+This foundation does not sign or broadcast transactions. A future managed
+relayer must accept the outbox idempotency key as its provider operation key
+and durably return that operation ID before any transaction-capable worker can
+be enabled. Until that separately approved design exists, handlers are limited
+to configuration checks, simulation, and read-only reconciliation.
