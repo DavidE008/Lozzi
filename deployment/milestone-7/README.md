@@ -126,7 +126,7 @@ future approval-gated work.
 
 ## Current outcome
 
-`pnpm submission:status` reports two passed gates and seven blocked gates.
+`pnpm submission:status` reports two passed gates and eight blocked gates.
 `readyForDeployment` and `readyForSubmission` are both `false`.
 
 No deployment, provisioning, signing, funding, Safe action, hosted mutation,

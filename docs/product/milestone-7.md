@@ -49,10 +49,15 @@ Blocked live ENS behavior:
 
 Blocked deployment and submission behavior:
 
+- Two moderate optional/transitive dependency advisories need a documented
+  reachability and upgrade or override disposition.
 - Hosted Supabase is ten migrations behind.
 - No frontend hosting project or public demo URL exists.
 - The registry chain, Safe, funding, simulation, and independent review are
   unresolved.
+- Slither reports zero high, seven medium, and eleven low findings. The
+  findings are locally triaged but still require independent acceptance or a
+  reviewed fix and deployment-evidence repin.
 - The target event, portal, deadline, required fields, prize tracks, and media
   requirements are not recorded.
 

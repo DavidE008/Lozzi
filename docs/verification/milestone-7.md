@@ -25,9 +25,9 @@ or export record content.
 
 `pnpm submission:status` passes structural validation and currently reports:
 
-- 9 required gates;
+- 10 required gates;
 - 2 passed;
-- 7 blocked;
+- 8 blocked;
 - `readyForDeployment: false`;
 - `readyForSubmission: false`;
 - `broadcast: false`;
@@ -41,6 +41,17 @@ The focused Milestone 7 script tests, web lint, web type-check, 173 web Vitest
 tests, and 12 web script tests pass. Full repository, database, contract, and
 browser totals will be recorded here after the final branch verification and
 hosted CI run.
+
+The configured high-severity dependency threshold passes. A full production
+audit reports two moderate optional/transitive advisories in `bn.js` and
+`uuid`; production deployment remains blocked until reachability and upgrade
+or override dispositions are recorded.
+
+Slither 0.11.5 completed against the four first-party contracts with the
+checked-in dependency and test exclusions. It reported 18 findings: zero high,
+seven medium, and eleven low. The local disposition is recorded in
+`docs/security/milestone-7-slither-review.md`; independent acceptance remains a
+deployment blocker.
 
 ## External action boundary
 

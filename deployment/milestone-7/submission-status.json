@@ -76,7 +76,14 @@
     "playwrightPassed": 17,
     "playwrightSkipped": 9,
     "concurrencyChecks": 3,
-    "slitherStatus": "not-run"
+    "dependencyAuditThreshold": "high",
+    "moderateDependencyAdvisories": 2,
+    "slitherVersion": "0.11.5",
+    "slitherStatus": "findings",
+    "slitherFindingCount": 18,
+    "slitherHighFindings": 0,
+    "slitherMediumFindings": 7,
+    "slitherLowFindings": 11
   },
   "evidencePaths": [
     "README.md",
@@ -90,6 +97,7 @@
     "docs/verification/milestone-7.md",
     "docs/submission-checklist.md",
     "docs/security/milestone-6-pre-deployment-review.md",
+    "docs/security/milestone-7-slither-review.md",
     "docs/deployment/milestone-6-approval-runbook.md",
     "docs/integrations/world-prize-evidence.md",
     "docs/integrations/world-ens-identity-journey.md",
@@ -122,6 +130,18 @@
         "3 concurrency checks"
       ],
       "blockers": []
+    },
+    {
+      "id": "dependency-security",
+      "status": "blocked",
+      "evidence": [
+        "Configured production audit threshold is high and passes",
+        "Full production audit reports no high or critical advisories"
+      ],
+      "blockers": [
+        "Two moderate transitive advisories remain through optional @x402/paywall wallet dependencies",
+        "bn.js GHSA-378v-28hj-76wf and uuid GHSA-w5hq-g745-h8pq require reachability and upgrade or override disposition before production deployment"
+      ]
     },
     {
       "id": "hosted-supabase",
@@ -189,13 +209,15 @@
       "status": "blocked",
       "evidence": [
         "Deployment schemas, bytecode fingerprints, and fail-closed offline preflight exist",
-        "World Chain Sepolia is documented only as a candidate"
+        "World Chain Sepolia is documented only as a candidate",
+        "Slither 0.11.5 completed with 0 high, 7 medium, and 11 low findings"
       ],
       "blockers": [
         "Exact chain and chain ID are not approved",
         "Safe, deployer, relayer, funding ceilings, and addresses are unresolved",
         "Unsigned fork simulation has not run",
-        "Independent pre-deployment review and Slither are incomplete"
+        "Slither findings require independent acceptance or a reviewed fix and deployment-evidence repin",
+        "Independent pre-deployment review is incomplete"
       ]
     },
     {

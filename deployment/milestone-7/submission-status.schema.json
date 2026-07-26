@@ -309,7 +309,14 @@
         "playwrightPassed",
         "playwrightSkipped",
         "concurrencyChecks",
-        "slitherStatus"
+        "dependencyAuditThreshold",
+        "moderateDependencyAdvisories",
+        "slitherVersion",
+        "slitherStatus",
+        "slitherFindingCount",
+        "slitherHighFindings",
+        "slitherMediumFindings",
+        "slitherLowFindings"
       ],
       "properties": {
         "domainTests": {
@@ -342,8 +349,29 @@
         "concurrencyChecks": {
           "const": 3
         },
+        "dependencyAuditThreshold": {
+          "const": "high"
+        },
+        "moderateDependencyAdvisories": {
+          "const": 2
+        },
+        "slitherVersion": {
+          "const": "0.11.5"
+        },
         "slitherStatus": {
-          "enum": ["not-run", "passed"]
+          "const": "findings"
+        },
+        "slitherFindingCount": {
+          "const": 18
+        },
+        "slitherHighFindings": {
+          "const": 0
+        },
+        "slitherMediumFindings": {
+          "const": 7
+        },
+        "slitherLowFindings": {
+          "const": 11
         }
       }
     },

@@ -25,10 +25,11 @@ test("accepts the honest tracked status and reports every live gate blocked", ()
   assert.equal(summary.readyForSubmission, false);
   assert.equal(summary.readyForDeployment, false);
   assert.equal(summary.passedGateCount, 2);
-  assert.equal(summary.blockedGateCount, 7);
+  assert.equal(summary.blockedGateCount, 8);
   assert.deepEqual(
     summary.blockedGates.map((gate) => gate.id),
     [
+      "dependency-security",
       "hosted-supabase",
       "frontend-deployment",
       "world-runtime",

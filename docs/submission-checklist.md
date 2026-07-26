@@ -14,12 +14,13 @@ expected to fail while any required gate below is blocked.
 | ----------------------- | ------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Public repository       | Passed  | Public `DavidE008/Lozzi`, MIT, issues enabled, `main` Quality passed             | None                                                                                     |
 | Local verification      | Passed  | 55 domain, 173 web, 12 script, 29 Forge, 413 pgTAP, 17 Playwright, 3 concurrency | Final M7 full rerun and hosted PR CI still pending                                       |
+| Dependency security     | Blocked | Configured high threshold passes; no high or critical advisories                 | Two moderate optional/transitive advisories need reachability and upgrade disposition    |
 | Hosted Supabase         | Blocked | Healthy `eu-west-2`; 7 users and 3 students match synthetic markers              | Hosted history has 30 of 40 migrations; no hosted mutation is authorized                 |
 | Frontend deployment     | Blocked | Connected Vercel account checked read-only                                       | No project, deployed commit, public demo URL, domain, or rollback evidence               |
 | World runtime           | Blocked | Managed production/staging RP registered; six action records                     | Signing key, entitlement, production-device journey, and anonymized feedback absent      |
 | World app review        | Blocked | External app exists and is active                                                | Website, overview, countries, logo, showcase, and explicit review approval absent        |
 | ENS                     | Blocked | Local adapter, lifecycle, and registrar tests                                    | No parent, Safe, registrar, signer, approval, deployment, issuance, or canary            |
-| Academic registries     | Blocked | Contracts, fingerprints, schemas, offline preflight                              | Chain, Safe, relayer, funding, fork simulation, Slither, and independent approval absent |
+| Academic registries     | Blocked | Contracts, fingerprints, schemas, offline preflight, Slither 0.11.5              | Chain, Safe, relayer, funding, fork simulation, finding acceptance, independent approval |
 | Event submission target | Blocked | Repository searched; no exact target recorded                                    | Event, portal, deadline, required fields, prize tracks, demo media, and submit approval  |
 
 ## Implemented and verified code
@@ -95,6 +96,34 @@ Hosted advisors currently report:
 
 These findings do not change local test results, but they block a production
 readiness claim.
+
+## Dependency audit status
+
+`pnpm audit:dependencies` passes the configured `high` threshold. The full
+production audit still reports two moderate transitive advisories:
+
+- `bn.js` through optional WalletConnect dependencies:
+  `GHSA-378v-28hj-76wf`;
+- `uuid` through optional MetaMask/wallet dependencies:
+  `GHSA-w5hq-g745-h8pq`.
+
+Both enter through `@x402/hono` to `@x402/paywall` optional wallet trees. Before
+production deployment, record whether those paths are bundled or reachable in
+Lozzi, then upgrade the owning package or apply a tested package-manager
+override. Do not weaken the audit threshold or claim the full audit is clean.
+
+## Solidity static-analysis status
+
+Slither 0.11.5 completed against the four first-party contracts with
+dependencies and tests excluded by the checked-in configuration. It reported
+18 findings: zero high, seven medium, and eleven low.
+
+The local triage is recorded in
+`docs/security/milestone-7-slither-review.md`. It does not replace the
+independent pre-deployment review. Deployment remains blocked until an
+independent reviewer accepts each disposition or an approved fix is tested and
+the bytecode fingerprints, manifest, simulation, and transaction packet are
+repinned.
 
 ## Actions requiring future explicit approval
 

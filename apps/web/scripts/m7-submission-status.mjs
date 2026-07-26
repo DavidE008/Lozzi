@@ -5,6 +5,7 @@ const GATE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const REQUIRED_GATE_IDS = new Set([
   "public-repository",
   "local-verification",
+  "dependency-security",
   "hosted-supabase",
   "frontend-deployment",
   "world-runtime",
