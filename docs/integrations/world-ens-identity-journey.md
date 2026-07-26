@@ -123,6 +123,7 @@ real ENS request.
 Identifiers and policy values are not secrets, but still belong in controlled
 runtime configuration rather than hard-coded deployment claims:
 
+- `NEXT_PUBLIC_APP_URL`
 - `NEXT_PUBLIC_WORLD_APP_ID`
 - `WORLD_RP_ID`
 - `WORLD_ID_ENVIRONMENT`
@@ -138,6 +139,9 @@ runtime configuration rather than hard-coded deployment claims:
 - `ENS_CONFIRMATIONS`
 - `ENS_MAX_GAS`
 - `ENS_MAX_FEE_WEI`
+
+`LOZZI_PARTNER_MOCKS=1` is a non-secret, local-development-only switch. It must
+remain unset in live environments; production validation rejects mock mode.
 
 Transport URLs may contain credentials and must be treated as secrets even
 though local public endpoints may not:
