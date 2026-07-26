@@ -12,7 +12,13 @@ export {
   canonicalizeJson,
   commitmentPreimage,
   createCommitment,
+  createInstitutionCommitment,
+  createStudentCommitment,
+  INSTITUTION_COMMITMENT_ALGORITHM,
+  STUDENT_COMMITMENT_ALGORITHM,
   type CommitmentInput,
+  type InstitutionCommitmentInput,
+  type StudentCommitmentInput,
 } from "./commitments";
 export {
   parseEnvironment,
@@ -48,6 +54,20 @@ export {
   type WorldRpContext,
   type WorldVerificationSignal,
 } from "./partners";
+export {
+  academicRecordAnchorRequestedV1Schema,
+  outboxEventSchema,
+  outboxEventTypeSchema,
+  shareDisclosureScopeSchema,
+  shareGrantCreateRequestedV1Schema,
+  shareGrantRevokeRequestedV1Schema,
+  type AcademicRecordAnchorRequestedV1,
+  type OutboxEvent,
+  type OutboxEventType,
+  type ShareDisclosureScope,
+  type ShareGrantCreateRequestedV1,
+  type ShareGrantRevokeRequestedV1,
+} from "./outbox-events";
 export {
   buildAcademicRecordCommitmentPayload,
   calculateDegreeAudit,

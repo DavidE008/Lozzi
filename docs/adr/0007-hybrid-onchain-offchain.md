@@ -22,6 +22,29 @@ fresh secret salt. Share events are relayed by an authorized institutional
 signer following offchain student authorization; no student wallet is
 included in the record or grant contract calls.
 
+Milestone 6 introduces versioned opaque identity commitments for event and
+registry correlation. `lozzi-institution-v1` binds the deployment environment
+and internal institution identifier to a server-held 32-byte secret.
+`lozzi-student-v1` binds an internal opaque student identifier to that
+institution commitment, environment, and a separate institution-scoped
+32-byte secret. Secrets are configuration material: they must never enter
+client bundles, event payloads, URLs, logs, analytics, or audit metadata.
+
+The student commitment is deliberately stable within one institution,
+environment, and algorithm version so immutable record versions can be
+linked to the correct pseudonymous registry subject. That stability exposes
+linkability between commitments published by the same institution. It does
+not provide anonymity against an operator that already controls the SIS.
+Institution and environment separation, plus independently managed secrets,
+limit cross-institution and cross-environment correlation.
+
+Algorithm names and positive key versions are stored beside commitments and
+are part of the commitment preimage. Secret rotation increments the key
+version for future versions and records a server-side mapping between old and
+new commitments; it does not rewrite historical academic versions or their
+finalized anchors. Operators must retain old key material under the approved
+recovery policy for as long as historical commitments need to be reproduced.
+
 ## Consequences
 
 Onchain evidence can show that an authorized institution anchored a specific
