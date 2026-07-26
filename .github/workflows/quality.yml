@@ -57,12 +57,15 @@ jobs:
       - run: pnpm exec supabase db reset
       - run: pnpm exec supabase test db
       - name: Export local Supabase environment
-        run: pnpm exec supabase status -o env >> "$GITHUB_ENV"
-      - name: Configure browser tests for local Supabase
         run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
-          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY" >> "$GITHUB_ENV"
-          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
+          eval "$(pnpm exec supabase status -o env)"
+          {
+            printf 'API_URL=%s\n' "$API_URL"
+            printf 'SERVICE_ROLE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLISHABLE_KEY"
+            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
       - name: Test final-seat concurrency
         run: pnpm --filter @lozzi/web exec node scripts/registration-concurrency.mjs
       - run: pnpm exec playwright install --with-deps chromium
