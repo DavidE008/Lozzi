@@ -206,6 +206,41 @@ const agentKitConfigSchema = z
   })
   .strict();
 
+const registryAdapterConfigSchema = z
+  .object({
+    academicRecordRegistryAddress: addressSchema,
+    academicRecordRegistryCodeHash: bytes32Schema,
+    chainId: z.coerce.number().int().positive(),
+    confirmations: z.coerce.number().int().min(1).max(256).default(3),
+    independentRpcUrl: appUrlSchema,
+    institutionRegistryAddress: addressSchema,
+    institutionRegistryCodeHash: bytes32Schema,
+    maxGas: z.coerce.bigint().positive().max(BigInt(5_000_000)),
+    mode: z.enum(["transactions-disabled", "simulation-only"]),
+    primaryRpcUrl: appUrlSchema,
+    relayerAddress: addressSchema,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.primaryRpcUrl === value.independentRpcUrl) {
+      context.addIssue({
+        code: "custom",
+        message: "Registry readback requires an independent RPC",
+        path: ["independentRpcUrl"],
+      });
+    }
+    if (
+      value.academicRecordRegistryAddress.toLowerCase() ===
+      value.institutionRegistryAddress.toLowerCase()
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Registry contracts require distinct addresses",
+        path: ["academicRecordRegistryAddress"],
+      });
+    }
+  });
+
 export type WorldConfig = z.infer<typeof worldConfigSchema>;
 export type EnsConfig = z.infer<typeof ensConfigInputSchema>;
 export type EnsWalletLinkConfig = z.infer<typeof ensWalletLinkConfigSchema>;
@@ -216,6 +251,9 @@ export type ZeroGStorageConfig = z.infer<typeof zeroGStorageConfigSchema>;
 export type ZeroGComputeConfig = z.infer<typeof zeroGComputeConfigSchema>;
 export type ServiceDatabaseConfig = z.infer<typeof serviceDatabaseConfigSchema>;
 export type AgentKitConfig = z.infer<typeof agentKitConfigSchema>;
+export type RegistryAdapterConfig = z.infer<
+  typeof registryAdapterConfigSchema
+>;
 
 export class IntegrationConfigurationError extends Error {
   readonly category = "configuration";
@@ -333,4 +371,23 @@ export const getAgentKitConfig = (
       "https://x402-worldchain.vercel.app/facilitator",
     humanIdHmacKey: source.AGENTKIT_HUMAN_ID_HMAC_KEY,
     worldChainRpcUrl: source.WORLD_CHAIN_MAINNET_RPC_URL,
+  });
+
+export const getRegistryAdapterConfig = (
+  source: Readonly<Record<string, string | undefined>> = process.env,
+): RegistryAdapterConfig =>
+  parseRequired("Milestone 6 registry adapter", registryAdapterConfigSchema, {
+    academicRecordRegistryAddress:
+      source.M6_ACADEMIC_RECORD_REGISTRY_ADDRESS,
+    academicRecordRegistryCodeHash:
+      source.M6_ACADEMIC_RECORD_REGISTRY_CODE_HASH,
+    chainId: source.M6_REGISTRY_CHAIN_ID,
+    confirmations: source.M6_REGISTRY_CONFIRMATIONS ?? "3",
+    independentRpcUrl: source.M6_REGISTRY_INDEPENDENT_RPC_URL,
+    institutionRegistryAddress: source.M6_INSTITUTION_REGISTRY_ADDRESS,
+    institutionRegistryCodeHash: source.M6_INSTITUTION_REGISTRY_CODE_HASH,
+    maxGas: source.M6_REGISTRY_MAX_GAS ?? "800000",
+    mode: source.M6_REGISTRY_MODE ?? "transactions-disabled",
+    primaryRpcUrl: source.M6_REGISTRY_PRIMARY_RPC_URL,
+    relayerAddress: source.M6_REGISTRY_RELAYER_ADDRESS,
   });
