@@ -7,7 +7,10 @@ Status: branch verification complete; hosted pull-request CI pending.
 - GitHub repository: public, MIT, issues enabled, default branch `main`.
 - Open pull requests at review time: none.
 - Latest merged `main` Quality run: passed.
-- Vercel projects in the connected team: zero.
+- Vercel projects in the connected team API: zero.
+- Git integration attempted an automatic preview for PR #11; Vercel reported
+  `Deployment has been deleted`, the check ended `ERROR`, and no live preview
+  remained.
 - Supabase Lozzi project: `ACTIVE_HEALTHY`, `eu-west-2`.
 - Hosted synthetic markers: 7 of 7 auth users and 3 of 3 students match the
   repository's synthetic conventions; no non-synthetic marker was found by the
@@ -78,7 +81,8 @@ deployment blocker.
 
 ## External action boundary
 
-No deployment, provisioning, signing, key retrieval or rotation, funding, Safe
-action, hosted Supabase mutation, ENS issuance, World app review submission,
-event submission, or onchain transaction occurred during this inventory and
-verification.
+No manual or production deployment, provisioning, signing, key retrieval or
+rotation, funding, Safe action, hosted Supabase mutation, ENS issuance, World
+app review submission, event submission, or onchain transaction occurred during
+this inventory and verification. The deleted automatic PR preview attempt is
+recorded above and is not treated as a live deployment.

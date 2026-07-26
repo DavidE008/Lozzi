@@ -67,8 +67,10 @@ This lane does not authorize a frontend deployment.
 
 ### Lane 2: frontend hosting
 
-Current state: the connected Vercel team has no projects and the GitHub
-repository has no homepage URL.
+Current state: the connected Vercel team API reports no projects and the GitHub
+repository has no homepage URL. Git integration attempted an automatic preview
+for PR #11, but Vercel reported `Deployment has been deleted` and the check
+ended `ERROR`; there is no live preview or production deployment.
 
 Before creation:
 
@@ -141,6 +143,8 @@ future approval-gated work.
 `pnpm submission:status` reports two passed gates and eight blocked gates.
 `readyForDeployment` and `readyForSubmission` are both `false`.
 
-No deployment, provisioning, signing, funding, Safe action, hosted mutation,
-World review submission, ENS issuance, event submission, or onchain
-transaction was performed to create this record.
+No manual or production deployment, provisioning, signing, funding, Safe
+action, hosted mutation, World review submission, ENS issuance, event
+submission, or onchain transaction was performed to create this record. The
+deleted automatic PR preview attempt is recorded above rather than represented
+as a live deployment.

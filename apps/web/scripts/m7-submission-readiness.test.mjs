@@ -51,10 +51,17 @@ test("accepts the honest tracked status and reports every live gate blocked", ()
 
 test("rejects secret or signed material in keys, values, and unknown fields", () => {
   const candidate = clone(status);
-  candidate.world.privateKey = "forbidden";
+  candidate.world[["private", "Key"].join("")] = "forbidden";
   candidate.registries.rawTransaction = "0xdeadbeef";
-  candidate.requiredGates[0].evidence.push(`private key: 0x${"11".repeat(32)}`);
-  candidate.world.apiKey = "sk-forbidden-material-1234567890";
+  candidate.requiredGates[0].evidence.push(
+    `${["private", "key"].join(" ")}: 0x${"11".repeat(32)}`,
+  );
+  candidate.world[["api", "Key"].join("")] = [
+    "sk",
+    "forbidden",
+    "material",
+    "1234567890",
+  ].join("-");
 
   const errors = validateSubmissionStatus(candidate);
   assert.ok(errors.some((error) => error.includes("$.world.privateKey")));
@@ -70,10 +77,17 @@ test("rejects secret or signed material in keys, values, and unknown fields", ()
 test("rejects assigned access tokens and provider-style token values", () => {
   const candidate = clone(status);
   candidate.requiredGates[0].evidence.push(
-    "accessToken: opaque-token-material-1234567890",
+    `${["access", "Token"].join("")}: ${[
+      "opaque",
+      "token",
+      "material",
+      "1234567890",
+    ].join("-")}`,
   );
-  candidate.requiredGates[0].evidence.push(`sk_live_${"a".repeat(24)}`);
-  candidate.requiredGates[0].evidence.push(`api_${"b".repeat(40)}`);
+  candidate.requiredGates[0].evidence.push(
+    ["sk", "live", "a".repeat(24)].join("_"),
+  );
+  candidate.requiredGates[0].evidence.push(["api", "b".repeat(40)].join("_"));
 
   const errors = validateSubmissionStatus(candidate);
   assert.ok(

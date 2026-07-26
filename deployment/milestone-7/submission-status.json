@@ -160,12 +160,13 @@
       "id": "frontend-deployment",
       "status": "blocked",
       "evidence": [
-        "Connected Vercel team contains no projects",
+        "Connected Vercel team API reports no projects",
+        "Git integration attempted a PR #11 preview, but Vercel reported Deployment has been deleted and the check ended ERROR",
         "GitHub repository homepage URL is empty"
       ],
       "blockers": [
-        "No preview or production deployment exists",
-        "No deployed commit or public demo URL can be verified"
+        "No live preview or production deployment exists",
+        "No deployed commit, stable public demo URL, domain, or rollback evidence can be verified"
       ]
     },
     {
@@ -233,7 +234,7 @@
     }
   ],
   "explicitNonActions": [
-    "no deployment",
+    "no manual or production deployment",
     "no contract broadcast",
     "no World or ENS provisioning",
     "no signer rotation or key retrieval",

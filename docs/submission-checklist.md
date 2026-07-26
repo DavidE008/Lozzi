@@ -16,7 +16,7 @@ expected to fail while any required gate below is blocked.
 | Local verification      | Passed  | 55 domain, 173 web, 25 script, 29 Forge, 413 pgTAP, 17 Playwright, 3 concurrency | Hosted PR CI still pending                                                               |
 | Dependency security     | Blocked | Configured high threshold passes; no high or critical advisories                 | Two moderate optional/transitive advisories need reachability and upgrade disposition    |
 | Hosted Supabase         | Blocked | Healthy `eu-west-2`; 7 users and 3 students match synthetic markers              | Hosted history has 30 of 40 migrations; no hosted mutation is authorized                 |
-| Frontend deployment     | Blocked | Connected Vercel account checked read-only                                       | No project, deployed commit, public demo URL, domain, or rollback evidence               |
+| Frontend deployment     | Blocked | Team API reports zero projects; automatic PR #11 preview was deleted             | No live preview, production deployment, deployed commit, domain, or rollback evidence    |
 | World runtime           | Blocked | Managed production/staging RP registered; six action records                     | Signing key, entitlement, production-device journey, and anonymized feedback absent      |
 | World app review        | Blocked | External app exists and is active                                                | Website, overview, countries, logo, showcase, and explicit review approval absent        |
 | ENS                     | Blocked | Local adapter, lifecycle, and registrar tests                                    | No parent, Safe, registrar, signer, approval, deployment, issuance, or canary            |
@@ -161,7 +161,8 @@ simulation block, expiry, readback, and recovery owner.
 
 ## Explicitly not performed
 
-- No deployment.
+- No manual or production deployment. Vercel's automatic PR preview attempt was
+  deleted and did not leave a live deployment.
 - No World or ENS provisioning.
 - No signer retrieval or rotation.
 - No Safe action.
