@@ -1,17 +1,24 @@
 import "server-only";
 
 import { createServiceClient } from "@/lib/supabase/service";
+import { createClient } from "@/lib/supabase/server";
 
 import { z } from "zod";
 
 interface SensitiveShareRpcClient {
   rpc(
-    name: "activate_sensitive_share",
+    name: "activate_sensitive_share_with_outbox",
     params: {
+      p_commitment_environment: string;
+      p_correlation_id: string;
       p_draft_id: string;
       p_grant_commitment: string;
-      p_student_id: string;
+      p_institution_commitment: string;
+      p_institution_commitment_key_version: number;
+      p_student_commitment: string;
+      p_student_commitment_key_version: number;
       p_token_hash: string;
+      p_trace_id: string;
     },
   ): Promise<{
     readonly data: unknown;
@@ -107,18 +114,39 @@ export const requestRegistrarAssistedConsent = async (input: {
 };
 
 export const activateSensitiveShare = async (input: {
+  readonly commitmentEnvironment:
+    | "development"
+    | "test"
+    | "staging"
+    | "production";
+  readonly correlationId: string;
   readonly draftId: string;
   readonly grantCommitment: `0x${string}`;
-  readonly studentId: string;
+  readonly institutionCommitment: `0x${string}`;
+  readonly institutionCommitmentKeyVersion: number;
+  readonly studentCommitment: `0x${string}`;
+  readonly studentCommitmentKeyVersion: number;
   readonly tokenHash: `0x${string}`;
+  readonly traceId: string;
 }) => {
-  const client = createServiceClient() as unknown as SensitiveShareRpcClient;
-  const { data, error } = await client.rpc("activate_sensitive_share", {
-    p_draft_id: input.draftId,
-    p_grant_commitment: bytea(input.grantCommitment),
-    p_student_id: input.studentId,
-    p_token_hash: bytea(input.tokenHash),
-  });
+  const client =
+    (await createClient()) as unknown as SensitiveShareRpcClient;
+  const { data, error } = await client.rpc(
+    "activate_sensitive_share_with_outbox",
+    {
+      p_commitment_environment: input.commitmentEnvironment,
+      p_correlation_id: input.correlationId,
+      p_draft_id: input.draftId,
+      p_grant_commitment: bytea(input.grantCommitment),
+      p_institution_commitment: bytea(input.institutionCommitment),
+      p_institution_commitment_key_version:
+        input.institutionCommitmentKeyVersion,
+      p_student_commitment: bytea(input.studentCommitment),
+      p_student_commitment_key_version: input.studentCommitmentKeyVersion,
+      p_token_hash: bytea(input.tokenHash),
+      p_trace_id: input.traceId,
+    },
+  );
   if (error) throw error;
   return activationResultSchema.parse(data);
 };

@@ -54,6 +54,12 @@ const envelopeSchema = z
 
 const commitmentIdentitySchema = z
   .object({
+    commitmentEnvironment: z.enum([
+      "development",
+      "test",
+      "staging",
+      "production",
+    ]),
     institutionCommitment: bytes32Schema,
     institutionCommitmentAlgorithm: algorithmSchema,
     institutionCommitmentKeyVersion: z.number().int().min(1).max(2_147_483_647),

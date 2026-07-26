@@ -24,6 +24,7 @@ const baseEvent = {
 };
 
 const commitmentIdentity = {
+  commitmentEnvironment: "test" as const,
   institutionCommitment: `0x${"11".repeat(32)}`,
   institutionCommitmentAlgorithm: "lozzi-institution-v1",
   institutionCommitmentKeyVersion: 1,

@@ -11,6 +11,7 @@
     "ens:verify-deployment": "node scripts/verify-ens-deployment.mjs",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run && node --test scripts/*.test.mjs",
+    "test:db-concurrency": "node scripts/m6-producer-concurrency.mjs",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },

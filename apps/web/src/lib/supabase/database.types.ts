@@ -17,11 +17,15 @@ export type Database = {
       academic_record_versions: {
         Row: {
           anchor_status: string
+          commitment_environment: string | null
           content_commitment: string
           correction_reason_code: string | null
           created_at: string
           created_by: string
           id: string
+          institution_commitment: string | null
+          institution_commitment_algorithm: string | null
+          institution_commitment_key_version: number | null
           institution_id: string
           is_current: boolean
           previous_version_id: string | null
@@ -29,17 +33,24 @@ export type Database = {
           salt_reference: string
           source_grade_record_id: string | null
           status: string
+          student_commitment: string | null
+          student_commitment_algorithm: string | null
+          student_commitment_key_version: number | null
           student_id: string
           superseded_at: string | null
           version_number: number
         }
         Insert: {
           anchor_status?: string
+          commitment_environment?: string | null
           content_commitment: string
           correction_reason_code?: string | null
           created_at?: string
           created_by: string
           id?: string
+          institution_commitment?: string | null
+          institution_commitment_algorithm?: string | null
+          institution_commitment_key_version?: number | null
           institution_id: string
           is_current?: boolean
           previous_version_id?: string | null
@@ -47,17 +58,24 @@ export type Database = {
           salt_reference: string
           source_grade_record_id?: string | null
           status?: string
+          student_commitment?: string | null
+          student_commitment_algorithm?: string | null
+          student_commitment_key_version?: number | null
           student_id: string
           superseded_at?: string | null
           version_number: number
         }
         Update: {
           anchor_status?: string
+          commitment_environment?: string | null
           content_commitment?: string
           correction_reason_code?: string | null
           created_at?: string
           created_by?: string
           id?: string
+          institution_commitment?: string | null
+          institution_commitment_algorithm?: string | null
+          institution_commitment_key_version?: number | null
           institution_id?: string
           is_current?: boolean
           previous_version_id?: string | null
@@ -65,6 +83,9 @@ export type Database = {
           salt_reference?: string
           source_grade_record_id?: string | null
           status?: string
+          student_commitment?: string | null
+          student_commitment_algorithm?: string | null
+          student_commitment_key_version?: number | null
           student_id?: string
           superseded_at?: string | null
           version_number?: number
@@ -319,6 +340,7 @@ export type Database = {
       ai_inference_runs: {
         Row: {
           completed_at: string | null
+          correlation_id: string
           created_at: string
           error_category: string | null
           human_review_status: string
@@ -1362,7 +1384,9 @@ export type Database = {
           last_error_category: string | null
           locked_at: string | null
           payload: Json
+          schema_version: number
           status: string
+          trace_id: string
           updated_at: string
         }
         Insert: {
@@ -1371,6 +1395,7 @@ export type Database = {
           attempts?: number
           available_at?: string
           completed_at?: string | null
+          correlation_id?: string
           created_at?: string
           event_type: string
           id?: string
@@ -1379,7 +1404,9 @@ export type Database = {
           last_error_category?: string | null
           locked_at?: string | null
           payload: Json
+          schema_version?: number
           status?: string
+          trace_id?: string
           updated_at?: string
         }
         Update: {
@@ -1388,6 +1415,7 @@ export type Database = {
           attempts?: number
           available_at?: string
           completed_at?: string | null
+          correlation_id?: string
           created_at?: string
           event_type?: string
           id?: string
@@ -1396,7 +1424,9 @@ export type Database = {
           last_error_category?: string | null
           locked_at?: string | null
           payload?: Json
+          schema_version?: number
           status?: string
+          trace_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -1747,48 +1777,69 @@ export type Database = {
       record_share_grants: {
         Row: {
           academic_record_version_id: string
+          commitment_environment: string | null
           created_at: string
           created_by: string
           expires_at: string
           grant_commitment: string
           id: string
+          institution_commitment: string | null
+          institution_commitment_algorithm: string | null
+          institution_commitment_key_version: number | null
           institution_id: string
           recipient_label: string
           revoked_at: string | null
           scopes: string[]
           status: string
+          student_commitment: string | null
+          student_commitment_algorithm: string | null
+          student_commitment_key_version: number | null
           student_id: string
           token_hash: string
           updated_at: string
         }
         Insert: {
           academic_record_version_id: string
+          commitment_environment?: string | null
           created_at?: string
           created_by: string
           expires_at: string
           grant_commitment: string
           id?: string
+          institution_commitment?: string | null
+          institution_commitment_algorithm?: string | null
+          institution_commitment_key_version?: number | null
           institution_id: string
           recipient_label: string
           revoked_at?: string | null
           scopes: string[]
           status?: string
+          student_commitment?: string | null
+          student_commitment_algorithm?: string | null
+          student_commitment_key_version?: number | null
           student_id: string
           token_hash: string
           updated_at?: string
         }
         Update: {
           academic_record_version_id?: string
+          commitment_environment?: string | null
           created_at?: string
           created_by?: string
           expires_at?: string
           grant_commitment?: string
           id?: string
+          institution_commitment?: string | null
+          institution_commitment_algorithm?: string | null
+          institution_commitment_key_version?: number | null
           institution_id?: string
           recipient_label?: string
           revoked_at?: string | null
           scopes?: string[]
           status?: string
+          student_commitment?: string | null
+          student_commitment_algorithm?: string | null
+          student_commitment_key_version?: number | null
           student_id?: string
           token_hash?: string
           updated_at?: string
@@ -2844,6 +2895,21 @@ export type Database = {
       }
     }
     Functions: {
+      activate_sensitive_share_with_outbox: {
+        Args: {
+          p_commitment_environment: string
+          p_correlation_id: string
+          p_draft_id: string
+          p_grant_commitment: string
+          p_institution_commitment: string
+          p_institution_commitment_key_version: number
+          p_student_commitment: string
+          p_student_commitment_key_version: number
+          p_token_hash: string
+          p_trace_id: string
+        }
+        Returns: Json
+      }
       approve_grade_submission: {
         Args: { p_grade_submission_id: string; p_idempotency_key: string }
         Returns: Json
@@ -2881,12 +2947,19 @@ export type Database = {
           term_name: string
         }[]
       }
-      publish_grade_submission: {
+      publish_grade_submission_with_anchor: {
         Args: {
+          p_commitment_environment: string
           p_content_commitment: string
+          p_correlation_id: string
           p_grade_submission_id: string
           p_idempotency_key: string
+          p_institution_commitment: string
+          p_institution_commitment_key_version: number
           p_salt_reference: string
+          p_student_commitment: string
+          p_student_commitment_key_version: number
+          p_trace_id: string
         }
         Returns: Json
       }
@@ -2899,6 +2972,15 @@ export type Database = {
           p_grades: Json
           p_idempotency_key: string
           p_section_id: string
+        }
+        Returns: Json
+      }
+      revoke_sensitive_share_with_outbox: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_share_grant_id: string
+          p_trace_id: string
         }
         Returns: Json
       }

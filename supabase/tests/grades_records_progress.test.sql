@@ -193,11 +193,18 @@ select ok(
 
 select ok(
   (
-    public.publish_grade_submission(
+    public.publish_grade_submission_with_anchor(
       '71000000-0000-4000-8000-000000000201',
       decode(repeat('cd', 32), 'hex'),
       'synthetic:m4:first-publication',
-      '91000000-0000-4000-8000-000000000005'
+      '91000000-0000-4000-8000-000000000005',
+      'test',
+      decode(repeat('a1', 32), 'hex'),
+      1,
+      decode(repeat('b1', 32), 'hex'),
+      1,
+      '92000000-0000-4000-8000-000000000001',
+      '92000000-0000-4000-8000-000000000002'
     ) ->> 'success'
   )::boolean,
   'the registrar publishes an approved grade'
@@ -205,11 +212,18 @@ select ok(
 
 select ok(
   (
-    public.publish_grade_submission(
+    public.publish_grade_submission_with_anchor(
       '71000000-0000-4000-8000-000000000201',
       decode(repeat('cd', 32), 'hex'),
       'synthetic:m4:first-publication',
-      '91000000-0000-4000-8000-000000000005'
+      '91000000-0000-4000-8000-000000000005',
+      'test',
+      decode(repeat('a1', 32), 'hex'),
+      1,
+      decode(repeat('b1', 32), 'hex'),
+      1,
+      '92000000-0000-4000-8000-000000000001',
+      '92000000-0000-4000-8000-000000000002'
     ) ->> 'idempotentReplay'
   )::boolean,
   'publishing the same request is idempotent'
@@ -315,7 +329,7 @@ select ok(
 
 select ok(
   (
-    public.publish_grade_submission(
+    public.publish_grade_submission_with_anchor(
       (
         select id
         from public.grade_submissions
@@ -324,7 +338,14 @@ select ok(
       ),
       decode(repeat('ef', 32), 'hex'),
       'synthetic:m4:corrected-publication',
-      '91000000-0000-4000-8000-000000000010'
+      '91000000-0000-4000-8000-000000000010',
+      'test',
+      decode(repeat('a1', 32), 'hex'),
+      1,
+      decode(repeat('b1', 32), 'hex'),
+      1,
+      '92000000-0000-4000-8000-000000000003',
+      '92000000-0000-4000-8000-000000000004'
     ) ->> 'success'
   )::boolean,
   'publishing a correction creates a new official version'

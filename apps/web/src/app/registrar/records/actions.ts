@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { getAuthenticatedUser } from "@/lib/auth";
+import { createAnchoringCommitmentIdentity } from "@/lib/integrations/anchoring-commitments";
 import { logEvent } from "@/lib/logging";
 import { getRecordCommitmentPreview } from "@/lib/repositories/grades";
 import { assertSameOrigin } from "@/lib/security/origin";
@@ -44,7 +45,7 @@ interface RegistrarGradeMutationClient {
   rpc(
     functionName:
       | "approve_grade_submission"
-      | "publish_grade_submission"
+      | "publish_grade_submission_with_anchor"
       | "start_grade_correction",
     parameters: Readonly<Record<string, unknown>>,
   ): Promise<{
@@ -124,14 +125,29 @@ export const publishGradeSubmission = async (
       payload: preview.payload,
     });
     const saltReference = `private-synthetic:${salt}`;
+    const identity = createAnchoringCommitmentIdentity({
+      institutionId: preview.institutionId,
+      studentOpaqueId: preview.studentId,
+    });
     const client =
       (await createClient()) as unknown as RegistrarGradeMutationClient;
-    const { data, error } = await client.rpc("publish_grade_submission", {
-      p_grade_submission_id: value.gradeSubmissionId,
-      p_content_commitment: `\\x${commitment.slice(2)}`,
-      p_salt_reference: saltReference,
-      p_idempotency_key: value.idempotencyKey,
-    });
+    const { data, error } = await client.rpc(
+      "publish_grade_submission_with_anchor",
+      {
+        p_commitment_environment: identity.commitmentEnvironment,
+        p_content_commitment: `\\x${commitment.slice(2)}`,
+        p_correlation_id: randomUUID(),
+        p_grade_submission_id: value.gradeSubmissionId,
+        p_idempotency_key: value.idempotencyKey,
+        p_institution_commitment: `\\x${identity.institutionCommitment.slice(2)}`,
+        p_institution_commitment_key_version:
+          identity.institutionCommitmentKeyVersion,
+        p_salt_reference: saltReference,
+        p_student_commitment: `\\x${identity.studentCommitment.slice(2)}`,
+        p_student_commitment_key_version: identity.studentCommitmentKeyVersion,
+        p_trace_id: randomUUID(),
+      },
+    );
 
     if (error) {
       logEvent("warn", "grade_publication_failed", {
