@@ -1,6 +1,6 @@
 # Milestone 7 verification
 
-Status: in progress on `codex/milestone-7-submission-readiness`.
+Status: branch verification complete; hosted pull-request CI pending.
 
 ## Read-only inventory
 
@@ -37,10 +37,33 @@ or export record content.
 
 ## Branch verification
 
-The focused Milestone 7 script tests, web lint, web type-check, 173 web Vitest
-tests, and 12 web script tests pass. Full repository, database, contract, and
-browser totals will be recorded here after the final branch verification and
-hosted CI run.
+The final branch verification completed with:
+
+- workspace lint and type-check passed;
+- 55 domain tests passed;
+- 173 web Vitest tests passed;
+- 12 web script tests passed, including 4 Milestone 7 readiness tests;
+- Next.js production build passed;
+- clean local Supabase reset applied all 40 migrations;
+- 413 pgTAP tests passed across 13 files;
+- 3 database concurrency checks passed;
+- `forge fmt --check` passed in the CI-matched Foundry v1.7.1 image;
+- 29 Forge tests passed across 4 suites with 0 failures and 0 skips, including
+  256-run fuzz cases and the 128,000-call invariant;
+- 17 Playwright tests passed with 9 intentional project-specific skips after a
+  clean local reset;
+- LF-normalized full-repository Prettier check passed;
+- contract privacy scan passed across 4 source files;
+- bytecode fingerprints matched all 3 deployment contracts;
+- secret scan passed across 440 repository files; and
+- `git diff --check` passed.
+
+The browser run used process-only values from `supabase status` for
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and
+`SUPABASE_SERVICE_ROLE_KEY`. No key was printed or written, and no environment
+file changed. Running the same browser paths against the configured hosted
+project fails closed because the hosted project is ten migrations behind; that
+expected hosted failure is not counted as local browser success.
 
 The configured high-severity dependency threshold passes. A full production
 audit reports two moderate optional/transitive advisories in `bn.js` and
@@ -57,5 +80,5 @@ deployment blocker.
 
 No deployment, provisioning, signing, key retrieval or rotation, funding, Safe
 action, hosted Supabase mutation, ENS issuance, World app review submission,
-event submission, merge, or onchain transaction occurred during this
-inventory.
+event submission, or onchain transaction occurred during this inventory and
+verification.
