@@ -55,6 +55,11 @@ export {
   type WorldVerificationSignal,
 } from "./partners";
 export {
+  publicVerifierRequestSchema,
+  publicVerifierResultSchema,
+  type PublicVerifierResult,
+} from "./public-verifier";
+export {
   academicRecordAnchorRequestedV1Schema,
   outboxEventSchema,
   outboxEventTypeSchema,

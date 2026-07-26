@@ -1815,6 +1815,7 @@ export type Database = {
           commitment_environment: string | null
           created_at: string
           created_by: string
+          disclosure_payload: Json
           expires_at: string
           grant_commitment: string
           id: string
@@ -1839,6 +1840,7 @@ export type Database = {
           commitment_environment?: string | null
           created_at?: string
           created_by: string
+          disclosure_payload?: Json
           expires_at: string
           grant_commitment: string
           id?: string
@@ -1863,6 +1865,7 @@ export type Database = {
           commitment_environment?: string | null
           created_at?: string
           created_by?: string
+          disclosure_payload?: Json
           expires_at?: string
           grant_commitment?: string
           id?: string
@@ -3010,6 +3013,13 @@ export type Database = {
         Returns: Json
       }
       get_m6_outbox_metrics: { Args: never; Returns: Json }
+      verify_record_share: {
+        Args: {
+          p_request_fingerprint_hash: string
+          p_token_hash: string
+        }
+        Returns: Json
+      }
       get_registration_catalog: {
         Args: { p_term_id?: string }
         Returns: {

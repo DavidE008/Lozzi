@@ -112,6 +112,29 @@ export type RegistryReconciliation = Readonly<{
   transactionHash: Hash;
 }>;
 
+export type RegistryShareVerification = Readonly<{
+  expiresAt: string;
+  status: "chain-confirmed";
+}>;
+
+const registryShareVerificationInputSchema = z
+  .object({
+    expiresAt: z.iso.datetime({ offset: true }),
+    grantCommitment: bytes32Schema,
+    institutionCommitment: bytes32Schema,
+    recordCommitment: bytes32Schema,
+    studentCommitment: bytes32Schema,
+  })
+  .strict();
+
+const shareGrantReadbackSchema = z.tuple([
+  z.boolean(),
+  bytes32Schema,
+  bytes32Schema,
+  z.bigint().nonnegative(),
+  z.boolean(),
+]);
+
 type RegistryReceipt = Readonly<{
   blockNumber: bigint;
   logs: readonly unknown[];
@@ -383,6 +406,84 @@ export class WorldChainRegistryAdapter {
       config.institutionRegistryAddress,
     );
     this.relayerAddress = getAddress(config.relayerAddress);
+  }
+
+  async verifyShareGrant(
+    input: z.infer<typeof registryShareVerificationInputSchema>,
+  ): Promise<RegistryShareVerification> {
+    const expected = registryShareVerificationInputSchema.parse(input);
+    await this.validateDeployment();
+
+    const [primaryInstitutionActive, independentInstitutionActive] =
+      await Promise.all([
+        readContract(
+          this.clients.primary,
+          this.institutionRegistryAddress,
+          institutionRegistryAbi,
+          "isInstitutionActive",
+          [expected.institutionCommitment],
+        ),
+        readContract(
+          this.clients.independent,
+          this.institutionRegistryAddress,
+          institutionRegistryAbi,
+          "isInstitutionActive",
+          [expected.institutionCommitment],
+        ),
+      ]);
+    if (
+      primaryInstitutionActive !== true ||
+      independentInstitutionActive !== true
+    ) {
+      throw new PartnerIntegrationError(
+        "authorization",
+        "The registry institution is not independently active.",
+      );
+    }
+
+    const [primaryRaw, independentRaw] = await Promise.all([
+      readContract(
+        this.clients.primary,
+        this.academicRecordRegistryAddress,
+        academicRecordRegistryAbi,
+        "verifyShareGrant",
+        [expected.institutionCommitment, expected.grantCommitment],
+      ),
+      readContract(
+        this.clients.independent,
+        this.academicRecordRegistryAddress,
+        academicRecordRegistryAbi,
+        "verifyShareGrant",
+        [expected.institutionCommitment, expected.grantCommitment],
+      ),
+    ]);
+    const primary = shareGrantReadbackSchema.parse(primaryRaw);
+    const independent = shareGrantReadbackSchema.parse(independentRaw);
+    const expectedExpiry = BigInt(
+      Math.floor(new Date(expected.expiresAt).getTime() / 1_000),
+    );
+    const readbackMatches = (result: typeof primary) =>
+      result[0] === true &&
+      sameHex(result[1], expected.studentCommitment) &&
+      sameHex(result[2], expected.recordCommitment) &&
+      result[3] === expectedExpiry &&
+      result[4] === false;
+
+    if (
+      !readbackMatches(primary) ||
+      !readbackMatches(independent) ||
+      primary.some((value, index) => value !== independent[index])
+    ) {
+      throw new PartnerIntegrationError(
+        "integrity",
+        "Primary and independent RPCs did not confirm the expected share grant.",
+      );
+    }
+
+    return {
+      expiresAt: expected.expiresAt,
+      status: "chain-confirmed",
+    };
   }
 
   async prepare(commandInput: RegistryCommand): Promise<PreparedRegistryTransaction> {

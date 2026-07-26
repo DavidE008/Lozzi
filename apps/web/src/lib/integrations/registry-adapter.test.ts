@@ -295,6 +295,45 @@ describe("World Chain registry adapter", () => {
     );
   });
 
+  it("independently verifies a reconciled share grant without preparing a write", async () => {
+    const { adapter } = adapterFixture();
+    const databaseExpiry = shareExpiresAt.replace("Z", "+00:00");
+
+    await expect(
+      adapter.verifyShareGrant({
+        expiresAt: databaseExpiry,
+        grantCommitment,
+        institutionCommitment,
+        recordCommitment: recordVersionCommitment,
+        studentCommitment,
+      }),
+    ).resolves.toEqual({
+      expiresAt: databaseExpiry,
+      status: "chain-confirmed",
+    });
+  });
+
+  it("rejects an independently inconsistent share grant readback", async () => {
+    const { adapter, independent } = adapterFixture();
+    independent.shareGrant = [
+      true,
+      studentCommitment,
+      recordVersionCommitment,
+      BigInt(Math.floor(new Date(shareExpiresAt).getTime() / 1_000)),
+      true,
+    ];
+
+    await expect(
+      adapter.verifyShareGrant({
+        expiresAt: shareExpiresAt,
+        grantCommitment,
+        institutionCommitment,
+        recordCommitment: recordVersionCommitment,
+        studentCommitment,
+      }),
+    ).rejects.toThrow(/did not confirm the expected share grant/u);
+  });
+
   it("rejects malformed, reverted, or event-mismatched receipts", async () => {
     const malformed = await prepareAnchor();
     await expect(
