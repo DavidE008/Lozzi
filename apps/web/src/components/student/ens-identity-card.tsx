@@ -17,13 +17,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface EnsIdentityCardProps {
   readonly capability: CapabilityState;
   readonly currentName: string | null;
   readonly currentStatus: string | null;
+  readonly embedded?: boolean;
+  readonly onIdentityChange?: (input: {
+    readonly name: string | null;
+    readonly status: string | null;
+  }) => void;
+  readonly onWalletAddressChange?: (address: `0x${string}` | null) => void;
   readonly parentName: string | null;
+  readonly walletLinkAvailable: boolean;
   readonly walletAddress: `0x${string}` | null;
+  readonly worldVerified: boolean;
 }
 
 interface EthereumProvider {
@@ -80,8 +89,13 @@ export function EnsIdentityCard({
   capability,
   currentName,
   currentStatus,
+  embedded = false,
+  onIdentityChange,
+  onWalletAddressChange,
   parentName,
+  walletLinkAvailable,
   walletAddress: initialWalletAddress,
+  worldVerified,
 }: EnsIdentityCardProps) {
   const [label, setLabel] = useState("");
   const [name, setName] = useState(currentName);
@@ -99,6 +113,8 @@ export function EnsIdentityCard({
   const available = capability.status === "available";
   const mockDevelopment = capability.status === "mock-development";
   const revocationPending = identityStatus === "revocation-pending";
+  const failed = identityStatus === "failed";
+  const localPrepared = identityStatus === "prepared-demo";
   const issuancePending = [
     "pending",
     "submitting",
@@ -107,10 +123,13 @@ export function EnsIdentityCard({
   ].includes(identityStatus ?? "");
   const active = Boolean(name) && identityStatus === "active";
   const canChooseAlias =
+    worldVerified &&
     !active &&
     !issuancePending &&
     !revocationPending &&
-    (Boolean(walletAddress) || mockDevelopment);
+    !localPrepared &&
+    Boolean(walletAddress) &&
+    (available || mockDevelopment);
 
   const regenerate = () => {
     setLabel(generateAlias());
@@ -187,6 +206,7 @@ export function EnsIdentityCard({
         "The wallet signature could not be verified.",
       );
       setWalletAddress(verified.address);
+      onWalletAddressChange?.(verified.address);
     } catch (walletError) {
       setError(errorMessage(walletError, "The wallet could not be connected."));
     } finally {
@@ -215,8 +235,13 @@ export function EnsIdentityCard({
         "The wallet link could not be revoked.",
       );
       setWalletAddress(null);
+      onWalletAddressChange?.(null);
       if (revoked.ensClearRequired) {
         setIdentityStatus("revocation-pending");
+        onIdentityChange?.({
+          name,
+          status: "revocation-pending",
+        });
       }
     } catch (revokeError) {
       setError(
@@ -231,9 +256,14 @@ export function EnsIdentityCard({
     setIssuePending(true);
     setError(null);
     if (mockDevelopment) {
-      setName(`${label}.mock.lozzi.test`);
-      setIdentityStatus("active");
+      const preparedName = `${label}.northstar.lozzi.test`;
+      setName(preparedName);
+      setIdentityStatus("prepared-demo");
       setMockUsed(true);
+      onIdentityChange?.({
+        name: preparedName,
+        status: "prepared-demo",
+      });
       setIssuePending(false);
       return;
     }
@@ -258,6 +288,10 @@ export function EnsIdentityCard({
       setName(result.name);
       setIdentityStatus(result.status);
       setTransactionHash(result.transactionHash);
+      onIdentityChange?.({
+        name: result.name,
+        status: result.status,
+      });
     } catch (issueError) {
       setError(errorMessage(issueError, "ENS subname issuance failed."));
     } finally {
@@ -265,24 +299,37 @@ export function EnsIdentityCard({
     }
   };
 
-  const badgeLabel = revocationPending
-    ? "Revocation pending"
-    : issuancePending
-      ? "Confirmation pending"
-      : active
-        ? mockUsed
-          ? "Development mock"
-          : "Active"
-        : available
-          ? walletAddress
-            ? "Ready"
-            : "Wallet required"
-          : mockDevelopment
-            ? "Development mock"
-            : "Not configured";
+  const badgeLabel = localPrepared
+    ? "Prepared locally"
+    : failed
+      ? "Needs attention"
+      : revocationPending
+        ? "Revocation pending"
+        : issuancePending
+          ? "Confirmation pending"
+          : active
+            ? mockUsed
+              ? "Development mock"
+              : "Active"
+            : available
+              ? walletAddress
+                ? "Ready"
+                : "Wallet required"
+              : mockDevelopment
+                ? walletAddress
+                  ? "Ready to preview"
+                  : "Demo available"
+                : worldVerified
+                  ? "Issuance unavailable"
+                  : "Person verification required";
 
   return (
-    <Card className="shadow-none lg:col-span-2">
+    <Card
+      className={cn(
+        "shadow-none lg:col-span-2",
+        embedded && "rounded-none border-0 shadow-none",
+      )}
+    >
       <CardHeader className="flex-row items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <span className="bg-lozzi-navy/5 text-lozzi-navy flex size-10 shrink-0 items-center justify-center rounded-sm">
@@ -290,12 +337,12 @@ export function EnsIdentityCard({
           </span>
           <div>
             <CardTitle className="font-heading text-xl">
-              Academic ENS identity
+              Connect your wallet and review your identity
             </CardTitle>
             <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
-              Publish a pseudonym beneath the institution’s Ethereum Sepolia
-              parent. Academic records and student details are never written to
-              ENS text records.
+              Prove control of a wallet, then choose whether your institution
+              may prepare a readable alias. Academic records and student details
+              stay private and offchain.
             </p>
           </div>
         </div>
@@ -311,112 +358,129 @@ export function EnsIdentityCard({
         </Badge>
       </CardHeader>
       <CardContent className="space-y-5">
-        {!mockDevelopment ? (
-          <div className="border-border space-y-3 border-t pt-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-medium">Verified Sepolia wallet</p>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  A one-time ERC-4361 signature proves wallet control. It is not
-                  a transaction and does not consent to an ENS name.
-                </p>
-              </div>
-              {walletAddress ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <a
-                    href={`https://sepolia.etherscan.io/address/${walletAddress}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-lozzi-navy inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
-                  >
-                    {truncateAddress(walletAddress)}
-                    <ExternalLink aria-hidden="true" className="size-3.5" />
-                  </a>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={copyAddress}
-                    aria-label="Copy verified wallet address"
-                  >
-                    {copied ? (
-                      <Check aria-hidden="true" className="size-3.5" />
-                    ) : (
-                      <Copy aria-hidden="true" className="size-3.5" />
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={revokeWallet}
-                    disabled={revokePending}
-                  >
-                    {revokePending ? (
-                      <LoaderCircle
-                        aria-hidden="true"
-                        className="size-3.5 animate-spin"
-                      />
-                    ) : (
-                      <Unlink aria-hidden="true" className="size-3.5" />
-                    )}
-                    {revokePending ? "Revoking…" : "Revoke link"}
-                  </Button>
-                </div>
-              ) : (
+        <div className="border-border space-y-3 border-t pt-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium">Verified wallet</p>
+              <p className="text-muted-foreground mt-1 max-w-xl text-xs">
+                {!worldVerified
+                  ? "Complete real person verification before linking a wallet."
+                  : !walletLinkAvailable
+                    ? "Wallet verification needs an approved app origin and a Sepolia read connection."
+                    : "A one-time SIWE signature proves wallet control. It is not a transaction and does not consent to an alias."}
+              </p>
+            </div>
+            {walletAddress ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href={`https://sepolia.etherscan.io/address/${walletAddress}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-lozzi-navy inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
+                >
+                  {truncateAddress(walletAddress)}
+                  <ExternalLink aria-hidden="true" className="size-3.5" />
+                </a>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={connectWallet}
-                  disabled={!available || walletPending}
+                  size="sm"
+                  onClick={copyAddress}
+                  aria-label="Copy verified wallet address"
                 >
-                  {walletPending ? (
+                  {copied ? (
+                    <Check aria-hidden="true" className="size-3.5" />
+                  ) : (
+                    <Copy aria-hidden="true" className="size-3.5" />
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={revokeWallet}
+                  disabled={revokePending}
+                >
+                  {revokePending ? (
                     <LoaderCircle
                       aria-hidden="true"
-                      className="size-4 animate-spin"
+                      className="size-3.5 animate-spin"
                     />
                   ) : (
-                    <ShieldCheck aria-hidden="true" className="size-4" />
+                    <Unlink aria-hidden="true" className="size-3.5" />
                   )}
-                  {walletPending ? "Verifying…" : "Connect and verify wallet"}
+                  {revokePending ? "Revoking…" : "Revoke link"}
                 </Button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={connectWallet}
+                disabled={
+                  !worldVerified || !walletLinkAvailable || walletPending
+                }
+              >
+                {walletPending ? (
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="size-4 animate-spin"
+                  />
+                ) : (
+                  <ShieldCheck aria-hidden="true" className="size-4" />
+                )}
+                {walletPending ? "Verifying…" : "Connect and verify wallet"}
+              </Button>
+            )}
           </div>
-        ) : null}
+        </div>
 
-        {name && (active || issuancePending || revocationPending) ? (
+        {name &&
+        (active ||
+          issuancePending ||
+          revocationPending ||
+          failed ||
+          localPrepared) ? (
           <div className="border-border flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">{name}</p>
               <p className="text-muted-foreground mt-1 text-xs">
-                {mockUsed
-                  ? "No ENS name, transaction, or wallet resolution was created."
+                {localPrepared || mockUsed
+                  ? "Prepared in local demo mode. No ENS name, transaction, or wallet resolution was created."
                   : revocationPending
-                    ? "The wallet link is revoked. The institutional Safe must still clear the public resolver address."
+                    ? "The wallet link is revoked. Institutional approval is still needed to clear the public address."
                     : issuancePending
-                      ? "The request is durable and will be reconciled without sending a duplicate transaction."
-                      : "Resolves to your verified Sepolia wallet."}
+                      ? "Your request is safely recorded and awaiting institutional confirmation."
+                      : failed
+                        ? "The previous request stopped before an identity was confirmed. You can prepare a fresh request below."
+                        : "Issued by your institution and linked to your verified wallet."}
               </p>
             </div>
             {transactionHash ? (
-              <a
-                href={`https://sepolia.etherscan.io/tx/${transactionHash}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-lozzi-navy inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
-              >
-                View transaction
-                <ExternalLink aria-hidden="true" className="size-3.5" />
-              </a>
+              <details className="text-sm">
+                <summary className="text-lozzi-navy cursor-pointer font-medium">
+                  Technical details
+                </summary>
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${transactionHash}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-lozzi-navy mt-2 inline-flex items-center gap-1 underline-offset-4 hover:underline"
+                >
+                  View test-network transaction
+                  <ExternalLink aria-hidden="true" className="size-3.5" />
+                </a>
+              </details>
             ) : null}
           </div>
-        ) : canChooseAlias ? (
+        ) : null}
+
+        {canChooseAlias ? (
           <div className="border-border space-y-4 border-t pt-4">
             <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
               <div className="space-y-2">
                 <label htmlFor="ens-label" className="text-sm font-medium">
-                  Generated public alias
+                  Generated institutional alias
                 </label>
                 <div className="flex items-center">
                   <Input
@@ -430,7 +494,7 @@ export function EnsIdentityCard({
                   <span className="border-input bg-muted text-muted-foreground flex h-9 items-center border border-l-0 px-3 text-xs">
                     .
                     {mockDevelopment
-                      ? "mock.lozzi.test"
+                      ? "northstar.lozzi.test"
                       : (parentName ?? "parent.eth")}
                   </span>
                 </div>
@@ -449,33 +513,39 @@ export function EnsIdentityCard({
               id="ens-alias-explanation"
               className="text-muted-foreground text-xs"
             >
-              Lozzi generates neutral aliases so names, email addresses, and
-              student IDs do not become public blockchain identifiers.
+              Lozzi generates neutral aliases so your name, email address,
+              student number, and academic details never become part of the
+              public identity.
             </p>
-            {!mockDevelopment ? (
-              <label className="border-border flex items-start gap-3 rounded-sm border p-3 text-sm">
-                <input
-                  type="checkbox"
-                  checked={consent}
-                  onChange={(event) => setConsent(event.target.checked)}
-                  disabled={issuePending}
-                  className="mt-0.5 size-4"
-                />
-                <span>
-                  I understand this alias and my verified wallet address will be
-                  public and durable on Sepolia. Lozzi can revoke its current
-                  resolution, but cannot erase blockchain history.
-                </span>
-              </label>
-            ) : null}
+            <label className="border-border flex items-start gap-3 rounded-sm border p-3 text-sm">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(event) => setConsent(event.target.checked)}
+                disabled={issuePending}
+                className="mt-0.5 size-4"
+              />
+              <span>
+                {mockDevelopment ? (
+                  <>
+                    I consent to prepare this local identity preview. I
+                    understand that no public name or transaction will be
+                    created.
+                  </>
+                ) : (
+                  <>
+                    I understand this alias and my verified wallet address will
+                    be public and durable on the Sepolia test network. Northstar
+                    can revoke its current link, but cannot erase public
+                    history.
+                  </>
+                )}
+              </span>
+            </label>
             <Button
               type="button"
               onClick={issue}
-              disabled={
-                !label ||
-                issuePending ||
-                (!mockDevelopment && (!walletAddress || !consent))
-              }
+              disabled={!label || issuePending || !walletAddress || !consent}
               className="sm:min-w-44"
             >
               {issuePending ? (
@@ -487,9 +557,9 @@ export function EnsIdentityCard({
                   Submitting…
                 </>
               ) : mockDevelopment ? (
-                "Create mock name"
+                "Prepare demo request"
               ) : (
-                "Publish public alias"
+                "Request institutional identity"
               )}
             </Button>
           </div>

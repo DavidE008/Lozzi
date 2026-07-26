@@ -5,6 +5,7 @@ import {
   getEnsConfig,
   getWorldConfig,
   getZeroGStorageConfig,
+  isEnsWalletLinkConfigured,
   IntegrationConfigurationError,
 } from "./config";
 
@@ -106,6 +107,26 @@ describe("partner server configuration", () => {
       },
     });
     expect(config.safeOwners).toHaveLength(3);
+  });
+
+  it("detects wallet verification independently from ENS issuance", () => {
+    expect(
+      isEnsWalletLinkConfigured({
+        NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+        ENS_SEPOLIA_READ_RPC_URL: "https://read.example",
+      }),
+    ).toBe(true);
+    expect(
+      isEnsWalletLinkConfigured({
+        NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      }),
+    ).toBe(false);
+    expect(
+      isEnsWalletLinkConfigured({
+        NEXT_PUBLIC_APP_URL: "http://remote.example",
+        ENS_SEPOLIA_READ_RPC_URL: "https://read.example",
+      }),
+    ).toBe(false);
   });
 
   it("requires an exact 32-byte key-wrapping key", () => {

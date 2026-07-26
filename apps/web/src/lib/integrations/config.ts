@@ -280,6 +280,14 @@ export const getEnsWalletLinkConfig = (
     readRpcUrl: source.ENS_SEPOLIA_READ_RPC_URL,
   });
 
+export const isEnsWalletLinkConfigured = (
+  source: Readonly<Record<string, string | undefined>> = process.env,
+): boolean =>
+  ensWalletLinkConfigSchema.safeParse({
+    appUrl: source.NEXT_PUBLIC_APP_URL,
+    readRpcUrl: source.ENS_SEPOLIA_READ_RPC_URL,
+  }).success;
+
 export const getZeroGStorageConfig = (
   source: Readonly<Record<string, string | undefined>> = process.env,
 ): ZeroGStorageConfig =>

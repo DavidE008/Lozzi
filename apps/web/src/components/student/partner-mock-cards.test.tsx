@@ -37,30 +37,34 @@ describe("development-only partner mock cards", () => {
     ).toBeDisabled();
   });
 
-  it("creates a clearly non-ENS mock name without a wallet", () => {
+  it("prepares a clearly local alias preview after consent", () => {
     render(
       <EnsIdentityCard
         capability={mockCapability("ens", "ENS subnames")}
         currentName={null}
         currentStatus={null}
         parentName={null}
-        walletAddress={null}
+        walletAddress={`0x${"11".repeat(20)}`}
+        walletLinkAvailable
+        worldVerified
       />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Generate alias" }));
     const generatedAlias = (
-      screen.getByLabelText("Generated public alias") as HTMLInputElement
+      screen.getByLabelText("Generated institutional alias") as HTMLInputElement
     ).value;
-    fireEvent.click(screen.getByRole("button", { name: "Create mock name" }));
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Prepare demo request" }),
+    );
 
     expect(
-      screen.getByText(`${generatedAlias}.mock.lozzi.test`),
+      screen.getByText(`${generatedAlias}.northstar.lozzi.test`),
     ).toBeInTheDocument();
+    expect(screen.getByText("Prepared locally")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "No ENS name, transaction, or wallet resolution was created.",
-      ),
+      screen.getByText(/No ENS name, transaction, or wallet resolution/u),
     ).toBeInTheDocument();
   });
 });
