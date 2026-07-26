@@ -67,3 +67,17 @@ authorized for these two registries, accept the outbox operation key as a
 durable idempotency key, enforce per-transaction gas and funding limits, and
 return an immutable provider operation ID. This milestone does not configure,
 fund, or call such a relayer.
+
+## Deployment-preparation artifacts
+
+`deployment/milestone-6/` now contains versioned, offline-only chain,
+deployment-manifest, bytecode-fingerprint, and unsigned-simulation artifacts.
+The templates pin the reviewed source and creation bytecode but deliberately
+leave the chain, addresses, constructor-dependent runtime hash, governance,
+relayer, funding, and approvals unresolved. `pnpm deployment:preflight` rejects
+that state.
+
+Constructor bindings, the Safe/governance and relayer matrices, preflight and
+readback checks, abort rules, and the per-transaction approval format live in
+`docs/deployment/`. They do not add a signer, wallet client, Safe proposal,
+funding path, deployment command, or broadcast capability.
