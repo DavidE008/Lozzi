@@ -13,7 +13,7 @@ expected to fail while any required gate below is blocked.
 | Gate                    | Status  | Verified evidence                                                                | Remaining blocker                                                                        |
 | ----------------------- | ------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Public repository       | Passed  | Public `DavidE008/Lozzi`, MIT, issues enabled, `main` Quality passed             | None                                                                                     |
-| Local verification      | Passed  | 55 domain, 173 web, 12 script, 29 Forge, 413 pgTAP, 17 Playwright, 3 concurrency | Hosted PR CI still pending                                                               |
+| Local verification      | Passed  | 55 domain, 173 web, 23 script, 29 Forge, 413 pgTAP, 17 Playwright, 3 concurrency | Hosted PR CI still pending                                                               |
 | Dependency security     | Blocked | Configured high threshold passes; no high or critical advisories                 | Two moderate optional/transitive advisories need reachability and upgrade disposition    |
 | Hosted Supabase         | Blocked | Healthy `eu-west-2`; 7 users and 3 students match synthetic markers              | Hosted history has 30 of 40 migrations; no hosted mutation is authorized                 |
 | Frontend deployment     | Blocked | Connected Vercel account checked read-only                                       | No project, deployed commit, public demo URL, domain, or rollback evidence               |

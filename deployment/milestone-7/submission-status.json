@@ -68,7 +68,7 @@
   "verification": {
     "domainTests": 55,
     "webVitestTests": 173,
-    "webScriptTests": 12,
+    "webScriptTests": 23,
     "forgeTests": 29,
     "forgeSuites": 4,
     "pgTapTests": 413,
@@ -123,7 +123,7 @@
       "evidence": [
         "55 domain tests",
         "173 web Vitest tests",
-        "12 web script tests",
+        "23 web script tests",
         "29 Forge tests across 4 suites",
         "413 pgTAP tests across 13 files",
         "17 Playwright tests passed with 9 intentional project skips",
@@ -243,7 +243,6 @@
     "no hosted Supabase mutation",
     "no wallet funding",
     "no onchain transaction",
-    "no submission",
-    "no merge"
+    "no submission"
   ]
 }

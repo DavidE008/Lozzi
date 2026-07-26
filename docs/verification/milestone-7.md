@@ -42,7 +42,7 @@ The final branch verification completed with:
 - workspace lint and type-check passed;
 - 55 domain tests passed;
 - 173 web Vitest tests passed;
-- 12 web script tests passed, including 4 Milestone 7 readiness tests;
+- 23 web script tests passed, including 15 Milestone 7 readiness tests;
 - Next.js production build passed;
 - clean local Supabase reset applied all 40 migrations;
 - 413 pgTAP tests passed across 13 files;

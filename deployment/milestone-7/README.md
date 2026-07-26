@@ -18,14 +18,26 @@ pnpm submission:status
 pnpm submission:check
 ```
 
-`submission:status` validates local evidence paths, the pinned Git ancestor,
-the absence of tracked generated or secret-bearing paths, and the internal
-consistency of every status claim. It performs no external call and exits zero
-when the evidence is structurally honest, even when required gates are blocked.
+`submission:status` enforces the checked-in JSON schema at runtime and derives
+whether each gate may pass from its typed evidence. Manual `status` labels
+cannot override failed CI, unresolved dependencies, stale hosted migrations,
+missing World/ENS configuration, invalid addresses, or an incomplete event
+target.
+
+It also validates local evidence paths, requires a clean tracked and untracked
+worktree, rejects secret-like keys and values, and binds the snapshot to a
+reviewed commit. Only the status snapshot itself may change after that commit,
+and live evidence expires after 24 hours. It performs no external call and
+exits zero when the evidence is current and structurally honest, even when
+required gates are blocked.
 
 `submission:check` runs the same validation with `--require-ready`. It exits
 non-zero until every required gate passes. A non-zero result is currently
 expected and must not be bypassed for submission.
+
+`readyForDeployment` is narrower than event submission but still requires
+passed repository, local-verification, dependency-security, and registry
+deployment gates. Registry object fields alone cannot make it true.
 
 Both commands reject deployment, signing, sending, submission, broadcast,
 funding, and provisioning arguments.

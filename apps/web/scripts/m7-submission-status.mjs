@@ -1,6 +1,19 @@
+import { readFileSync } from "node:fs";
+
+import Ajv2020 from "ajv/dist/2020.js";
+import addFormats from "ajv-formats";
+
 const COMMIT = /^[0-9a-f]{40}$/u;
 const HTTPS_URL = /^https:\/\/[^\s]+$/u;
+const ETHEREUM_ADDRESS = /^0x[0-9a-fA-F]{40}$/u;
 const GATE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const PRIVATE_KEY = /\b0x[0-9a-fA-F]{64}\b/u;
+const SIGNATURE = /\b0x[0-9a-fA-F]{128,130}\b/u;
+const TOKEN =
+  /\b(?:github_pat_[A-Za-z0-9_]{20,}|gh[oprsu]_[A-Za-z0-9]{20,}|s[bb]_(?:secret|publishable)_[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9_-]{20,}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/u;
+const ASSIGNED_SECRET =
+  /\b(?:api.?key|bearer|credential|mnemonic|private.?key|raw.?transaction|secret|seed.?phrase|signature)\s*[:=]\s*\S+/iu;
+const PEM_PRIVATE_KEY = /-----BEGIN [A-Z ]*PRIVATE KEY-----/u;
 
 const REQUIRED_GATE_IDS = new Set([
   "public-repository",
@@ -15,6 +28,29 @@ const REQUIRED_GATE_IDS = new Set([
   "event-submission-target",
 ]);
 
+const DEPLOYMENT_GATE_IDS = new Set([
+  "public-repository",
+  "local-verification",
+  "dependency-security",
+  "registry-deployment",
+]);
+
+const MAXIMUM_REVIEW_AGE_MILLISECONDS = 24 * 60 * 60 * 1_000;
+const MAXIMUM_CLOCK_SKEW_MILLISECONDS = 5 * 60 * 1_000;
+
+const schema = JSON.parse(
+  readFileSync(
+    new URL(
+      "../../../deployment/milestone-7/submission-status.schema.json",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
+const ajv = new Ajv2020({ allErrors: true, strict: true });
+addFormats(ajv);
+const validateSchema = ajv.compile(schema);
+
 const isObject = (value) =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -23,6 +59,17 @@ const add = (errors, path, message) => errors.push(`${path}: ${message}`);
 const checkNonEmptyString = (errors, path, value) => {
   if (typeof value !== "string" || value.trim() === "") {
     add(errors, path, "must be a non-empty string");
+    return false;
+  }
+  return true;
+};
+
+const isNonEmptyString = (value) =>
+  typeof value === "string" && value.trim() !== "";
+
+const checkAddress = (errors, path, value) => {
+  if (typeof value !== "string" || !ETHEREUM_ADDRESS.test(value)) {
+    add(errors, path, "must be a 20-byte Ethereum address");
     return false;
   }
   return true;
@@ -42,24 +89,34 @@ const checkStringArray = (errors, path, value, { nonEmpty = false } = {}) => {
   return true;
 };
 
-const rejectSensitiveKeys = (errors, value, path = "$") => {
+const rejectSensitiveMaterial = (errors, value, path = "$") => {
   if (Array.isArray(value)) {
     value.forEach((entry, index) =>
-      rejectSensitiveKeys(errors, entry, `${path}[${index}]`),
+      rejectSensitiveMaterial(errors, entry, `${path}[${index}]`),
     );
+    return;
+  }
+  if (typeof value === "string") {
+    if (
+      [PRIVATE_KEY, SIGNATURE, TOKEN, ASSIGNED_SECRET, PEM_PRIVATE_KEY].some(
+        (pattern) => pattern.test(value),
+      )
+    ) {
+      add(errors, path, "secret or signed material is forbidden");
+    }
     return;
   }
   if (!isObject(value)) return;
 
   for (const [key, entry] of Object.entries(value)) {
     if (
-      /(?:private.?key|mnemonic|seed.?phrase|raw.?transaction|signature|bearer|secret|credential)/iu.test(
+      /(?:api.?key|private.?key|mnemonic|seed.?phrase|raw.?transaction|signature|bearer|secret|credential)/iu.test(
         key,
       )
     ) {
       add(errors, `${path}.${key}`, "secret or signed material is forbidden");
     }
-    rejectSensitiveKeys(errors, entry, `${path}.${key}`);
+    rejectSensitiveMaterial(errors, entry, `${path}.${key}`);
   }
 };
 
@@ -165,14 +222,10 @@ const checkServiceState = (errors, status) => {
   if (!isObject(status.ens)) {
     add(errors, "$.ens", "must be an object");
   } else if (status.ens.status === "provisioned") {
-    for (const key of [
-      "parent",
-      "safeAddress",
-      "registrarAddress",
-      "signerAddress",
-    ]) {
-      checkNonEmptyString(errors, `$.ens.${key}`, status.ens[key]);
+    for (const key of ["safeAddress", "registrarAddress", "signerAddress"]) {
+      checkAddress(errors, `$.ens.${key}`, status.ens[key]);
     }
+    checkNonEmptyString(errors, "$.ens.parent", status.ens.parent);
     if (status.ens.canaryVerified !== true) {
       add(
         errors,
@@ -196,11 +249,7 @@ const checkServiceState = (errors, status) => {
       "institutionRegistryAddress",
       "academicRecordRegistryAddress",
     ]) {
-      checkNonEmptyString(
-        errors,
-        `$.registries.${key}`,
-        status.registries[key],
-      );
+      checkAddress(errors, `$.registries.${key}`, status.registries[key]);
     }
     if (
       status.registries.unsignedSimulationStatus !== "passed" ||
@@ -212,6 +261,137 @@ const checkServiceState = (errors, status) => {
         "deployment claims require passed simulation and approved independent review",
       );
     }
+  }
+
+  if (isObject(status.verification)) {
+    const severityTotal =
+      status.verification.slitherHighFindings +
+      status.verification.slitherMediumFindings +
+      status.verification.slitherLowFindings;
+    if (status.verification.slitherFindingCount !== severityTotal) {
+      add(
+        errors,
+        "$.verification.slitherFindingCount",
+        "must equal the sum of high, medium, and low findings",
+      );
+    }
+    if (
+      status.verification.slitherStatus === "passed" &&
+      status.verification.slitherFindingCount !== 0
+    ) {
+      add(
+        errors,
+        "$.verification.slitherStatus",
+        "cannot pass while findings are recorded",
+      );
+    }
+  }
+};
+
+const localVerificationPassed = (status) => {
+  const verification = status.verification;
+  return (
+    isObject(verification) &&
+    verification.domainTests === 55 &&
+    verification.webVitestTests === 173 &&
+    verification.webScriptTests === 23 &&
+    verification.forgeTests === 29 &&
+    verification.forgeSuites === 4 &&
+    verification.pgTapTests === 413 &&
+    verification.pgTapFiles === 13 &&
+    verification.playwrightPassed === 17 &&
+    verification.playwrightSkipped === 9 &&
+    verification.concurrencyChecks === 3
+  );
+};
+
+const gatePredicate = (id, status) => {
+  switch (id) {
+    case "public-repository":
+      return (
+        status.repository?.url === "https://github.com/DavidE008/Lozzi" &&
+        status.repository?.defaultBranch === "main" &&
+        status.repository?.visibility === "public" &&
+        status.repository?.license === "MIT" &&
+        status.repository?.issuesEnabled === true &&
+        status.repository?.mainQualityStatus === "passed" &&
+        HTTPS_URL.test(status.repository?.mainQualityRun ?? "")
+      );
+    case "local-verification":
+      return localVerificationPassed(status);
+    case "dependency-security":
+      return (
+        status.verification?.dependencyAuditThreshold === "moderate" &&
+        status.verification?.moderateDependencyAdvisories === 0 &&
+        status.verification?.slitherHighFindings === 0
+      );
+    case "hosted-supabase":
+      return (
+        status.supabase?.status === "ACTIVE_HEALTHY" &&
+        status.supabase?.hostedSchemaCurrent === true &&
+        status.supabase?.hostedMigrationCount ===
+          status.supabase?.localMigrationCount &&
+        status.supabase?.authUserCount > 0 &&
+        status.supabase?.studentCount > 0 &&
+        status.supabase?.nonSyntheticAuthUserCount === 0 &&
+        status.supabase?.nonSyntheticStudentCount === 0
+      );
+    case "frontend-deployment":
+      return (
+        status.hosting?.status === "production" &&
+        isNonEmptyString(status.hosting?.projectId) &&
+        HTTPS_URL.test(status.hosting?.productionUrl ?? "") &&
+        COMMIT.test(status.hosting?.deployedCommit ?? "")
+      );
+    case "world-runtime":
+      return (
+        status.world?.productionRegistration === "registered" &&
+        status.world?.stagingRegistration === "registered" &&
+        status.world?.actionRecordCount === 6 &&
+        status.world?.signingKeyAvailableLocally === true
+      );
+    case "world-submission-metadata":
+      return (
+        status.world?.appReviewStatus === "verified" &&
+        status.world?.websiteConfigured === true &&
+        status.world?.storeMediaComplete === true
+      );
+    case "ens-live-integration":
+      return (
+        status.ens?.status === "provisioned" &&
+        isNonEmptyString(status.ens?.parent) &&
+        ETHEREUM_ADDRESS.test(status.ens?.safeAddress ?? "") &&
+        ETHEREUM_ADDRESS.test(status.ens?.registrarAddress ?? "") &&
+        ETHEREUM_ADDRESS.test(status.ens?.signerAddress ?? "") &&
+        status.ens?.canaryVerified === true
+      );
+    case "registry-deployment":
+      return (
+        status.registries?.status === "deployed" &&
+        Number.isSafeInteger(status.registries?.approvedChainId) &&
+        status.registries.approvedChainId > 0 &&
+        ETHEREUM_ADDRESS.test(
+          status.registries?.institutionRegistryAddress ?? "",
+        ) &&
+        ETHEREUM_ADDRESS.test(
+          status.registries?.academicRecordRegistryAddress ?? "",
+        ) &&
+        status.registries?.unsignedSimulationStatus === "passed" &&
+        status.registries?.independentReviewStatus === "approved"
+      );
+    case "event-submission-target": {
+      const reviewedAt = Date.parse(status.reviewedAt ?? "");
+      const deadline = Date.parse(status.target?.deadline ?? "");
+      return (
+        isNonEmptyString(status.target?.event) &&
+        HTTPS_URL.test(status.target?.submissionPortal ?? "") &&
+        Number.isFinite(reviewedAt) &&
+        Number.isFinite(deadline) &&
+        deadline > reviewedAt
+      );
+    }
+    default:
+      return false;
   }
 };
 
@@ -232,6 +412,8 @@ const checkGates = (errors, status) => {
       add(errors, `${path}.id`, "must be a lowercase kebab-case identifier");
     } else if (gateIds.has(gate.id)) {
       add(errors, `${path}.id`, "must be unique");
+    } else if (!REQUIRED_GATE_IDS.has(gate.id)) {
+      add(errors, `${path}.id`, "is not a recognized required gate");
     } else {
       gateIds.add(gate.id);
     }
@@ -262,65 +444,30 @@ const checkGates = (errors, status) => {
       .filter((gate) => isObject(gate))
       .map((gate) => [gate.id, gate]),
   );
-  if (
-    status.hosting?.status !== "production" &&
-    byId.get("frontend-deployment")?.status === "passed"
-  ) {
-    add(
-      errors,
-      "$.requiredGates.frontend-deployment",
-      "cannot pass without production hosting",
-    );
-  }
-  if (
-    status.supabase?.hostedSchemaCurrent !== true &&
-    byId.get("hosted-supabase")?.status === "passed"
-  ) {
-    add(
-      errors,
-      "$.requiredGates.hosted-supabase",
-      "cannot pass while the hosted schema is behind",
-    );
-  }
-  if (
-    status.ens?.status !== "provisioned" &&
-    byId.get("ens-live-integration")?.status === "passed"
-  ) {
-    add(
-      errors,
-      "$.requiredGates.ens-live-integration",
-      "cannot pass without provisioned ENS infrastructure",
-    );
-  }
-  if (
-    status.registries?.status !== "deployed" &&
-    byId.get("registry-deployment")?.status === "passed"
-  ) {
-    add(
-      errors,
-      "$.requiredGates.registry-deployment",
-      "cannot pass without deployed registries",
-    );
-  }
-  if (
-    [
-      status.target?.event,
-      status.target?.submissionPortal,
-      status.target?.deadline,
-    ].some((value) => value === null) &&
-    byId.get("event-submission-target")?.status === "passed"
-  ) {
-    add(
-      errors,
-      "$.requiredGates.event-submission-target",
-      "cannot pass while event fields are unresolved",
-    );
+  for (const id of REQUIRED_GATE_IDS) {
+    if (byId.get(id)?.status === "passed" && !gatePredicate(id, status)) {
+      add(
+        errors,
+        `$.requiredGates.${id}`,
+        "cannot pass because its typed readiness predicate is false",
+      );
+    }
   }
 };
 
 export const validateSubmissionStatus = (status) => {
   const errors = [];
   if (!isObject(status)) return ["$: must be an object"];
+
+  if (!validateSchema(status)) {
+    for (const error of validateSchema.errors ?? []) {
+      add(
+        errors,
+        error.instancePath ? `$${error.instancePath}` : "$",
+        error.message ?? "does not match the submission status schema",
+      );
+    }
+  }
 
   if (status.schemaVersion !== "lozzi.m7.submission-status.v1") {
     add(errors, "$.schemaVersion", "must equal lozzi.m7.submission-status.v1");
@@ -381,7 +528,7 @@ export const validateSubmissionStatus = (status) => {
   checkStringArray(errors, "$.explicitNonActions", status.explicitNonActions, {
     nonEmpty: true,
   });
-  rejectSensitiveKeys(errors, status);
+  rejectSensitiveMaterial(errors, status);
   return [...new Set(errors)];
 };
 
@@ -392,16 +539,21 @@ export const summarizeSubmissionStatus = (status) => {
     : [];
   const blockedGates = gates.filter((gate) => gate.status === "blocked");
   const passedGates = gates.filter((gate) => gate.status === "passed");
+  const byId = new Map(
+    gates.filter((gate) => isObject(gate)).map((gate) => [gate.id, gate]),
+  );
+  const allGatesPassed = [...REQUIRED_GATE_IDS].every(
+    (id) => byId.get(id)?.status === "passed" && gatePredicate(id, status),
+  );
+  const deploymentGatesPassed = [...DEPLOYMENT_GATE_IDS].every(
+    (id) => byId.get(id)?.status === "passed" && gatePredicate(id, status),
+  );
   const readyForSubmission =
     validationErrors.length === 0 &&
     blockedGates.length === 0 &&
-    status.hosting?.status === "production" &&
-    status.supabase?.hostedSchemaCurrent === true;
+    allGatesPassed;
   const readyForDeployment =
-    validationErrors.length === 0 &&
-    status.registries?.status === "deployed" &&
-    status.registries?.unsignedSimulationStatus === "passed" &&
-    status.registries?.independentReviewStatus === "approved";
+    validationErrors.length === 0 && deploymentGatesPassed;
 
   return {
     basisCommit: status?.basisCommit ?? null,
@@ -418,4 +570,37 @@ export const summarizeSubmissionStatus = (status) => {
     })),
     validationErrors,
   };
+};
+
+export const validateReviewBinding = ({
+  changedPaths,
+  reviewedAt,
+  statusPath,
+  worktreeStatus,
+  now = Date.now(),
+}) => {
+  const errors = [];
+  const reviewedAtMilliseconds = Date.parse(reviewedAt ?? "");
+  if (Number.isFinite(reviewedAtMilliseconds)) {
+    if (reviewedAtMilliseconds > now + MAXIMUM_CLOCK_SKEW_MILLISECONDS) {
+      errors.push("$.reviewedAt: cannot be materially in the future");
+    } else if (now - reviewedAtMilliseconds > MAXIMUM_REVIEW_AGE_MILLISECONDS) {
+      errors.push(
+        "$.reviewedAt: live readiness evidence is older than 24 hours",
+      );
+    }
+  }
+
+  const unreviewedPaths = changedPaths.filter((file) => file !== statusPath);
+  if (unreviewedPaths.length > 0) {
+    errors.push(
+      `$.basisCommit: unreviewed paths changed after the reviewed commit: ${unreviewedPaths.join(", ")}`,
+    );
+  }
+  if (worktreeStatus.trim() !== "") {
+    errors.push(
+      "working tree: tracked or untracked changes are outside the reviewed evidence",
+    );
+  }
+  return errors;
 };

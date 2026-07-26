@@ -326,7 +326,7 @@
           "const": 173
         },
         "webScriptTests": {
-          "const": 12
+          "const": 23
         },
         "forgeTests": {
           "const": 29
@@ -350,28 +350,33 @@
           "const": 3
         },
         "dependencyAuditThreshold": {
-          "const": "high"
+          "enum": ["high", "moderate"]
         },
         "moderateDependencyAdvisories": {
-          "const": 2
+          "type": "integer",
+          "minimum": 0
         },
         "slitherVersion": {
           "const": "0.11.5"
         },
         "slitherStatus": {
-          "const": "findings"
+          "enum": ["findings", "passed"]
         },
         "slitherFindingCount": {
-          "const": 18
+          "type": "integer",
+          "minimum": 0
         },
         "slitherHighFindings": {
-          "const": 0
+          "type": "integer",
+          "minimum": 0
         },
         "slitherMediumFindings": {
-          "const": 7
+          "type": "integer",
+          "minimum": 0
         },
         "slitherLowFindings": {
-          "const": 11
+          "type": "integer",
+          "minimum": 0
         }
       }
     },

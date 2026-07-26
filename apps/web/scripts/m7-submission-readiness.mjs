@@ -4,6 +4,7 @@ import path from "node:path";
 
 import {
   summarizeSubmissionStatus,
+  validateReviewBinding,
   validateSubmissionStatus,
 } from "./m7-submission-status.mjs";
 
@@ -46,6 +47,7 @@ for (const evidencePath of status.evidencePaths ?? []) {
   }
 }
 
+let changedSinceReview = [];
 if (/^[0-9a-f]{40}$/u.test(status.basisCommit ?? "")) {
   try {
     execFileSync(
@@ -59,7 +61,37 @@ if (/^[0-9a-f]{40}$/u.test(status.basisCommit ?? "")) {
   } catch {
     errors.push("$.basisCommit: must be an ancestor of the checked-out commit");
   }
+
+  changedSinceReview = execFileSync(
+    "git",
+    ["diff", "--name-only", `${status.basisCommit}..HEAD`],
+    {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  )
+    .split(/\r?\n/u)
+    .filter(Boolean);
 }
+
+const worktreeStatus = execFileSync(
+  "git",
+  ["status", "--porcelain=v1", "--untracked-files=all"],
+  {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  },
+).trim();
+errors.push(
+  ...validateReviewBinding({
+    changedPaths: changedSinceReview,
+    reviewedAt: status.reviewedAt,
+    statusPath,
+    worktreeStatus,
+  }),
+);
 
 const trackedFiles = execFileSync("git", ["ls-files"], {
   cwd: root,
