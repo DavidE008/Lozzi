@@ -12,10 +12,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface WorldVerificationCardProps {
   readonly capability: CapabilityState;
   readonly credentialType: string | null;
+  readonly embedded?: boolean;
+  readonly onVerificationChange?: (input: {
+    readonly mode: "demo" | "live";
+    readonly verifiedAt: string;
+  }) => void;
   readonly verifiedAt: string | null;
 }
 
@@ -33,6 +39,8 @@ const statusLabel = (
 export function WorldVerificationCard({
   capability,
   credentialType,
+  embedded = false,
+  onVerificationChange,
   verifiedAt,
 }: WorldVerificationCardProps) {
   const [request, setRequest] = useState<WorldIdFlowRequest | null>(null);
@@ -48,8 +56,13 @@ export function WorldVerificationCard({
     setPending(true);
     setError(null);
     if (mockDevelopment) {
+      const completedAt = new Date().toISOString();
       setMockUsed(true);
-      setSuccessAt(new Date().toISOString());
+      setSuccessAt(completedAt);
+      onVerificationChange?.({
+        mode: "demo",
+        verifiedAt: completedAt,
+      });
       setPending(false);
       return;
     }
@@ -90,7 +103,12 @@ export function WorldVerificationCard({
       if (!response.ok) {
         throw new Error(payload.error ?? "World verification failed.");
       }
-      setSuccessAt(payload.verifiedAt ?? new Date().toISOString());
+      const completedAt = payload.verifiedAt ?? new Date().toISOString();
+      setSuccessAt(completedAt);
+      onVerificationChange?.({
+        mode: "live",
+        verifiedAt: completedAt,
+      });
     } catch (verificationError) {
       setError(
         verificationError instanceof Error
@@ -104,7 +122,12 @@ export function WorldVerificationCard({
   };
 
   return (
-    <Card className="shadow-none lg:col-span-2">
+    <Card
+      className={cn(
+        "shadow-none lg:col-span-2",
+        embedded && "rounded-none border-0 border-b shadow-none",
+      )}
+    >
       <CardHeader className="flex-row items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <span className="bg-lozzi-navy/5 text-lozzi-navy flex size-10 shrink-0 items-center justify-center rounded-sm">
@@ -112,12 +135,13 @@ export function WorldVerificationCard({
           </span>
           <div>
             <CardTitle className="font-heading text-xl">
-              World verification
+              Verify person
             </CardTitle>
             <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
-              Prove that one unique person controls this account. World returns
-              a privacy-preserving proof; Lozzi stores only the scoped nullifier
-              and verification metadata.
+              World confirms the configured personhood claim for this account.
+              It does not prove enrollment, academic standing, legal identity,
+              or institutional affiliation. Raw proof material is not kept;
+              Lozzi stores only the scoped nullifier and verification time.
             </p>
           </div>
         </div>

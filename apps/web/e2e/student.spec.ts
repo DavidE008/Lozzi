@@ -71,7 +71,9 @@ test("student signs in, sees hosted rows, navigates, and signs out", async ({
     page.waitForURL(/\/student\/settings$/u),
     page.getByRole("link", { name: "Settings" }).click(),
   ]);
-  await expect(page.getByText("World verification").last()).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Identity & privacy" }),
+  ).toBeVisible();
   await expect(page.getByText("Not configured").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Sign out" }).click();

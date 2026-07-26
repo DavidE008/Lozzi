@@ -10,6 +10,9 @@ const privateKeySchema = z
 const addressSchema = z
   .string()
   .regex(/^0x[0-9a-fA-F]{40}$/u, "Expected an Ethereum address");
+const bytes32Schema = z
+  .string()
+  .regex(/^0x[0-9a-fA-F]{64}$/u, "Expected a 32-byte hexadecimal value");
 
 const worldConfigSchema = z
   .object({
@@ -20,12 +23,128 @@ const worldConfigSchema = z
   })
   .strict();
 
-const ensConfigSchema = z
+const appUrlSchema = z
+  .url()
+  .refine((value) => {
+    const url = new URL(value);
+    return (
+      url.username === "" &&
+      url.password === "" &&
+      url.hash === "" &&
+      (url.protocol === "https:" ||
+        (url.protocol === "http:" &&
+          (url.hostname === "localhost" || url.hostname === "127.0.0.1")))
+    );
+  }, "Expected HTTPS, or HTTP only for local development");
+
+const ensConfigInputSchema = z
   .object({
+    confirmations: z.coerce.number().int().min(1).max(64).default(3),
+    deploymentBlock: z.coerce.bigint().min(BigInt(0)),
+    maxFeeWei: z.coerce.bigint().positive().max(BigInt("100000000000000000")),
+    maxGas: z.coerce.bigint().positive().max(BigInt(3_000_000)),
+    nodeEnvironment: z
+      .enum(["development", "test", "production"])
+      .default("development"),
     parentName: z.string().min(1).max(255),
     registrarAddress: addressSchema,
-    rpcUrl: z.url(),
-    signerPrivateKey: privateKeySchema,
+    registrarCodeHash: bytes32Schema,
+    readRpcUrl: z.url(),
+    safeAddress: addressSchema,
+    safeOwners: z.array(addressSchema).min(1).max(10),
+    safeThreshold: z.coerce.number().int().min(1).max(10),
+    signerAddress: addressSchema.optional(),
+    signerPrivateKey: privateKeySchema.optional(),
+    signerProvider: z.enum(["json-rpc", "local-private-key"]),
+    signerRpcUrl: z.url().optional(),
+    writeRpcUrl: z.url(),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (
+      value.nodeEnvironment === "production" &&
+      value.signerProvider === "local-private-key"
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Raw ENS private keys are forbidden in production",
+        path: ["signerProvider"],
+      });
+    }
+    if (
+      value.signerProvider === "local-private-key" &&
+      !value.signerPrivateKey
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "The local ENS signer requires a private key",
+        path: ["signerPrivateKey"],
+      });
+    }
+    if (
+      value.signerProvider === "json-rpc" &&
+      (!value.signerAddress || !value.signerRpcUrl)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "The managed JSON-RPC signer requires an address and RPC URL",
+        path: ["signerProvider"],
+      });
+    }
+    if (
+      value.nodeEnvironment === "production" &&
+      value.readRpcUrl === value.writeRpcUrl
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Production ENS confirmation requires an independent read RPC",
+        path: ["readRpcUrl"],
+      });
+    }
+    const uniqueSafeOwners = new Set(
+      value.safeOwners.map((address) => address.toLowerCase()),
+    );
+    if (
+      uniqueSafeOwners.size !== value.safeOwners.length ||
+      value.safeThreshold > value.safeOwners.length
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Safe owners must be unique and satisfy the threshold",
+        path: ["safeOwners"],
+      });
+    }
+  })
+  .transform((value) => ({
+    confirmations: value.confirmations,
+    deploymentBlock: value.deploymentBlock,
+    maxFeeWei: value.maxFeeWei,
+    maxGas: value.maxGas,
+    parentName: value.parentName,
+    readRpcUrl: value.readRpcUrl,
+    registrarAddress: value.registrarAddress,
+    registrarCodeHash: value.registrarCodeHash,
+    safeAddress: value.safeAddress,
+    safeOwners: value.safeOwners,
+    safeThreshold: value.safeThreshold,
+    signer:
+      value.signerProvider === "local-private-key"
+        ? ({
+            privateKey: value.signerPrivateKey!,
+            type: "local-private-key",
+          } as const)
+        : ({
+            address: value.signerAddress!,
+            rpcUrl: value.signerRpcUrl!,
+            type: "json-rpc",
+          } as const),
+    writeRpcUrl: value.writeRpcUrl,
+  }));
+
+const ensWalletLinkConfigSchema = z
+  .object({
+    appUrl: appUrlSchema,
+    readRpcUrl: z.url(),
   })
   .strict();
 
@@ -62,6 +181,12 @@ const serviceDatabaseConfigSchema = z
   })
   .strict();
 
+const ensReconciliationConfigSchema = z
+  .object({
+    secret: z.string().min(32),
+  })
+  .strict();
+
 const agentKitConfigSchema = z
   .object({
     agentAddress: addressSchema,
@@ -82,7 +207,11 @@ const agentKitConfigSchema = z
   .strict();
 
 export type WorldConfig = z.infer<typeof worldConfigSchema>;
-export type EnsConfig = z.infer<typeof ensConfigSchema>;
+export type EnsConfig = z.infer<typeof ensConfigInputSchema>;
+export type EnsWalletLinkConfig = z.infer<typeof ensWalletLinkConfigSchema>;
+export type EnsReconciliationConfig = z.infer<
+  typeof ensReconciliationConfigSchema
+>;
 export type ZeroGStorageConfig = z.infer<typeof zeroGStorageConfigSchema>;
 export type ZeroGComputeConfig = z.infer<typeof zeroGComputeConfigSchema>;
 export type ServiceDatabaseConfig = z.infer<typeof serviceDatabaseConfigSchema>;
@@ -120,12 +249,44 @@ export const getWorldConfig = (
 export const getEnsConfig = (
   source: Readonly<Record<string, string | undefined>> = process.env,
 ): EnsConfig =>
-  parseRequired("ENS", ensConfigSchema, {
+  parseRequired("ENS", ensConfigInputSchema, {
+    confirmations: source.ENS_CONFIRMATIONS ?? "3",
+    deploymentBlock: source.ENS_REGISTRAR_DEPLOYMENT_BLOCK,
+    maxFeeWei: source.ENS_MAX_FEE_WEI ?? "10000000000000000",
+    maxGas: source.ENS_MAX_GAS ?? "800000",
+    nodeEnvironment: source.NODE_ENV ?? "development",
     parentName: source.NEXT_PUBLIC_ENS_PARENT,
     registrarAddress: source.ENS_REGISTRAR_ADDRESS,
-    rpcUrl: source.ENS_SEPOLIA_RPC_URL,
+    registrarCodeHash: source.ENS_REGISTRAR_CODE_HASH,
+    readRpcUrl: source.ENS_SEPOLIA_READ_RPC_URL,
+    safeAddress: source.ENS_PARENT_SAFE_ADDRESS,
+    safeOwners:
+      source.ENS_PARENT_SAFE_OWNERS?.split(",")
+        .map((address) => address.trim())
+        .filter(Boolean) ?? [],
+    safeThreshold: source.ENS_PARENT_SAFE_THRESHOLD ?? "2",
+    signerAddress: source.ENS_SIGNER_ADDRESS,
     signerPrivateKey: source.ENS_SIGNER_PRIVATE_KEY,
+    signerProvider: source.ENS_SIGNER_PROVIDER,
+    signerRpcUrl: source.ENS_SIGNER_RPC_URL,
+    writeRpcUrl: source.ENS_SEPOLIA_WRITE_RPC_URL,
   });
+
+export const getEnsWalletLinkConfig = (
+  source: Readonly<Record<string, string | undefined>> = process.env,
+): EnsWalletLinkConfig =>
+  parseRequired("ENS wallet linking", ensWalletLinkConfigSchema, {
+    appUrl: source.NEXT_PUBLIC_APP_URL,
+    readRpcUrl: source.ENS_SEPOLIA_READ_RPC_URL,
+  });
+
+export const isEnsWalletLinkConfigured = (
+  source: Readonly<Record<string, string | undefined>> = process.env,
+): boolean =>
+  ensWalletLinkConfigSchema.safeParse({
+    appUrl: source.NEXT_PUBLIC_APP_URL,
+    readRpcUrl: source.ENS_SEPOLIA_READ_RPC_URL,
+  }).success;
 
 export const getZeroGStorageConfig = (
   source: Readonly<Record<string, string | undefined>> = process.env,
@@ -152,6 +313,13 @@ export const getServiceDatabaseConfig = (
   parseRequired("Supabase server writes", serviceDatabaseConfigSchema, {
     secretKey: source.SUPABASE_SERVICE_ROLE_KEY,
     url: source.NEXT_PUBLIC_SUPABASE_URL,
+  });
+
+export const getEnsReconciliationConfig = (
+  source: Readonly<Record<string, string | undefined>> = process.env,
+): EnsReconciliationConfig =>
+  parseRequired("ENS reconciliation", ensReconciliationConfigSchema, {
+    secret: source.ENS_RECONCILIATION_SECRET,
   });
 
 export const getAgentKitConfig = (

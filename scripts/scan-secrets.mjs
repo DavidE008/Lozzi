@@ -1,7 +1,13 @@
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 
-const trackedFiles = execFileSync("git", ["ls-files"], { encoding: "utf8" })
+const repositoryFiles = [
+  execFileSync("git", ["ls-files"], { encoding: "utf8" }),
+  execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  }),
+]
+  .join("\n")
   .split(/\r?\n/u)
   .filter(Boolean);
 
@@ -25,7 +31,7 @@ const rules = [
 ];
 
 const findings = [];
-for (const file of trackedFiles) {
+for (const file of repositoryFiles) {
   if (/\.(?:png|jpg|jpeg|gif|woff2?|lock)$/iu.test(file)) continue;
   const content = (await readFile(file, "utf8").catch(() => ""))
     .split(/\r?\n/u)
@@ -42,4 +48,4 @@ if (findings.length) {
   process.exit(1);
 }
 
-console.log(`Secret scan passed (${trackedFiles.length} tracked files).`);
+console.log(`Secret scan passed (${repositoryFiles.length} repository files).`);

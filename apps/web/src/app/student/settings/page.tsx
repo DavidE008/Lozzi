@@ -1,24 +1,17 @@
 import { parseEnvironment } from "@lozzi/domain";
 import { redirect } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EnsIdentityCard } from "@/components/student/ens-identity-card";
-import { WorldVerificationCard } from "@/components/student/world-verification-card";
+import { IdentitySetupCard } from "@/components/student/identity-setup-card";
 import { PageHeading } from "@/components/student/page-heading";
 import { getAuthenticatedUser } from "@/lib/auth";
+import { isEnsWalletLinkConfigured } from "@/lib/integrations/config";
 import {
   getStudentPartnerStatus,
   getVerifiedStudentWallet,
+  hasVerifiedWorldAccount,
 } from "@/lib/repositories/partner-status";
 import { getDashboardForUser } from "@/lib/repositories/student";
-
-const capabilityStatusLabel = {
-  available: "Available",
-  failed: "Unavailable",
-  "mock-development": "Development mock",
-  "not-configured": "Not configured",
-} as const;
 
 export default async function SettingsPage() {
   const user = await getAuthenticatedUser();
@@ -32,15 +25,16 @@ export default async function SettingsPage() {
   ]);
   const worldCapability = capabilities.find(({ name }) => name === "world")!;
   const ensCapability = capabilities.find(({ name }) => name === "ens")!;
+  const worldVerified = hasVerifiedWorldAccount(partnerStatus);
 
   return (
     <>
       <PageHeading
-        eyebrow="Preferences and integrations"
-        title="Settings"
-        description="Review your profile context and the honest availability of optional partner capabilities."
+        eyebrow="Privacy-first identity"
+        title="Identity & privacy"
+        description="Set up one account-bound identity while keeping academic records private and offchain."
       />
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card className="shadow-none">
           <CardHeader>
             <CardTitle className="font-heading text-xl">
@@ -48,62 +42,32 @@ export default async function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
-            <div className="flex justify-between border-b pb-3">
+            <div className="grid gap-1 border-b pb-3">
               <span className="text-muted-foreground">Name</span>
               <span className="font-medium">{dashboard.displayName}</span>
             </div>
-            <div className="flex justify-between border-b pb-3">
+            <div className="grid gap-1 border-b pb-3">
               <span className="text-muted-foreground">Institution</span>
               <span className="font-medium">{dashboard.institutionName}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="grid gap-1">
               <span className="text-muted-foreground">Program</span>
               <span className="font-medium">{dashboard.programName}</span>
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardTitle className="font-heading text-xl">
-              Capability status
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="divide-y">
-            {capabilities.map((capability) => (
-              <div
-                key={capability.name}
-                className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
-              >
-                <div>
-                  <p className="text-sm font-medium">{capability.label}</p>
-                  <p className="text-muted-foreground mt-0.5 text-xs">
-                    {capability.detail}
-                  </p>
-                </div>
-                <Badge
-                  variant="outline"
-                  className={
-                    capability.status === "available"
-                      ? "border-lozzi-teal/30 text-lozzi-teal"
-                      : "text-muted-foreground"
-                  }
-                >
-                  {capabilityStatusLabel[capability.status]}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <WorldVerificationCard
-          capability={worldCapability}
+        <IdentitySetupCard
           credentialType={partnerStatus?.world_credential_type ?? null}
-          verifiedAt={partnerStatus?.world_verified_at ?? null}
-        />
-        <EnsIdentityCard
-          capability={ensCapability}
           currentName={partnerStatus?.ens_name ?? null}
+          currentStatus={partnerStatus?.ens_status ?? null}
+          ensCapability={ensCapability}
+          institutionName={dashboard.institutionName}
           parentName={process.env.NEXT_PUBLIC_ENS_PARENT ?? null}
+          verifiedAt={partnerStatus?.world_verified_at ?? null}
           walletAddress={verifiedWallet?.address ?? null}
+          walletLinkAvailable={isEnsWalletLinkConfigured(process.env)}
+          worldCapability={worldCapability}
+          worldVerified={worldVerified}
         />
       </div>
     </>

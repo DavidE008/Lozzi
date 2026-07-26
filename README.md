@@ -80,9 +80,14 @@ the complete acceptance record and remaining partner credentials.
 - [Synthetic test and demo accounts](docs/testing/test-accounts.md)
 - [World real-configuration runbook](docs/integrations/world-real-configuration.md)
 - [World prize evidence](docs/integrations/world-prize-evidence.md)
+- [World + ENS identity journey](docs/integrations/world-ens-identity-journey.md)
+- [ENS real-integration plan](docs/integrations/ens-real-integration-plan.md)
+- [ENS operator runbook](docs/integrations/ens-operator-runbook.md)
 
-World integration code is present, but Portal beta access, runtime secrets,
-production device evidence, and AgentBook registration are still deliberately
-unconfirmed. ENS, 0G, WalletConnect, and World Chain registry deployment remain
-unconfigured. The app reports those states honestly, and no Lozzi registry
-contract has been deployed.
+The World Portal app, RP environments, and required action records have been
+verified read-only. Live runtime verification still needs approved signer-key
+rotation, entitlement confirmation, and production-device evidence.
+The ENS implementation is locally verified, but no parent, Safe, registrar,
+approval, signer, or subname has been provisioned. 0G, WalletConnect, and World
+Chain registry work remains paused or unconfigured. The app reports those
+states honestly, and no Lozzi contract has been deployed.

@@ -14,17 +14,20 @@ describe("EnsIdentityCard", () => {
           detail: "Configured",
         }}
         currentName={null}
+        currentStatus={null}
         parentName="lozzi-sepolia.eth"
+        walletLinkAvailable
         walletAddress={null}
+        worldVerified
       />,
     );
 
     expect(screen.getByText("Wallet required")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Claim subname" }),
-    ).toBeDisabled();
+      screen.getByRole("button", { name: "Connect and verify wallet" }),
+    ).toBeEnabled();
     expect(
-      screen.getByText(/never written to ENS text records/u),
+      screen.getByText(/Academic records and student details stay private/u),
     ).toBeInTheDocument();
   });
 
@@ -38,15 +41,16 @@ describe("EnsIdentityCard", () => {
           detail: "Configured",
         }}
         currentName="aisha.lozzi-sepolia.eth"
+        currentStatus="active"
         parentName="lozzi-sepolia.eth"
+        walletLinkAvailable
         walletAddress={`0x${"11".repeat(20)}`}
+        worldVerified
       />,
     );
 
     expect(screen.getByText("Active")).toBeInTheDocument();
     expect(screen.getByText("aisha.lozzi-sepolia.eth")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Resolves to your verified Sepolia wallet/u),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Issued by your institution/u)).toBeInTheDocument();
   });
 });

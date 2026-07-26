@@ -12,26 +12,37 @@
 - [ ] Final dashboard screenshot compared with the approved concept across
       layout, copy, typography, color, spacing, icons, responsiveness, and
       state behavior.
+- [x] World Developer Portal app/RP inventory verified, production and staging
+      registrations confirmed, and all three actions created in both
+      environments.
+- [ ] World runtime signing key, entitlement checks, and production-device
+      evidence approved and recorded.
+- [ ] ENS parent/Safe/registrar deployment and one consenting synthetic canary
+      independently verified.
 - [ ] No contract deployment or live-partner claim.
 
-## Still-required credentials for later milestones
+## Still-required World + ENS inputs
 
-- Recoverable World RP signing key for `rp_27a81819333b3230`, stored only in
-  ignored local server configuration.
-- Callable World Developer Portal MCP access to verify the supplied legacy app
-  and RP, create/confirm all three actions, and poll registered environments.
+- Explicit approval to rotate the unavailable signing key for
+  `rp_27a81819333b3230`, with the replacement stored only in approved runtime
+  secret storage.
 - Confirmed Selfie Check and Identity Check beta access.
-- A 32-byte AgentKit human-ID HMAC key and configurable World Chain mainnet RPC.
-- Explicit approval and World App QR completion for AgentBook registration of
-  `0xA8619B20cd66BBf9c3684EfE7D0B099DfE98AD5f`.
-- A real Proof-of-Human credential, a consenting document-backed adult
-  credential, Sandbox access, and anonymized tester feedback.
-- Ethereum Sepolia ENS parent name and authorized adapter key.
-- 0G Compute Router credentials and billing configuration.
-- WalletConnect project ID.
-- World Chain Sepolia RPC URL, funded institutional signer, verification API
-  key if required, explorer settings, and deployment governance approval.
-- Object key-wrapping provider key identifier and access policy.
+- A real Proof-of-Human credential, production-device evidence, and anonymized
+  tester feedback.
+- Approved Ethereum Sepolia ENS parent, 2-of-3 Safe ownership, verified adapter
+  deployment, KMS-backed issuance address, independent read RPC, and renewal
+  owner. Raw production private keys are not an acceptable prerequisite.
 
-These credentials are deliberately absent from the repository and current
+These inputs are deliberately absent from the repository and current
 environment.
+
+The combined journey, runtime boundaries, manual provisioning gates, and
+remaining limitations are tracked in the
+[World + ENS identity journey](integrations/world-ens-identity-journey.md).
+
+## Paused partner inputs
+
+0G Compute/Storage, WalletConnect, World AgentKit, and World Chain registry
+inputs are not required for the current identity demo. Existing abstractions are
+preserved, but no provisioning, funding, completion claim, or further
+integration work is in scope.

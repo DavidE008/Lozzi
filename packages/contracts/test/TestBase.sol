@@ -37,6 +37,10 @@ abstract contract TestBase {
         if (actual != expected) revert AssertionFailed();
     }
 
+    function assertEq(address actual, address expected) internal pure {
+        if (actual != expected) revert AssertionFailed();
+    }
+
     function assertEq(uint256 actual, uint256 expected) internal pure {
         if (actual != expected) revert AssertionFailed();
     }

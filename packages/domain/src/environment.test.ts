@@ -71,6 +71,35 @@ describe("environment capability detection", () => {
     ).toBe("available");
   });
 
+  it("never reports a raw ENS private key as production-ready", () => {
+    const result = parseEnvironment({
+      ENS_CONFIRMATIONS: "3",
+      ENS_MAX_FEE_WEI: "10000000000000000",
+      ENS_MAX_GAS: "800000",
+      ENS_PARENT_SAFE_ADDRESS: `0x${"11".repeat(20)}`,
+      ENS_PARENT_SAFE_OWNERS: [
+        `0x${"12".repeat(20)}`,
+        `0x${"13".repeat(20)}`,
+        `0x${"14".repeat(20)}`,
+      ].join(","),
+      ENS_PARENT_SAFE_THRESHOLD: "2",
+      ENS_RECONCILIATION_SECRET: "r".repeat(32),
+      ENS_REGISTRAR_ADDRESS: `0x${"15".repeat(20)}`,
+      ENS_REGISTRAR_CODE_HASH: `0x${"16".repeat(32)}`,
+      ENS_REGISTRAR_DEPLOYMENT_BLOCK: "1",
+      ENS_SEPOLIA_READ_RPC_URL: "https://read.example",
+      ENS_SEPOLIA_WRITE_RPC_URL: "https://write.example",
+      ENS_SIGNER_PRIVATE_KEY: `0x${"17".repeat(32)}`,
+      ENS_SIGNER_PROVIDER: "local-private-key",
+      NEXT_PUBLIC_ENS_PARENT: "lozzi-sepolia.eth",
+      NODE_ENV: "production",
+    });
+
+    expect(result.capabilities.find(({ name }) => name === "ens")?.status).toBe(
+      "not-configured",
+    );
+  });
+
   it("labels development mocks but never enables them in production", () => {
     const development = parseEnvironment({
       NODE_ENV: "development",

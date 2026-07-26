@@ -16,6 +16,32 @@ export const classifyPartnerError = (
 ): PartnerIntegrationError => {
   if (error instanceof PartnerIntegrationError) return error;
   if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "P0001" &&
+    "message" in error &&
+    error.message === "Wallet-link challenge rate limit exceeded"
+  ) {
+    return new PartnerIntegrationError(
+      "rate-limited",
+      "Too many wallet verification attempts were started. Try again later.",
+      { cause: error },
+    );
+  }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "23505"
+  ) {
+    return new PartnerIntegrationError(
+      "replay",
+      "A conflicting partner operation already exists.",
+      { cause: error },
+    );
+  }
+  if (
     error instanceof Error &&
     "category" in error &&
     error.category === "configuration"

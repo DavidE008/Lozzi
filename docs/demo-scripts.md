@@ -1,5 +1,36 @@
 # Demo scripts
 
+## World + ENS identity path (3-4 minutes)
+
+> Lozzi is a privacy-first student information system where World verifies the
+> person and ENS gives that student a readable, institution-issued digital
+> identity. Academic records remain private and offchain, while the student
+> controls wallet linking, identity consent, and record sharing.
+
+1. Sign in as the synthetic student and open **Identity & privacy**.
+2. Show the four steps: verify person, verify wallet, review identity, and
+   institution confirms.
+3. Explain that World proves only the configured personhood claim. It does not
+   prove enrollment, grades, legal identity, or institutional affiliation.
+4. Complete the configured World flow, or run the clearly labeled local demo.
+   In local mode, show that the result says **Local demo only** and wallet
+   linking remains blocked with **Real proof required**.
+5. In a real configured flow, show that SIWE proves wallet control without a
+   transaction and without consenting to an ENS alias.
+6. Generate the neutral alias and show the separate public-alias consent. Point
+   out that no name, email, student number, course, or grade is encoded.
+7. If live ENS is absent, stop at **Prepared locally** and state that no ENS
+   name, wallet resolution, Safe action, or transaction exists.
+8. Explain that a live request is durable and idempotent, the institutional Safe
+   retains control, and Lozzi requires an independent resolution read before it
+   calls an identity issued.
+9. Close on the privacy summary: raw World proofs are not stored and the
+   academic record remains private and offchain.
+
+See the
+[combined identity journey](integrations/world-ens-identity-journey.md) for the
+timed narration, trust boundaries, and judge-facing technical explanation.
+
 ## Student path
 
 1. Sign in as `aisha.demo@lozzi.example`.
@@ -10,10 +41,12 @@
 
 ## Privacy and capability path
 
-1. Open Settings and show World, ENS, 0G, WalletConnect, and World Chain as
-   “Not configured”.
-2. Explain that the SIS remains available without those partners.
-3. Show that demo data is synthetic and that no wallet is linked to Aisha.
+1. Open **Identity & privacy** and show the unified World + ENS status.
+2. Explain that the SIS remains available when either integration is absent.
+3. Show that demo data is synthetic and that no mock result is presented as a
+   live proof, wallet link, ENS name, or transaction.
+4. Do not present 0G, WalletConnect, World AgentKit, or World Chain registry work
+   as part of the current identity demo.
 
 ## Verifiability path
 
