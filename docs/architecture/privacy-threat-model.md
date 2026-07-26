@@ -50,4 +50,9 @@ enter false data; append-only versioning and audit evidence improve
 accountability but cannot prove real-world truth. World, Ethereum RPC, ENS, 0G,
 and the future key wrapper remain external processors with availability and
 metadata-leakage risk. Minimum disclosure and optional capability states reduce
-but do not eliminate those risks.
+but do not eliminate those risks. Student commitments remain intentionally
+stable inside one institution, environment, algorithm, and key version, so an
+onchain observer can link that institution's publications even though
+cross-institution correlation is limited. A future relayer, signer, or Safe is
+also an authorization and availability risk; a finalized transaction cannot be
+removed, only superseded or counteracted by a separately governed transaction.

@@ -45,3 +45,52 @@ abstract contract TestBase {
         if (actual != expected) revert AssertionFailed();
     }
 }
+
+abstract contract InvariantTargetBase {
+    struct FuzzSelector {
+        address addr;
+        bytes4[] selectors;
+    }
+
+    struct FuzzArtifactSelector {
+        string artifact;
+        bytes4[] selectors;
+    }
+
+    struct FuzzInterface {
+        address addr;
+        string[] artifacts;
+    }
+
+    address[] private targetedContracts;
+
+    function targetContract(address target) internal {
+        targetedContracts.push(target);
+    }
+
+    function excludeArtifacts() public pure returns (string[] memory values) { }
+
+    function excludeContracts() public pure returns (address[] memory values) { }
+
+    function excludeSelectors() public pure returns (FuzzSelector[] memory values) { }
+
+    function excludeSenders() public pure returns (address[] memory values) { }
+
+    function targetArtifactSelectors()
+        public
+        pure
+        returns (FuzzArtifactSelector[] memory values)
+    { }
+
+    function targetArtifacts() public pure returns (string[] memory values) { }
+
+    function targetContracts() public view returns (address[] memory) {
+        return targetedContracts;
+    }
+
+    function targetInterfaces() public pure returns (FuzzInterface[] memory values) { }
+
+    function targetSelectors() public pure returns (FuzzSelector[] memory values) { }
+
+    function targetSenders() public pure returns (address[] memory values) { }
+}

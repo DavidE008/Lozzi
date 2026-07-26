@@ -103,7 +103,10 @@ export type OutboxMetrics = Readonly<{
   shareAccessResultCounts: Readonly<Record<string, number>>;
   shareLifecycleCounts: Readonly<Record<string, number>>;
   shareReconciliationCounts: Readonly<Record<string, number>>;
+  staleReconciliationCounts: Readonly<Record<string, number>>;
   statusCounts: Readonly<Record<string, number>>;
+  verifierAttemptOutcomeCounts: Readonly<Record<string, number>>;
+  verifierRateLimitedFingerprints: number;
 }>;
 
 export interface OutboxRepository {

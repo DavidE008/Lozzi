@@ -106,4 +106,27 @@ describe("verifyPublicShare", () => {
 
     expect(result.status).toBe("configuration_unavailable");
   });
+
+  it("rejects a database disclosure that escalates beyond its frozen scopes", async () => {
+    await expect(
+      verifyPublicShare(
+        {
+          requestFingerprint: `0x${"ab".repeat(32)}`,
+          token: "synthetic_private_token_123456",
+        },
+        {
+          rpcClient: rpcClient({
+            ...allowedPayload,
+            disclosure: {
+              ...allowedPayload.disclosure,
+              program: {
+                credentialType: "bachelors",
+                name: "Computer Science",
+              },
+            },
+          }),
+        },
+      ),
+    ).rejects.toThrow("authorized scopes");
+  });
 });

@@ -50,12 +50,15 @@ describe("POST /api/verify", () => {
   it("does not accept a bearer token from the query string", async () => {
     const response = await POST(
       request(
-        {},
+        { token: "synthetic_private_token_123456" },
         "https://lozzi.test/api/verify?token=synthetic_query_token_123456",
       ),
     );
 
     expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      error: "Query-string tokens are not accepted.",
+    });
     expect(mocks.verify).not.toHaveBeenCalled();
   });
 
@@ -81,6 +84,23 @@ describe("POST /api/verify", () => {
     expect(nonJson.status).toBe(415);
     expect(oversized.status).toBe(413);
     expect(mocks.verify).not.toHaveBeenCalled();
+  });
+
+  it("keeps malformed JSON details and body material out of logs", async () => {
+    const sensitiveMarker = "synthetic_malformed_token_123456";
+    const response = await POST(
+      new Request("https://lozzi.test/api/verify", {
+        body: `{"token":"${sensitiveMarker}"`,
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.text()).not.toContain(sensitiveMarker);
+    expect(JSON.stringify(mocks.logEvent.mock.calls)).not.toContain(
+      sensitiveMarker,
+    );
   });
 
   it("never copies a rejected bearer token into logs or errors", async () => {

@@ -68,7 +68,13 @@ const metricsSchema = z
     shareAccessResultCounts: z.record(z.string(), z.number().int().min(0)),
     shareLifecycleCounts: z.record(z.string(), z.number().int().min(0)),
     shareReconciliationCounts: z.record(z.string(), z.number().int().min(0)),
+    staleReconciliationCounts: z.record(z.string(), z.number().int().min(0)),
     statusCounts: z.record(z.string(), z.number().int().min(0)),
+    verifierAttemptOutcomeCounts: z.record(
+      z.string(),
+      z.number().int().min(0),
+    ),
+    verifierRateLimitedFingerprints: z.number().int().min(0),
   })
   .strict();
 
@@ -159,7 +165,9 @@ export class SupabaseOutboxRepository implements OutboxRepository {
   }
 
   async metrics(): Promise<OutboxMetrics> {
-    const { data, error } = await this.client.rpc("get_m6_outbox_metrics");
+    const { data, error } = await this.client.rpc(
+      "get_m6_operational_metrics",
+    );
     if (error) throw rpcError("metrics read", error.code);
     return metricsSchema.parse(data);
   }

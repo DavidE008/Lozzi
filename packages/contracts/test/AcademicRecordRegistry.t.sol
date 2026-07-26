@@ -3,7 +3,7 @@ pragma solidity 0.8.30;
 
 import { AcademicRecordRegistry } from "../src/AcademicRecordRegistry.sol";
 import { InstitutionRegistry } from "../src/InstitutionRegistry.sol";
-import { TestBase } from "./TestBase.sol";
+import { InvariantTargetBase, TestBase } from "./TestBase.sol";
 
 contract AcademicRecordRegistryTest is TestBase {
     InstitutionRegistry private institutions;
@@ -154,10 +154,111 @@ contract AcademicRecordRegistryTest is TestBase {
         );
     }
 
+    function testFuzzShareValidityChangesExactlyAtExpiration(uint64 rawLifetime) public {
+        _publishVersionOne();
+        uint64 lifetime = uint64(uint256(rawLifetime) % 30 days) + 1;
+        uint64 expiration = uint64(block.timestamp) + lifetime;
+
+        vm.prank(SIGNER);
+        records.createShareGrant(
+            INSTITUTION,
+            STUDENT,
+            VERSION_ONE,
+            GRANT,
+            expiration,
+            keccak256(abi.encode("fuzz-share-create", rawLifetime))
+        );
+
+        vm.warp(expiration - 1);
+        (bool validBefore,,,,) = records.verifyShareGrant(INSTITUTION, GRANT);
+        assertTrue(validBefore);
+
+        vm.warp(expiration);
+        (bool validAtBoundary,,,,) = records.verifyShareGrant(INSTITUTION, GRANT);
+        assertFalse(validAtBoundary);
+    }
+
+    function testFuzzPublishingNextVersionPreservesPriorVersion(bytes32 entropy) public {
+        _publishVersionOne();
+        bytes32 nextVersion = keccak256(abi.encode("lozzi-fuzz-version", entropy));
+
+        vm.prank(SIGNER);
+        records.publishRecordVersion(
+            INSTITUTION,
+            STUDENT,
+            nextVersion,
+            VERSION_ONE,
+            keccak256(abi.encode("lozzi-fuzz-publish", entropy))
+        );
+
+        (bytes32 priorStudent, bytes32 priorPrevious,) =
+            records.getRecordVersion(INSTITUTION, VERSION_ONE);
+        assertEq(priorStudent, STUDENT);
+        assertEq(priorPrevious, bytes32(0));
+        assertEq(records.currentRecordVersion(INSTITUTION, STUDENT), nextVersion);
+    }
+
     function _publishVersionOne() private {
         vm.prank(SIGNER);
         records.publishRecordVersion(
             INSTITUTION, STUDENT, VERSION_ONE, bytes32(0), keccak256("publish-v1")
         );
+    }
+}
+
+contract AcademicRecordRegistryHandler {
+    AcademicRecordRegistry private immutable records;
+    bytes32 private immutable institutionId;
+    bytes32 private immutable studentCommitment;
+
+    bytes32 public latestVersion;
+    uint256 public publishCount;
+
+    constructor(
+        AcademicRecordRegistry registry,
+        bytes32 configuredInstitutionId,
+        bytes32 configuredStudentCommitment
+    ) {
+        records = registry;
+        institutionId = configuredInstitutionId;
+        studentCommitment = configuredStudentCommitment;
+    }
+
+    function publish(bytes32 entropy) external {
+        bytes32 nextVersion =
+            keccak256(abi.encode("lozzi-invariant-version", entropy, publishCount));
+        bytes32 idempotencyKey =
+            keccak256(abi.encode("lozzi-invariant-publish", entropy, publishCount));
+
+        records.publishRecordVersion(
+            institutionId, studentCommitment, nextVersion, latestVersion, idempotencyKey
+        );
+        latestVersion = nextVersion;
+        publishCount += 1;
+    }
+}
+
+contract AcademicRecordRegistryInvariantTest is TestBase, InvariantTargetBase {
+    bytes32 private constant INSTITUTION = keccak256("invariant-university");
+    bytes32 private constant STUDENT = keccak256("invariant-student-commitment");
+
+    AcademicRecordRegistry private records;
+    AcademicRecordRegistryHandler private handler;
+
+    function setUp() public {
+        InstitutionRegistry institutions = new InstitutionRegistry(address(this));
+        records = new AcademicRecordRegistry(institutions);
+        handler = new AcademicRecordRegistryHandler(records, INSTITUTION, STUDENT);
+        institutions.registerInstitution(
+            INSTITUTION,
+            address(this),
+            address(handler),
+            keccak256("invariant-institution-registration")
+        );
+        targetContract(address(handler));
+    }
+
+    function invariantCurrentVersionAlwaysMatchesLatestSuccessfulPublication() public view {
+        assertEq(records.currentRecordVersion(INSTITUTION, STUDENT), handler.latestVersion());
     }
 }

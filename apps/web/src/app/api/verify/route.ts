@@ -13,6 +13,12 @@ const responseHeaders = {
 
 export async function POST(request: Request): Promise<Response> {
   try {
+    if (new URL(request.url).searchParams.has("token")) {
+      return NextResponse.json(
+        { error: "Query-string tokens are not accepted." },
+        { headers: responseHeaders, status: 400 },
+      );
+    }
     if (
       request.headers.get("content-type")?.split(";")[0] !== "application/json"
     ) {
