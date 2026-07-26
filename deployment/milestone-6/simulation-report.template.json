@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "lozzi.m6.simulation-report.v1",
+  "status": "not-run",
+  "manifestCommit": null,
+  "chainId": null,
+  "forkBlockNumber": null,
+  "forkBlockHash": null,
+  "simulator": null,
+  "simulatorVersion": null,
+  "executedAt": null,
+  "broadcast": false,
+  "signedTransactionCount": 0,
+  "transactions": [],
+  "postSimulationReadback": "not-run",
+  "reviewer": null
+}

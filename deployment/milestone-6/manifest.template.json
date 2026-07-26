@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "lozzi.m6.deployment.v1",
+  "approvalStatus": "unapproved",
+  "pinnedSourceCommit": "c7fed38f15b64dc995cfba024d44bdab9457e437",
+  "chainConfigPath": "deployment/milestone-6/chain-config.template.json",
+  "bytecodeFingerprintPath": "deployment/milestone-6/bytecode-fingerprints.json",
+  "simulationReportPath": "deployment/milestone-6/simulation-report.template.json",
+  "compiler": {
+    "solcVersion": "0.8.30",
+    "evmVersion": "cancun",
+    "optimizerEnabled": true,
+    "optimizerRuns": 200
+  },
+  "contracts": [
+    {
+      "name": "InstitutionRegistry",
+      "source": "packages/contracts/src/InstitutionRegistry.sol",
+      "expectedAddress": null,
+      "creationBytecodeKeccak256": "0xff8eee6ce6dde92829858d08c0ff18c12c87b0d13e6dfb90d1007f436ff48e05",
+      "expectedRuntimeBytecodeKeccak256": "0xcf6433c1732e47e924891684662d6f5b0e4f759106d4e35ce5bebf5f458f807c",
+      "constructorArguments": [
+        {
+          "name": "protocolAdministrator",
+          "type": "address",
+          "value": null
+        }
+      ]
+    },
+    {
+      "name": "AcademicRecordRegistry",
+      "source": "packages/contracts/src/AcademicRecordRegistry.sol",
+      "expectedAddress": null,
+      "creationBytecodeKeccak256": "0x50af864bfe558f50f2eb5ba4147c4f1a4538d6cc9799c036750a4c2722f6ed23",
+      "expectedRuntimeBytecodeKeccak256": null,
+      "constructorArguments": [
+        {
+          "name": "registry",
+          "type": "address",
+          "value": null
+        }
+      ]
+    }
+  ],
+  "governance": {
+    "safeAddress": null,
+    "safeOwners": [],
+    "safeThreshold": null,
+    "deployerAddress": null,
+    "institutionAdministrator": null,
+    "institutionSigner": null,
+    "emergencyOwner": null
+  },
+  "relayer": {
+    "address": null,
+    "provider": null,
+    "allowedChainId": null,
+    "allowedContract": null,
+    "allowedMethods": [
+      "createShareGrant",
+      "publishRecordVersion",
+      "revokeShareGrant"
+    ],
+    "maxValueWei": "0",
+    "maxGasPerTransaction": null,
+    "dailyFundingCeilingWei": null
+  },
+  "funding": {
+    "deploymentFundingCeilingWei": null,
+    "maximumBatchGas": null,
+    "maximumFeePerGasWei": null,
+    "maximumPriorityFeePerGasWei": null,
+    "maximumTotalCostWei": null
+  },
+  "transactionBatch": {
+    "batchId": null,
+    "approvalRequired": true,
+    "transactions": [
+      {
+        "sequence": 1,
+        "action": "deploy InstitutionRegistry",
+        "target": null,
+        "valueWei": "0",
+        "calldataKeccak256": null,
+        "gasLimit": null,
+        "approvalId": null
+      },
+      {
+        "sequence": 2,
+        "action": "deploy AcademicRecordRegistry",
+        "target": null,
+        "valueWei": "0",
+        "calldataKeccak256": null,
+        "gasLimit": null,
+        "approvalId": null
+      },
+      {
+        "sequence": 3,
+        "action": "register institution and authorize signer",
+        "target": null,
+        "valueWei": "0",
+        "calldataKeccak256": null,
+        "gasLimit": null,
+        "approvalId": null
+      }
+    ]
+  },
+  "approval": {
+    "status": "unapproved",
+    "packetId": null,
+    "preparedBy": null,
+    "independentReviewer": null,
+    "approvers": [],
+    "approvedAt": null,
+    "expiresAt": null
+  }
+}

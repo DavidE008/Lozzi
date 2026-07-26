@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "lozzi.m6.bytecode-fingerprints.v1",
+  "sourceCommit": "c7fed38f15b64dc995cfba024d44bdab9457e437",
+  "compiler": {
+    "solcVersion": "0.8.30",
+    "evmVersion": "cancun",
+    "optimizerEnabled": true,
+    "optimizerRuns": 200
+  },
+  "contracts": [
+    {
+      "name": "InstitutionRegistry",
+      "source": "packages/contracts/src/InstitutionRegistry.sol",
+      "sourceKeccak256": "0x2f496c47501d9a60116c3210db84e3016a6e508f0fa8dcf4d23a967d384ab2a6",
+      "creationBytecodeKeccak256": "0xff8eee6ce6dde92829858d08c0ff18c12c87b0d13e6dfb90d1007f436ff48e05",
+      "runtimeTemplateKeccak256": "0xcf6433c1732e47e924891684662d6f5b0e4f759106d4e35ce5bebf5f458f807c",
+      "immutableReferenceCount": 0,
+      "runtimeHashRequiresConstructorArguments": false
+    },
+    {
+      "name": "AcademicRecordRegistry",
+      "source": "packages/contracts/src/AcademicRecordRegistry.sol",
+      "sourceKeccak256": "0xdec683c0f8bfab86561b5acbba34357f35c6810ae48fbc052ca7383331be2178",
+      "creationBytecodeKeccak256": "0x50af864bfe558f50f2eb5ba4147c4f1a4538d6cc9799c036750a4c2722f6ed23",
+      "runtimeTemplateKeccak256": "0x3897d65a7f053e1934ff46f1eea85b33e9356b46f8ed940a8e03cb1fa75a8ee6",
+      "immutableReferenceCount": 7,
+      "runtimeHashRequiresConstructorArguments": true
+    },
+    {
+      "name": "InstitutionalEnsRegistrar",
+      "source": "packages/contracts/src/InstitutionalEnsRegistrar.sol",
+      "sourceKeccak256": "0x65ad68d3e097d17886ba5bcf7364dc61f0cdecfe43f2a6725c3ebcb2b76d3a4c",
+      "creationBytecodeKeccak256": "0x978adb2874bd1514b34fe6afa6d638b37f25c1e2e0ca5bfac1d9aa6358f21262",
+      "runtimeTemplateKeccak256": "0xb6d4970ef22ba7f546030863432400ab9812c58b47a5aee4d891c56119a16e9e",
+      "immutableReferenceCount": 22,
+      "runtimeHashRequiresConstructorArguments": true
+    }
+  ]
+}
