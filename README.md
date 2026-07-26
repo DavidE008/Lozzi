@@ -5,8 +5,9 @@ and universities. Milestones 0–7 establish the product, security, normalized
 data, contracts, CI, authenticated role products, deterministic registration
 and grades, record versioning, degree progress, World and ENS identity
 boundaries, anchoring and sharing lifecycles, and fail-closed deployment and
-submission evidence. No Lozzi contract or frontend is deployed and no
-unconfigured partner is presented as live.
+submission evidence. A Vercel preview for commit `554bd78` is deployed but
+returns HTTP 500, so it is neither a working demo nor production. No Lozzi
+contract is deployed and no unconfigured partner is presented as live.
 
 ## Synthetic student demo
 
@@ -102,7 +103,7 @@ The ENS implementation is locally verified, but no parent, Safe, registrar,
 approval, signer, or subname has been provisioned. 0G, WalletConnect, and World
 Chain registry work remains paused or unconfigured. The app reports those
 states honestly. The hosted Supabase project is ten migrations behind this
-repository, and the automatic Vercel PR preview returns HTTP 500 despite a
-successful build. It is not a working demo or production deployment. No Lozzi
-contract has been deployed. See the submission checklist before making any live
-claim.
+repository, and the verified Vercel preview for commit `554bd78` returns HTTP
+500 despite a successful build. It is not a working demo or production
+deployment. No Lozzi contract has been deployed. See the submission checklist
+before making any live claim.

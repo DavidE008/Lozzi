@@ -52,8 +52,8 @@ Blocked deployment and submission behavior:
 - Two moderate optional/transitive dependency advisories need a documented
   reachability and upgrade or override disposition.
 - Hosted Supabase is ten migrations behind.
-- Vercel's automatic PR preview is `READY` but returns HTTP 500; no working
-  public demo or production deployment exists.
+- Vercel's automatic PR preview for commit `554bd78` is `READY` but returns HTTP
+  500; no working public demo or production deployment exists.
 - The registry chain, Safe, funding, simulation, and independent review are
   unresolved.
 - Slither reports zero high, seven medium, and eleven low findings. The
