@@ -69,6 +69,11 @@ export {
   type ShareGrantRevokeRequestedV1,
 } from "./outbox-events";
 export {
+  sensitiveShareDraftInputSchema,
+  sensitiveShareDurationMinutesSchema,
+  type SensitiveShareDraftInput,
+} from "./sharing";
+export {
   buildAcademicRecordCommitmentPayload,
   calculateDegreeAudit,
   calculateGpa,

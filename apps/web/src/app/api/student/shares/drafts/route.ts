@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { sensitiveShareDraftInputSchema } from "@lozzi/domain";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -11,12 +12,6 @@ import {
   getDashboardForUser,
 } from "@/lib/repositories/student";
 import { assertSameOrigin } from "@/lib/security/origin";
-
-const createDraftSchema = z
-  .object({
-    recipientLabel: z.string().trim().min(1).max(120),
-  })
-  .strict();
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -35,7 +30,7 @@ export async function POST(request: Request): Promise<Response> {
         { status: 403 },
       );
     }
-    const input = createDraftSchema.parse(await request.json());
+    const input = sensitiveShareDraftInputSchema.parse(await request.json());
     const idempotencyHeader = request.headers.get("idempotency-key");
     const idempotencyKey = idempotencyHeader
       ? z.uuid().parse(idempotencyHeader)
@@ -52,10 +47,10 @@ export async function POST(request: Request): Promise<Response> {
 
     const result = await createSensitiveShareDraft({
       academicRecordVersionId: recordVersionId,
-      grantExpiresAt: new Date(Date.now() + 30 * 60 * 1_000).toISOString(),
+      grantDurationMinutes: input.expiryMinutes,
       idempotencyKey,
       recipientLabel: input.recipientLabel,
-      scopes: ["program", "degree-progress", "record-summary", "full-record"],
+      scopes: input.scopes,
       studentId: dashboard.studentId,
     });
 

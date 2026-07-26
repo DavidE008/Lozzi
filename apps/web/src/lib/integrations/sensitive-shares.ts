@@ -1,5 +1,10 @@
 import "server-only";
 
+import {
+  shareDisclosureScopeSchema,
+  type ShareDisclosureScope,
+} from "@lozzi/domain";
+
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,10 +30,10 @@ interface SensitiveShareRpcClient {
     readonly error: { readonly code?: string; readonly message?: string } | null;
   }>;
   rpc(
-    name: "create_sensitive_share_draft",
+    name: "create_minimum_scope_share_draft",
     params: {
       p_academic_record_version_id: string;
-      p_grant_expires_at: string;
+      p_grant_duration_minutes: number;
       p_idempotency_key: string;
       p_recipient_label: string;
       p_scopes: string[];
@@ -60,7 +65,9 @@ const bytea = (value: `0x${string}`): string => {
 const draftResultSchema = z.object({
   draftExpiresAt: z.iso.datetime(),
   draftId: z.uuid(),
+  grantDurationMinutes: z.union([z.literal(10), z.literal(15), z.literal(30)]),
   grantExpiresAt: z.iso.datetime(),
+  scopes: z.array(shareDisclosureScopeSchema).min(1).max(4),
   status: z.literal("draft"),
 });
 
@@ -70,6 +77,7 @@ const assistedResultSchema = z.object({
 });
 
 const activationResultSchema = z.object({
+  chainStatus: z.literal("local_private").default("local_private"),
   draftId: z.uuid(),
   expiresAt: z.iso.datetime(),
   shareGrantId: z.uuid(),
@@ -78,21 +86,24 @@ const activationResultSchema = z.object({
 
 export const createSensitiveShareDraft = async (input: {
   readonly academicRecordVersionId: string;
-  readonly grantExpiresAt: string;
+  readonly grantDurationMinutes: 10 | 15 | 30;
   readonly idempotencyKey: string;
   readonly recipientLabel: string;
-  readonly scopes: string[];
+  readonly scopes: ShareDisclosureScope[];
   readonly studentId: string;
 }) => {
-  const client = createServiceClient() as unknown as SensitiveShareRpcClient;
-  const { data, error } = await client.rpc("create_sensitive_share_draft", {
-    p_academic_record_version_id: input.academicRecordVersionId,
-    p_grant_expires_at: input.grantExpiresAt,
-    p_idempotency_key: input.idempotencyKey,
-    p_recipient_label: input.recipientLabel,
-    p_scopes: input.scopes,
-    p_student_id: input.studentId,
-  });
+  const client = (await createClient()) as unknown as SensitiveShareRpcClient;
+  const { data, error } = await client.rpc(
+    "create_minimum_scope_share_draft",
+    {
+      p_academic_record_version_id: input.academicRecordVersionId,
+      p_grant_duration_minutes: input.grantDurationMinutes,
+      p_idempotency_key: input.idempotencyKey,
+      p_recipient_label: input.recipientLabel,
+      p_scopes: input.scopes,
+      p_student_id: input.studentId,
+    },
+  );
   if (error) throw error;
   return draftResultSchema.parse(data);
 };

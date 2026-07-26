@@ -1811,6 +1811,7 @@ export type Database = {
       record_share_grants: {
         Row: {
           academic_record_version_id: string
+          chain_status: string
           commitment_environment: string | null
           created_at: string
           created_by: string
@@ -1834,6 +1835,7 @@ export type Database = {
         }
         Insert: {
           academic_record_version_id: string
+          chain_status?: string
           commitment_environment?: string | null
           created_at?: string
           created_by: string
@@ -1857,6 +1859,7 @@ export type Database = {
         }
         Update: {
           academic_record_version_id?: string
+          chain_status?: string
           commitment_environment?: string | null
           created_at?: string
           created_by?: string
@@ -2941,6 +2944,17 @@ export type Database = {
           p_student_commitment_key_version: number
           p_token_hash: string
           p_trace_id: string
+        }
+        Returns: Json
+      }
+      create_minimum_scope_share_draft: {
+        Args: {
+          p_academic_record_version_id: string
+          p_grant_duration_minutes: number
+          p_idempotency_key: string
+          p_recipient_label: string
+          p_scopes: string[]
+          p_student_id: string
         }
         Returns: Json
       }

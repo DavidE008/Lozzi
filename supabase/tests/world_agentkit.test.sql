@@ -257,24 +257,27 @@ select throws_ok(
   'expired World challenges are rejected'
 );
 
+set local role authenticated;
+set local "request.jwt.claim.sub" = '00000000-0000-4000-8000-000000000101';
+
 select lives_ok(
   $test$
     do $body$
     begin
-      perform public.create_sensitive_share_draft(
+      perform public.create_minimum_scope_share_draft(
       '13000000-0000-4000-8000-000000000101',
       '73000000-0000-4000-8000-000000000001',
       'Synthetic scholarship verifier',
       array['program', 'record-summary'],
-      now() + interval '30 minutes',
+      30,
       '83000000-0000-4000-8000-000000000001'
       );
-      perform public.create_sensitive_share_draft(
+      perform public.create_minimum_scope_share_draft(
       '13000000-0000-4000-8000-000000000101',
       '73000000-0000-4000-8000-000000000001',
       'Synthetic transfer evaluator',
       array['program'],
-      now() + interval '30 minutes',
+      30,
       '83000000-0000-4000-8000-000000000002'
       );
     end
@@ -282,6 +285,8 @@ select lives_ok(
   $test$,
   'a student can create distinct synthetic sensitive-share drafts'
 );
+
+set local role service_role;
 
 create temporary table world_share_test_context as
 select
