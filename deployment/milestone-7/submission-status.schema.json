@@ -95,6 +95,12 @@
         "provider",
         "status",
         "projectId",
+        "previewDeploymentId",
+        "previewUrl",
+        "previewCommit",
+        "previewState",
+        "previewHttpStatus",
+        "previewRuntimeStatus",
         "productionUrl",
         "deployedCommit"
       ],
@@ -107,6 +113,28 @@
         },
         "projectId": {
           "type": ["string", "null"]
+        },
+        "previewDeploymentId": {
+          "type": ["string", "null"]
+        },
+        "previewUrl": {
+          "type": ["string", "null"],
+          "format": "uri"
+        },
+        "previewCommit": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "previewState": {
+          "enum": ["not-created", "READY", "ERROR"]
+        },
+        "previewHttpStatus": {
+          "type": ["integer", "null"],
+          "minimum": 100,
+          "maximum": 599
+        },
+        "previewRuntimeStatus": {
+          "enum": ["not-run", "passed", "failed"]
         },
         "productionUrl": {
           "type": ["string", "null"],
@@ -326,7 +354,7 @@
           "const": 173
         },
         "webScriptTests": {
-          "const": 25
+          "const": 26
         },
         "forgeTests": {
           "const": 29

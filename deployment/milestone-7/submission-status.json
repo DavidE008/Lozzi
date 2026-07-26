@@ -18,8 +18,14 @@
   },
   "hosting": {
     "provider": "vercel",
-    "status": "not-provisioned",
-    "projectId": null,
+    "status": "preview",
+    "projectId": "prj_Bec5Ozlc0QwfbjUXBmEAWQQN3UTn",
+    "previewDeploymentId": "dpl_2skzsd2GTB5h5zyUpTJaw36YtRsN",
+    "previewUrl": "https://lozzi-btkkw2jf2-david-e-projects8.vercel.app",
+    "previewCommit": "554bd78883bee978b6ade249c2681967adab0411",
+    "previewState": "READY",
+    "previewHttpStatus": 500,
+    "previewRuntimeStatus": "failed",
     "productionUrl": null,
     "deployedCommit": null
   },
@@ -68,7 +74,7 @@
   "verification": {
     "domainTests": 55,
     "webVitestTests": 173,
-    "webScriptTests": 25,
+    "webScriptTests": 26,
     "forgeTests": 29,
     "forgeSuites": 4,
     "pgTapTests": 413,
@@ -123,7 +129,7 @@
       "evidence": [
         "55 domain tests",
         "173 web Vitest tests",
-        "25 web script tests",
+        "26 web script tests",
         "29 Forge tests across 4 suites",
         "413 pgTAP tests across 13 files",
         "17 Playwright tests passed with 9 intentional project skips",
@@ -160,13 +166,13 @@
       "id": "frontend-deployment",
       "status": "blocked",
       "evidence": [
-        "Connected Vercel team API reports no projects",
-        "Git integration attempted a PR #11 preview, but Vercel reported Deployment has been deleted and the check ended ERROR",
-        "GitHub repository homepage URL is empty"
+        "Vercel Git integration produced READY preview dpl_2skzsd2GTB5h5zyUpTJaw36YtRsN for commit 554bd78883bee978b6ade249c2681967adab0411",
+        "Authenticated preview fetch returned HTTP 500",
+        "Deployment target is null, confirming preview rather than production"
       ],
       "blockers": [
-        "No live preview or production deployment exists",
-        "No deployed commit, stable public demo URL, domain, or rollback evidence can be verified"
+        "Preview runtime is unhealthy and returns HTTP 500",
+        "No production deployment, stable production URL, domain, or rollback evidence exists"
       ]
     },
     {

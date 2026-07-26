@@ -123,6 +123,16 @@ test("accepts only normalized repository-relative evidence paths", () => {
   }
 });
 
+test("requires exact preview deployment and runtime evidence", () => {
+  const candidate = clone(status);
+  candidate.hosting.previewRuntimeStatus = "passed";
+
+  const errors = validateSubmissionStatus(candidate);
+  assert.ok(
+    errors.some((error) => error.includes("$.hosting.previewRuntimeStatus")),
+  );
+});
+
 const missingEvidenceMutations = new Map([
   [
     "public-repository",

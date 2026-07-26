@@ -7,10 +7,12 @@ Status: branch verification complete; hosted pull-request CI pending.
 - GitHub repository: public, MIT, issues enabled, default branch `main`.
 - Open pull requests at review time: none.
 - Latest merged `main` Quality run: passed.
-- Vercel projects in the connected team API: zero.
-- Git integration attempted an automatic preview for PR #11; Vercel reported
-  `Deployment has been deleted`, the check ended `ERROR`, and no live preview
-  remained.
+- Vercel's list-projects endpoint returned zero projects, while direct
+  inspection of Git deployment `dpl_2skzsd2GTB5h5zyUpTJaw36YtRsN` exposed
+  project `prj_Bec5Ozlc0QwfbjUXBmEAWQQN3UTn`.
+- The automatic PR #11 preview for commit `554bd78` reached Vercel state
+  `READY`, but an authenticated fetch returned HTTP 500. It is not a working
+  demo or production deployment.
 - Supabase Lozzi project: `ACTIVE_HEALTHY`, `eu-west-2`.
 - Hosted synthetic markers: 7 of 7 auth users and 3 of 3 students match the
   repository's synthetic conventions; no non-synthetic marker was found by the
@@ -45,7 +47,7 @@ The final branch verification completed with:
 - workspace lint and type-check passed;
 - 55 domain tests passed;
 - 173 web Vitest tests passed;
-- 25 web script tests passed, including 17 Milestone 7 readiness tests;
+- 26 web script tests passed, including 18 Milestone 7 readiness tests;
 - Next.js production build passed;
 - clean local Supabase reset applied all 40 migrations;
 - 413 pgTAP tests passed across 13 files;
@@ -84,5 +86,6 @@ deployment blocker.
 No manual or production deployment, provisioning, signing, key retrieval or
 rotation, funding, Safe action, hosted Supabase mutation, ENS issuance, World
 app review submission, event submission, or onchain transaction occurred during
-this inventory and verification. The deleted automatic PR preview attempt is
-recorded above and is not treated as a live deployment.
+this inventory and verification. Vercel Git integration created the automatic
+preview recorded above; it was not manually deployed or promoted and its HTTP
+500 response keeps the frontend gate blocked.

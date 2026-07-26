@@ -150,7 +150,8 @@ const checkServiceState = (errors, status) => {
     }
     if (
       status.hosting.status === "production" &&
-      (!HTTPS_URL.test(status.hosting.productionUrl ?? "") ||
+      (!isNonEmptyString(status.hosting.projectId) ||
+        !HTTPS_URL.test(status.hosting.productionUrl ?? "") ||
         !COMMIT.test(status.hosting.deployedCommit ?? ""))
     ) {
       add(
@@ -159,16 +160,55 @@ const checkServiceState = (errors, status) => {
         "production hosting requires an HTTPS URL and full deployed commit",
       );
     }
+    if (status.hosting.status === "preview") {
+      if (
+        !isNonEmptyString(status.hosting.projectId) ||
+        !isNonEmptyString(status.hosting.previewDeploymentId) ||
+        !HTTPS_URL.test(status.hosting.previewUrl ?? "") ||
+        !COMMIT.test(status.hosting.previewCommit ?? "") ||
+        status.hosting.previewState !== "READY" ||
+        !Number.isSafeInteger(status.hosting.previewHttpStatus) ||
+        status.hosting.previewHttpStatus < 100 ||
+        status.hosting.previewHttpStatus > 599 ||
+        !["passed", "failed"].includes(status.hosting.previewRuntimeStatus) ||
+        status.hosting.productionUrl !== null ||
+        status.hosting.deployedCommit !== null
+      ) {
+        add(
+          errors,
+          "$.hosting",
+          "preview hosting requires exact READY deployment and runtime evidence without a production claim",
+        );
+      } else if (
+        (status.hosting.previewRuntimeStatus === "passed") !==
+        (status.hosting.previewHttpStatus >= 200 &&
+          status.hosting.previewHttpStatus < 400)
+      ) {
+        add(
+          errors,
+          "$.hosting.previewRuntimeStatus",
+          "must agree with the observed preview HTTP status",
+        );
+      }
+    }
     if (
       status.hosting.status === "not-provisioned" &&
-      [status.hosting.projectId, status.hosting.productionUrl].some(
-        (value) => value !== null,
-      )
+      ([
+        status.hosting.projectId,
+        status.hosting.previewDeploymentId,
+        status.hosting.previewUrl,
+        status.hosting.previewCommit,
+        status.hosting.previewHttpStatus,
+        status.hosting.productionUrl,
+        status.hosting.deployedCommit,
+      ].some((value) => value !== null) ||
+        status.hosting.previewState !== "not-created" ||
+        status.hosting.previewRuntimeStatus !== "not-run")
     ) {
       add(
         errors,
         "$.hosting",
-        "not-provisioned hosting cannot claim a project or production URL",
+        "not-provisioned hosting cannot claim preview or production evidence",
       );
     }
   }
@@ -311,7 +351,7 @@ const localVerificationPassed = (status) => {
     isObject(verification) &&
     verification.domainTests === 55 &&
     verification.webVitestTests === 173 &&
-    verification.webScriptTests === 25 &&
+    verification.webScriptTests === 26 &&
     verification.forgeTests === 29 &&
     verification.forgeSuites === 4 &&
     verification.pgTapTests === 413 &&

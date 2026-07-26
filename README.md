@@ -102,7 +102,7 @@ The ENS implementation is locally verified, but no parent, Safe, registrar,
 approval, signer, or subname has been provisioned. 0G, WalletConnect, and World
 Chain registry work remains paused or unconfigured. The app reports those
 states honestly. The hosted Supabase project is ten migrations behind this
-repository, the connected Vercel API reports no project, and an automatic PR
-preview attempt was deleted without producing a live deployment. No Lozzi
+repository, and the automatic Vercel PR preview returns HTTP 500 despite a
+successful build. It is not a working demo or production deployment. No Lozzi
 contract has been deployed. See the submission checklist before making any live
 claim.
