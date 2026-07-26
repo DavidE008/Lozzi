@@ -1,10 +1,11 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 
 import { createCommitment } from "@lozzi/domain";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getAuthenticatedUser } from "@/lib/auth";
+import { createAnchoringCommitmentIdentity } from "@/lib/integrations/anchoring-commitments";
 import { activateSensitiveShare } from "@/lib/integrations/sensitive-shares";
 import { logEvent } from "@/lib/logging";
 import { getInstitutionAccessForUser } from "@/lib/repositories/access";
@@ -41,7 +42,13 @@ export async function POST(
     const tokenBytes = randomBytes(32);
     const tokenSalt = `0x${tokenBytes.toString("hex")}` as const;
     const shareToken = tokenBytes.toString("base64url");
+    const identity = createAnchoringCommitmentIdentity({
+      institutionId: access.institutionId,
+      studentOpaqueId: dashboard.studentId,
+    });
     const activation = await activateSensitiveShare({
+      commitmentEnvironment: identity.commitmentEnvironment,
+      correlationId: randomUUID(),
       draftId,
       grantCommitment: createCommitment({
         domain: "share-grant",
@@ -52,8 +59,12 @@ export async function POST(
         },
         salt: tokenSalt,
       }),
-      studentId: dashboard.studentId,
+      institutionCommitment: identity.institutionCommitment,
+      institutionCommitmentKeyVersion: identity.institutionCommitmentKeyVersion,
+      studentCommitment: identity.studentCommitment,
+      studentCommitmentKeyVersion: identity.studentCommitmentKeyVersion,
       tokenHash: sha256Hex(tokenBytes),
+      traceId: randomUUID(),
     });
 
     return NextResponse.json(

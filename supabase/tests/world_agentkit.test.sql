@@ -453,18 +453,33 @@ select is(
   'the identity summary reports the account-humanity milestone'
 );
 
+grant select on world_share_test_context to authenticated;
+reset role;
+set local role authenticated;
+set local "request.jwt.claim.sub" = '00000000-0000-4000-8000-000000000101';
+
 select is(
   (
-    public.activate_sensitive_share(
+    public.activate_sensitive_share_with_outbox(
       (select first_draft_id from world_share_test_context),
-      '13000000-0000-4000-8000-000000000101',
       decode(repeat('e1', 32), 'hex'),
-      decode(repeat('e2', 32), 'hex')
+      decode(repeat('e2', 32), 'hex'),
+      'test',
+      decode(repeat('a1', 32), 'hex'),
+      1,
+      decode(repeat('b1', 32), 'hex'),
+      1,
+      '92000000-0000-4000-8000-000000000101',
+      '92000000-0000-4000-8000-000000000102'
     )->>'status'
   ),
   'active',
   'both step-ups activate the existing scoped share grant transactionally'
 );
+
+reset role;
+set local role service_role;
+reset "request.jwt.claim.sub";
 
 select lives_ok(
   $$
