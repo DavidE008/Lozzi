@@ -22,6 +22,8 @@
     "format:check": "prettier --check .",
     "lint": "pnpm -r lint",
     "secrets:scan": "node scripts/scan-secrets.mjs",
+    "submission:check": "pnpm --filter @lozzi/web m7:submission:check",
+    "submission:status": "pnpm --filter @lozzi/web m7:submission:status",
     "test": "pnpm --filter @lozzi/domain test && pnpm --filter @lozzi/web test",
     "test:e2e": "pnpm --filter @lozzi/web test:e2e",
     "typecheck": "pnpm -r typecheck"

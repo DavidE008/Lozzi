@@ -1,0 +1,255 @@
+{
+  "schemaVersion": "lozzi.m7.submission-status.v1",
+  "reviewedAt": "2026-07-26T07:47:39Z",
+  "basisCommit": "1ec928b88eea63b2e863d53fdf0dc19885d96a80",
+  "target": {
+    "event": null,
+    "submissionPortal": null,
+    "deadline": null
+  },
+  "repository": {
+    "url": "https://github.com/DavidE008/Lozzi",
+    "defaultBranch": "main",
+    "visibility": "public",
+    "license": "MIT",
+    "issuesEnabled": true,
+    "mainQualityRun": "https://github.com/DavidE008/Lozzi/actions/runs/30189625797",
+    "mainQualityStatus": "passed"
+  },
+  "hosting": {
+    "provider": "vercel",
+    "status": "preview",
+    "projectId": "prj_Bec5Ozlc0QwfbjUXBmEAWQQN3UTn",
+    "previewDeploymentId": "dpl_2skzsd2GTB5h5zyUpTJaw36YtRsN",
+    "previewUrl": "https://lozzi-btkkw2jf2-david-e-projects8.vercel.app",
+    "previewCommit": "554bd78883bee978b6ade249c2681967adab0411",
+    "previewState": "READY",
+    "previewHttpStatus": 500,
+    "previewRuntimeStatus": "failed",
+    "productionUrl": null,
+    "deployedCommit": null
+  },
+  "supabase": {
+    "projectRef": "mmyndcqtovqxyoucrfdb",
+    "name": "Lozzi",
+    "region": "eu-west-2",
+    "status": "ACTIVE_HEALTHY",
+    "authUserCount": 7,
+    "studentCount": 3,
+    "nonSyntheticAuthUserCount": 0,
+    "nonSyntheticStudentCount": 0,
+    "localMigrationCount": 40,
+    "hostedMigrationCount": 30,
+    "hostedSchemaCurrent": false
+  },
+  "world": {
+    "appId": "app_406624a7ab8b70f37f662453518dda71",
+    "rpId": "rp_27a81819333b3230",
+    "mode": "managed",
+    "productionRegistration": "registered",
+    "stagingRegistration": "registered",
+    "actionRecordCount": 6,
+    "signingKeyAvailableLocally": false,
+    "appReviewStatus": "unverified",
+    "websiteConfigured": false,
+    "storeMediaComplete": false
+  },
+  "ens": {
+    "status": "not-provisioned",
+    "parent": null,
+    "safeAddress": null,
+    "registrarAddress": null,
+    "signerAddress": null,
+    "canaryVerified": false
+  },
+  "registries": {
+    "status": "not-deployed",
+    "candidateChain": "World Chain Sepolia",
+    "approvedChainId": null,
+    "institutionRegistryAddress": null,
+    "academicRecordRegistryAddress": null,
+    "unsignedSimulationStatus": "not-run",
+    "independentReviewStatus": "not-completed"
+  },
+  "verification": {
+    "domainTests": 55,
+    "webVitestTests": 173,
+    "webScriptTests": 26,
+    "forgeTests": 29,
+    "forgeSuites": 4,
+    "pgTapTests": 413,
+    "pgTapFiles": 13,
+    "playwrightPassed": 17,
+    "playwrightSkipped": 9,
+    "concurrencyChecks": 3,
+    "dependencyAuditThreshold": "high",
+    "moderateDependencyAdvisories": 2,
+    "slitherVersion": "0.11.5",
+    "slitherStatus": "findings",
+    "slitherFindingCount": 18,
+    "slitherHighFindings": 0,
+    "slitherMediumFindings": 7,
+    "slitherLowFindings": 11
+  },
+  "evidencePaths": [
+    "README.md",
+    "LICENSE",
+    ".github/workflows/quality.yml",
+    "docs/architecture/crops-review.md",
+    "docs/architecture/milestone-7-crops-review.md",
+    "docs/product/milestone-6.md",
+    "docs/product/milestone-7.md",
+    "docs/verification/milestone-6.md",
+    "docs/verification/milestone-7.md",
+    "docs/submission-checklist.md",
+    "docs/security/milestone-6-pre-deployment-review.md",
+    "docs/security/milestone-7-slither-review.md",
+    "docs/deployment/milestone-6-approval-runbook.md",
+    "docs/integrations/world-prize-evidence.md",
+    "docs/integrations/world-ens-identity-journey.md",
+    "docs/integrations/ens-operator-runbook.md",
+    "deployment/milestone-6/manifest.template.json",
+    "deployment/milestone-6/simulation-report.template.json"
+  ],
+  "requiredGates": [
+    {
+      "id": "public-repository",
+      "status": "passed",
+      "evidence": [
+        "Public DavidE008/Lozzi repository",
+        "MIT license",
+        "Issues enabled",
+        "Green main Quality run 30189625797"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "local-verification",
+      "status": "passed",
+      "evidence": [
+        "55 domain tests",
+        "173 web Vitest tests",
+        "26 web script tests",
+        "29 Forge tests across 4 suites",
+        "413 pgTAP tests across 13 files",
+        "17 Playwright tests passed with 9 intentional project skips",
+        "3 concurrency checks"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "dependency-security",
+      "status": "blocked",
+      "evidence": [
+        "Configured production audit threshold is high and passes",
+        "Full production audit reports no high or critical advisories"
+      ],
+      "blockers": [
+        "Two moderate transitive advisories remain through optional @x402/paywall wallet dependencies",
+        "bn.js GHSA-378v-28hj-76wf and uuid GHSA-w5hq-g745-h8pq require reachability and upgrade or override disposition before production deployment"
+      ]
+    },
+    {
+      "id": "hosted-supabase",
+      "status": "blocked",
+      "evidence": [
+        "Lozzi project is ACTIVE_HEALTHY in eu-west-2",
+        "7 auth users and 3 students match repository synthetic markers",
+        "Hosted migration history contains 30 migrations"
+      ],
+      "blockers": [
+        "Hosted schema is 10 migrations behind the 40 local migrations",
+        "World, ENS, and Milestone 6 hosted migrations are not applied"
+      ]
+    },
+    {
+      "id": "frontend-deployment",
+      "status": "blocked",
+      "evidence": [
+        "Vercel Git integration produced READY preview dpl_2skzsd2GTB5h5zyUpTJaw36YtRsN for commit 554bd78883bee978b6ade249c2681967adab0411",
+        "Authenticated preview fetch returned HTTP 500",
+        "Deployment target is null, confirming preview rather than production"
+      ],
+      "blockers": [
+        "Preview runtime is unhealthy and returns HTTP 500",
+        "No production deployment, stable production URL, domain, or rollback evidence exists"
+      ]
+    },
+    {
+      "id": "world-runtime",
+      "status": "blocked",
+      "evidence": [
+        "Managed RP is registered in production and staging",
+        "Six action records exist"
+      ],
+      "blockers": [
+        "RP signing key is unavailable locally",
+        "Entitlement and production-device journeys have no recorded evidence"
+      ]
+    },
+    {
+      "id": "world-submission-metadata",
+      "status": "blocked",
+      "evidence": [
+        "World external app exists and is active",
+        "World app review status is unverified"
+      ],
+      "blockers": [
+        "Website URL is not configured",
+        "Logo, showcase media, overview, and supported countries are incomplete",
+        "No World app review submission is authorized"
+      ]
+    },
+    {
+      "id": "ens-live-integration",
+      "status": "blocked",
+      "evidence": [
+        "ENS adapter, durable issuance lifecycle, and 13 registrar tests are implemented locally"
+      ],
+      "blockers": [
+        "No approved parent, Safe, registrar, signer, or deployment exists",
+        "No consenting synthetic canary or independent resolution evidence exists"
+      ]
+    },
+    {
+      "id": "registry-deployment",
+      "status": "blocked",
+      "evidence": [
+        "Deployment schemas, bytecode fingerprints, and fail-closed offline preflight exist",
+        "World Chain Sepolia is documented only as a candidate",
+        "Slither 0.11.5 completed with 0 high, 7 medium, and 11 low findings"
+      ],
+      "blockers": [
+        "Exact chain and chain ID are not approved",
+        "Safe, deployer, relayer, funding ceilings, and addresses are unresolved",
+        "Unsigned fork simulation has not run",
+        "Slither findings require independent acceptance or a reviewed fix and deployment-evidence repin",
+        "Independent pre-deployment review is incomplete"
+      ]
+    },
+    {
+      "id": "event-submission-target",
+      "status": "blocked",
+      "evidence": [
+        "No event name, submission portal, deadline, or event-specific required fields are recorded in the repository"
+      ],
+      "blockers": [
+        "The intended submission event and deadline must be identified",
+        "Required demo video, screenshots, team metadata, and prize tracks cannot be validated without the target"
+      ]
+    }
+  ],
+  "explicitNonActions": [
+    "no manual or production deployment",
+    "no contract broadcast",
+    "no World or ENS provisioning",
+    "no signer rotation or key retrieval",
+    "no Safe action",
+    "no ENS subname issuance",
+    "no ownership or approval change",
+    "no hosted Supabase mutation",
+    "no wallet funding",
+    "no onchain transaction",
+    "no submission"
+  ]
+}
