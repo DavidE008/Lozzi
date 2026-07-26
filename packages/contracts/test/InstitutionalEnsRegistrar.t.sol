@@ -89,9 +89,8 @@ contract MockNameWrapper is INameWrapper {
         ++createCalls;
 
         if (newOwner.code.length != 0) {
-            bytes4 response = IERC1155Receiver(newOwner).onERC1155Received(
-                msg.sender, address(0), uint256(node), 1, ""
-            );
+            bytes4 response = IERC1155Receiver(newOwner)
+                .onERC1155Received(msg.sender, address(0), uint256(node), 1, "");
             if (response != IERC1155Receiver.onERC1155Received.selector) revert();
         }
     }
@@ -171,9 +170,8 @@ contract InstitutionalEnsRegistrarTest is TestBase {
         wrapper = new MockNameWrapper(registry);
         resolver = new MockPublicResolver(wrapper);
         wrapper.configureParent(PARENT_NODE, SAFE, uint64(block.timestamp + 365 days));
-        registrar = new InstitutionalEnsRegistrar(
-            registry, wrapper, resolver, PARENT_NODE, SAFE, ISSUER
-        );
+        registrar =
+            new InstitutionalEnsRegistrar(registry, wrapper, resolver, PARENT_NODE, SAFE, ISSUER);
         wrapper.setApprovalForAll(SAFE, address(registrar), true);
     }
 
@@ -225,9 +223,7 @@ contract InstitutionalEnsRegistrarTest is TestBase {
 
         vm.prank(ISSUER);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                InstitutionalEnsRegistrar.LabelUnavailable.selector, labelHash
-            )
+            abi.encodeWithSelector(InstitutionalEnsRegistrar.LabelUnavailable.selector, labelHash)
         );
         registrar.issue("calm-river-42", RESOLVED, REQUEST_KEY);
     }
@@ -235,9 +231,7 @@ contract InstitutionalEnsRegistrarTest is TestBase {
     function testUnauthorizedAccountCannotIssue() public {
         vm.prank(ATTACKER);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                InstitutionalEnsRegistrar.UnauthorizedIssuer.selector, ATTACKER
-            )
+            abi.encodeWithSelector(InstitutionalEnsRegistrar.UnauthorizedIssuer.selector, ATTACKER)
         );
         registrar.issue("calm-river-42", RESOLVED, REQUEST_KEY);
     }

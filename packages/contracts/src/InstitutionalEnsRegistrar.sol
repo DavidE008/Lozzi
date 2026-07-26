@@ -188,8 +188,8 @@ contract InstitutionalEnsRegistrar is Ownable2Step, Pausable, ReentrancyGuard, I
         bytes calldata
     ) external override returns (bytes4) {
         if (
-            msg.sender != address(nameWrapper) || operator != address(this)
-                || from != address(0) || bytes32(id) != expectedReceiptNode || value != 1
+            msg.sender != address(nameWrapper) || operator != address(this) || from != address(0)
+                || bytes32(id) != expectedReceiptNode || value != 1
                 || expectedReceiptNode == bytes32(0) || expectedReceiptObserved
         ) {
             revert UnexpectedTokenReceipt();
