@@ -16,6 +16,8 @@
     "contracts:test": "node scripts/check-contract-privacy.mjs && forge test --root packages/contracts -vvv",
     "db:test": "supabase test db",
     "dev": "pnpm --filter @lozzi/web dev",
+    "deployment:bytecode:check": "pnpm --filter @lozzi/web m6:deployment:bytecode",
+    "deployment:preflight": "pnpm --filter @lozzi/web m6:deployment:preflight",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "pnpm -r lint",

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lozzi.example/schemas/milestone-6/chain-config.v1.schema.json",
+  "title": "Lozzi Milestone 6 chain configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "approvalStatus",
+    "name",
+    "chainId",
+    "nativeCurrency",
+    "primaryRpcUrl",
+    "independentRpcUrl",
+    "blockExplorerUrl",
+    "minimumConfirmations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "lozzi.m6.chain-config.v1"
+    },
+    "approvalStatus": {
+      "enum": ["candidate", "approved"]
+    },
+    "name": {
+      "type": ["string", "null"],
+      "minLength": 2
+    },
+    "chainId": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "nativeCurrency": {
+      "type": ["string", "null"],
+      "minLength": 2
+    },
+    "primaryRpcUrl": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "independentRpcUrl": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "blockExplorerUrl": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "minimumConfirmations": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 256
+    }
+  }
+}

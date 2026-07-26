@@ -9,6 +9,8 @@
     "agentkit:demo": "node scripts/agentkit-degree-plan-demo.mjs",
     "agentkit:keystore": "node scripts/create-agent-keystore.mjs",
     "ens:verify-deployment": "node scripts/verify-ens-deployment.mjs",
+    "m6:deployment:bytecode": "node scripts/m6-bytecode-fingerprints.mjs --check",
+    "m6:deployment:preflight": "node scripts/m6-deployment-preflight.mjs",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run && node --test scripts/*.test.mjs",
     "test:db-concurrency": "node scripts/m6-producer-concurrency.mjs",

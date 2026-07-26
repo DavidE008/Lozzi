@@ -3,6 +3,11 @@
 Status: required gate, not completed. Passing local tests or this checklist is
 not an external audit and does not establish production readiness.
 
+The versioned manifest, unsigned simulation format, governance matrix, and
+transaction approval packet are defined in
+`deployment/milestone-6/README.md` and `docs/deployment/`. The repository
+templates are intentionally unresolved and fail the offline preflight.
+
 The reviewer must be independent of the transaction preparer. Record reviewer
 identity, pinned Git commit, date, evidence links, unresolved findings, and an
 explicit approve/reject decision. A checklist item may not be waived without a

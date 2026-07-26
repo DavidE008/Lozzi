@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lozzi.example/schemas/milestone-6/simulation-report.v1.schema.json",
+  "title": "Lozzi Milestone 6 unsigned simulation report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "manifestCommit",
+    "chainId",
+    "forkBlockNumber",
+    "forkBlockHash",
+    "simulator",
+    "simulatorVersion",
+    "executedAt",
+    "broadcast",
+    "signedTransactionCount",
+    "transactions",
+    "postSimulationReadback",
+    "reviewer"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "lozzi.m6.simulation-report.v1"
+    },
+    "status": {
+      "enum": ["not-run", "failed", "passed"]
+    },
+    "manifestCommit": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "chainId": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "forkBlockNumber": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "forkBlockHash": {
+      "type": ["string", "null"],
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    },
+    "simulator": {
+      "type": ["string", "null"]
+    },
+    "simulatorVersion": {
+      "type": ["string", "null"]
+    },
+    "executedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "broadcast": {
+      "const": false
+    },
+    "signedTransactionCount": {
+      "const": 0
+    },
+    "transactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "status",
+          "from",
+          "to",
+          "valueWei",
+          "gasEstimate",
+          "gasLimit",
+          "calldataKeccak256"
+        ],
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "enum": ["failed", "passed"]
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "to": {
+            "type": ["string", "null"],
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "valueWei": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "gasEstimate": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "gasLimit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "calldataKeccak256": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          }
+        }
+      }
+    },
+    "postSimulationReadback": {
+      "enum": ["not-run", "failed", "passed"]
+    },
+    "reviewer": {
+      "type": ["string", "null"]
+    }
+  }
+}

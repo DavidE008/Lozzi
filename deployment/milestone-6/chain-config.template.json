@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "lozzi.m6.chain-config.v1",
+  "approvalStatus": "candidate",
+  "name": null,
+  "chainId": null,
+  "nativeCurrency": null,
+  "primaryRpcUrl": null,
+  "independentRpcUrl": null,
+  "blockExplorerUrl": null,
+  "minimumConfirmations": null
+}
