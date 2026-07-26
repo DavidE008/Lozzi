@@ -1,0 +1,402 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lozzi.example/schemas/milestone-7/submission-status.v1.schema.json",
+  "title": "Lozzi Milestone 7 submission status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "reviewedAt",
+    "basisCommit",
+    "target",
+    "repository",
+    "hosting",
+    "supabase",
+    "world",
+    "ens",
+    "registries",
+    "verification",
+    "evidencePaths",
+    "requiredGates",
+    "explicitNonActions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "lozzi.m7.submission-status.v1"
+    },
+    "reviewedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "basisCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "submissionPortal", "deadline"],
+      "properties": {
+        "event": {
+          "type": ["string", "null"]
+        },
+        "submissionPortal": {
+          "type": ["string", "null"],
+          "format": "uri"
+        },
+        "deadline": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "defaultBranch",
+        "visibility",
+        "license",
+        "issuesEnabled",
+        "mainQualityRun",
+        "mainQualityStatus"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "defaultBranch": {
+          "const": "main"
+        },
+        "visibility": {
+          "const": "public"
+        },
+        "license": {
+          "const": "MIT"
+        },
+        "issuesEnabled": {
+          "const": true
+        },
+        "mainQualityRun": {
+          "type": "string",
+          "format": "uri"
+        },
+        "mainQualityStatus": {
+          "enum": ["passed", "failed", "pending"]
+        }
+      }
+    },
+    "hosting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "status",
+        "projectId",
+        "productionUrl",
+        "deployedCommit"
+      ],
+      "properties": {
+        "provider": {
+          "const": "vercel"
+        },
+        "status": {
+          "enum": ["not-provisioned", "preview", "production"]
+        },
+        "projectId": {
+          "type": ["string", "null"]
+        },
+        "productionUrl": {
+          "type": ["string", "null"],
+          "format": "uri"
+        },
+        "deployedCommit": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "supabase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectRef",
+        "name",
+        "region",
+        "status",
+        "authUserCount",
+        "studentCount",
+        "nonSyntheticAuthUserCount",
+        "nonSyntheticStudentCount",
+        "localMigrationCount",
+        "hostedMigrationCount",
+        "hostedSchemaCurrent"
+      ],
+      "properties": {
+        "projectRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "const": "Lozzi"
+        },
+        "region": {
+          "const": "eu-west-2"
+        },
+        "status": {
+          "const": "ACTIVE_HEALTHY"
+        },
+        "authUserCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "studentCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nonSyntheticAuthUserCount": {
+          "const": 0
+        },
+        "nonSyntheticStudentCount": {
+          "const": 0
+        },
+        "localMigrationCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hostedMigrationCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hostedSchemaCurrent": {
+          "type": "boolean"
+        }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "appId",
+        "rpId",
+        "mode",
+        "productionRegistration",
+        "stagingRegistration",
+        "actionRecordCount",
+        "signingKeyAvailableLocally",
+        "appReviewStatus",
+        "websiteConfigured",
+        "storeMediaComplete"
+      ],
+      "properties": {
+        "appId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rpId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "const": "managed"
+        },
+        "productionRegistration": {
+          "const": "registered"
+        },
+        "stagingRegistration": {
+          "const": "registered"
+        },
+        "actionRecordCount": {
+          "const": 6
+        },
+        "signingKeyAvailableLocally": {
+          "type": "boolean"
+        },
+        "appReviewStatus": {
+          "enum": ["unverified", "verified"]
+        },
+        "websiteConfigured": {
+          "type": "boolean"
+        },
+        "storeMediaComplete": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "parent",
+        "safeAddress",
+        "registrarAddress",
+        "signerAddress",
+        "canaryVerified"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not-provisioned", "provisioned"]
+        },
+        "parent": {
+          "type": ["string", "null"]
+        },
+        "safeAddress": {
+          "type": ["string", "null"]
+        },
+        "registrarAddress": {
+          "type": ["string", "null"]
+        },
+        "signerAddress": {
+          "type": ["string", "null"]
+        },
+        "canaryVerified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "registries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "candidateChain",
+        "approvedChainId",
+        "institutionRegistryAddress",
+        "academicRecordRegistryAddress",
+        "unsignedSimulationStatus",
+        "independentReviewStatus"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not-deployed", "deployed"]
+        },
+        "candidateChain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvedChainId": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "institutionRegistryAddress": {
+          "type": ["string", "null"]
+        },
+        "academicRecordRegistryAddress": {
+          "type": ["string", "null"]
+        },
+        "unsignedSimulationStatus": {
+          "enum": ["not-run", "passed"]
+        },
+        "independentReviewStatus": {
+          "enum": ["not-completed", "approved"]
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domainTests",
+        "webVitestTests",
+        "webScriptTests",
+        "forgeTests",
+        "forgeSuites",
+        "pgTapTests",
+        "pgTapFiles",
+        "playwrightPassed",
+        "playwrightSkipped",
+        "concurrencyChecks",
+        "slitherStatus"
+      ],
+      "properties": {
+        "domainTests": {
+          "const": 55
+        },
+        "webVitestTests": {
+          "const": 173
+        },
+        "webScriptTests": {
+          "const": 12
+        },
+        "forgeTests": {
+          "const": 29
+        },
+        "forgeSuites": {
+          "const": 4
+        },
+        "pgTapTests": {
+          "const": 413
+        },
+        "pgTapFiles": {
+          "const": 13
+        },
+        "playwrightPassed": {
+          "const": 17
+        },
+        "playwrightSkipped": {
+          "const": 9
+        },
+        "concurrencyChecks": {
+          "const": 3
+        },
+        "slitherStatus": {
+          "enum": ["not-run", "passed"]
+        }
+      }
+    },
+    "evidencePaths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "requiredGates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "evidence", "blockers"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "status": {
+            "enum": ["passed", "blocked"]
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "explicitNonActions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

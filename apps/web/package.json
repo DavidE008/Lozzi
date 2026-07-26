@@ -11,6 +11,8 @@
     "ens:verify-deployment": "node scripts/verify-ens-deployment.mjs",
     "m6:deployment:bytecode": "node scripts/m6-bytecode-fingerprints.mjs --check",
     "m6:deployment:preflight": "node scripts/m6-deployment-preflight.mjs",
+    "m7:submission:check": "node scripts/m7-submission-readiness.mjs --require-ready",
+    "m7:submission:status": "node scripts/m7-submission-readiness.mjs",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run && node --test scripts/*.test.mjs",
     "test:db-concurrency": "node scripts/m6-producer-concurrency.mjs",
