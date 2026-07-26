@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import path from "node:path";
 
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -10,9 +11,9 @@ const GATE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const PRIVATE_KEY = /\b0x[0-9a-fA-F]{64}\b/u;
 const SIGNATURE = /\b0x[0-9a-fA-F]{128,130}\b/u;
 const TOKEN =
-  /\b(?:github_pat_[A-Za-z0-9_]{20,}|gh[oprsu]_[A-Za-z0-9]{20,}|s[bb]_(?:secret|publishable)_[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9_-]{20,}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/u;
+  /\b(?:api_[A-Za-z0-9_-]{20,}|github_pat_[A-Za-z0-9_]{20,}|gh[oprsu]_[A-Za-z0-9]{20,}|s[bb]_(?:secret|publishable)_[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9_-]{20,}|(?:sk|rk)_(?:live|test)_[A-Za-z0-9_-]{16,}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/u;
 const ASSIGNED_SECRET =
-  /\b(?:api.?key|bearer|credential|mnemonic|private.?key|raw.?transaction|secret|seed.?phrase|signature)\s*[:=]\s*\S+/iu;
+  /\b(?:access.?token|api.?key|authorization|bearer|credential|mnemonic|private.?key|raw.?transaction|refresh.?token|secret|seed.?phrase|signature|token)\s*[:=]\s*\S+/iu;
 const PEM_PRIVATE_KEY = /-----BEGIN [A-Z ]*PRIVATE KEY-----/u;
 
 const REQUIRED_GATE_IDS = new Set([
@@ -67,6 +68,22 @@ const checkNonEmptyString = (errors, path, value) => {
 const isNonEmptyString = (value) =>
   typeof value === "string" && value.trim() !== "";
 
+export const validateEvidencePathSyntax = (value) => {
+  if (!isNonEmptyString(value)) {
+    return ["must be a non-empty repository-relative path"];
+  }
+  if (
+    value.includes("\\") ||
+    path.posix.isAbsolute(value) ||
+    path.win32.isAbsolute(value) ||
+    path.posix.normalize(value) !== value ||
+    value.split("/").some((segment) => ["", ".", ".."].includes(segment))
+  ) {
+    return ["must be a normalized repository-relative path"];
+  }
+  return [];
+};
+
 const checkAddress = (errors, path, value) => {
   if (typeof value !== "string" || !ETHEREUM_ADDRESS.test(value)) {
     add(errors, path, "must be a 20-byte Ethereum address");
@@ -110,7 +127,7 @@ const rejectSensitiveMaterial = (errors, value, path = "$") => {
 
   for (const [key, entry] of Object.entries(value)) {
     if (
-      /(?:api.?key|private.?key|mnemonic|seed.?phrase|raw.?transaction|signature|bearer|secret|credential)/iu.test(
+      /(?:access.?token|api.?key|authorization|bearer|credential|mnemonic|private.?key|raw.?transaction|refresh.?token|secret|seed.?phrase|signature|token)/iu.test(
         key,
       )
     ) {
@@ -294,7 +311,7 @@ const localVerificationPassed = (status) => {
     isObject(verification) &&
     verification.domainTests === 55 &&
     verification.webVitestTests === 173 &&
-    verification.webScriptTests === 23 &&
+    verification.webScriptTests === 25 &&
     verification.forgeTests === 29 &&
     verification.forgeSuites === 4 &&
     verification.pgTapTests === 413 &&
@@ -525,6 +542,13 @@ export const validateSubmissionStatus = (status) => {
   checkStringArray(errors, "$.evidencePaths", status.evidencePaths, {
     nonEmpty: true,
   });
+  if (Array.isArray(status.evidencePaths)) {
+    status.evidencePaths.forEach((evidencePath, index) => {
+      for (const message of validateEvidencePathSyntax(evidencePath)) {
+        add(errors, `$.evidencePaths[${index}]`, message);
+      }
+    });
+  }
   checkStringArray(errors, "$.explicitNonActions", status.explicitNonActions, {
     nonEmpty: true,
   });

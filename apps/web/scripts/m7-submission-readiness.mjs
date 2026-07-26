@@ -1,9 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { access, readFile } from "node:fs/promises";
+import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
   summarizeSubmissionStatus,
+  validateEvidencePathSyntax,
   validateReviewBinding,
   validateSubmissionStatus,
 } from "./m7-submission-status.mjs";
@@ -40,10 +41,41 @@ const status = JSON.parse(
 const errors = validateSubmissionStatus(status);
 
 for (const evidencePath of status.evidencePaths ?? []) {
+  if (validateEvidencePathSyntax(evidencePath).length > 0) continue;
+
+  const absoluteEvidencePath = path.resolve(root, evidencePath);
+  const repositoryPrefix = `${root}${path.sep}`;
+  if (!absoluteEvidencePath.startsWith(repositoryPrefix)) {
+    errors.push(
+      `$.evidencePaths: ${evidencePath} resolves outside the repository`,
+    );
+    continue;
+  }
+
   try {
-    await access(path.resolve(root, evidencePath));
+    const evidenceStat = await lstat(absoluteEvidencePath);
+    if (!evidenceStat.isFile()) {
+      errors.push(
+        `$.evidencePaths: ${evidencePath} must be a tracked regular file`,
+      );
+      continue;
+    }
   } catch {
     errors.push(`$.evidencePaths: missing ${evidencePath}`);
+    continue;
+  }
+
+  try {
+    execFileSync(
+      "git",
+      ["ls-files", "--error-unmatch", "--", `:(literal)${evidencePath}`],
+      {
+        cwd: root,
+        stdio: ["ignore", "ignore", "pipe"],
+      },
+    );
+  } catch {
+    errors.push(`$.evidencePaths: ${evidencePath} must be tracked by Git`);
   }
 }
 

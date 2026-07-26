@@ -5,6 +5,7 @@ import test from "node:test";
 
 import {
   summarizeSubmissionStatus,
+  validateEvidencePathSyntax,
   validateReviewBinding,
   validateSubmissionStatus,
 } from "./m7-submission-status.mjs";
@@ -64,6 +65,48 @@ test("rejects secret or signed material in keys, values, and unknown fields", ()
     errors.some((error) => error.includes("$.requiredGates[0].evidence[4]")),
   );
   assert.ok(errors.some((error) => error.includes("$.world.apiKey")));
+});
+
+test("rejects assigned access tokens and provider-style token values", () => {
+  const candidate = clone(status);
+  candidate.requiredGates[0].evidence.push(
+    "accessToken: opaque-token-material-1234567890",
+  );
+  candidate.requiredGates[0].evidence.push(`sk_live_${"a".repeat(24)}`);
+  candidate.requiredGates[0].evidence.push(`api_${"b".repeat(40)}`);
+
+  const errors = validateSubmissionStatus(candidate);
+  assert.ok(
+    errors.some((error) => error.includes("$.requiredGates[0].evidence[4]")),
+  );
+  assert.ok(
+    errors.some((error) => error.includes("$.requiredGates[0].evidence[5]")),
+  );
+  assert.ok(
+    errors.some((error) => error.includes("$.requiredGates[0].evidence[6]")),
+  );
+});
+
+test("accepts only normalized repository-relative evidence paths", () => {
+  assert.deepEqual(
+    validateEvidencePathSyntax("docs/submission-checklist.md"),
+    [],
+  );
+  for (const candidate of [
+    "C:/Windows/win.ini",
+    "C:\\Windows\\win.ini",
+    "/etc/passwd",
+    "../outside.md",
+    "docs/../README.md",
+    "./README.md",
+    "docs//submission-checklist.md",
+  ]) {
+    assert.notDeepEqual(
+      validateEvidencePathSyntax(candidate),
+      [],
+      `unexpectedly accepted ${candidate}`,
+    );
+  }
 });
 
 const missingEvidenceMutations = new Map([
