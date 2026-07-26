@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  sensitiveShareRevocationResultSchema,
   shareDisclosureScopeSchema,
   type ShareDisclosureScope,
 } from "@lozzi/domain";
@@ -11,6 +12,18 @@ import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 interface SensitiveShareRpcClient {
+  rpc(
+    name: "revoke_sensitive_share_with_outbox",
+    params: {
+      p_correlation_id: string;
+      p_idempotency_key: string;
+      p_share_grant_id: string;
+      p_trace_id: string;
+    },
+  ): Promise<{
+    readonly data: unknown;
+    readonly error: { readonly code?: string; readonly message?: string } | null;
+  }>;
   rpc(
     name: "activate_sensitive_share_with_outbox",
     params: {
@@ -160,4 +173,25 @@ export const activateSensitiveShare = async (input: {
   );
   if (error) throw error;
   return activationResultSchema.parse(data);
+};
+
+export const revokeSensitiveShare = async (input: {
+  readonly correlationId: string;
+  readonly idempotencyKey: string;
+  readonly shareGrantId: string;
+  readonly traceId: string;
+}) => {
+  const client =
+    (await createClient()) as unknown as SensitiveShareRpcClient;
+  const { data, error } = await client.rpc(
+    "revoke_sensitive_share_with_outbox",
+    {
+      p_correlation_id: input.correlationId,
+      p_idempotency_key: input.idempotencyKey,
+      p_share_grant_id: input.shareGrantId,
+      p_trace_id: input.traceId,
+    },
+  );
+  if (error) throw error;
+  return sensitiveShareRevocationResultSchema.parse(data);
 };

@@ -118,6 +118,32 @@ test("student searches registration rows and reviews the hosted schedule", async
   await expect(page.getByText("CS 2305", { exact: true })).toBeVisible();
 });
 
+test("student confirms immediate share revocation", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name.startsWith("mobile"),
+    "The revocation confirmation is viewport-independent.",
+  );
+  await signIn(page);
+  await page.getByRole("link", { name: "Shares", exact: true }).click();
+
+  const shareCard = page
+    .getByRole("heading", { name: "Synthetic revocation acceptance" })
+    .locator('xpath=ancestor::*[@data-slot="card"]');
+  await expect(shareCard.getByText("Active", { exact: true })).toBeVisible();
+  await shareCard.getByRole("button", { name: "Revoke access" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Revoke this share?" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Confirm revocation" }).click();
+
+  await expect(shareCard.getByText("Revoked", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText(
+    "Access was revoked immediately.",
+  );
+});
+
 test("mobile navigation reaches every student destination", async ({
   page,
 }, testInfo) => {

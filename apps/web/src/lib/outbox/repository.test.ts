@@ -133,10 +133,13 @@ describe("Supabase outbox repository", () => {
         .mockResolvedValueOnce({
           data: {
             expiredLeases: 1,
-            generatedAt: "2026-07-26T01:00:00.000Z",
+            generatedAt: "2026-07-26T01:00:00+00:00",
             manualRetryEligible: 2,
             oldestReadyAt: null,
             receiptStateCounts: { confirmation_pending: 1 },
+            shareAccessResultCounts: { denied_revoked: 2 },
+            shareLifecycleCounts: { revoked: 1 },
+            shareReconciliationCounts: { revocation_pending: 1 },
             statusCounts: { pending: 3 },
           },
           error: null,
@@ -152,6 +155,7 @@ describe("Supabase outbox repository", () => {
 
     await expect(repository.metrics()).resolves.toMatchObject({
       expiredLeases: 1,
+      shareLifecycleCounts: { revoked: 1 },
       statusCounts: { pending: 3 },
     });
     const failure = repository.metrics();

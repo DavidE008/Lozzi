@@ -24,21 +24,23 @@ type OutboxRpcClient = {
   rpc: (name: string, parameters?: Record<string, unknown>) => RpcResult;
 };
 
+const databaseTimestampSchema = z.iso.datetime({ offset: true });
+
 const claimRowSchema = z
   .object({
     aggregate_id: z.uuid(),
     aggregate_type: z.string().min(1),
     attempt_number: z.number().int().positive(),
-    available_at: z.iso.datetime(),
+    available_at: databaseTimestampSchema,
     correlation_id: z.uuid(),
-    created_at: z.iso.datetime(),
+    created_at: databaseTimestampSchema,
     event_id: z.uuid(),
     event_type: z.string().min(1),
-    first_attempt_at: z.iso.datetime(),
+    first_attempt_at: databaseTimestampSchema,
     idempotency_key: z.uuid(),
     institution_id: z.uuid(),
-    last_attempt_at: z.iso.datetime(),
-    lease_expires_at: z.iso.datetime(),
+    last_attempt_at: databaseTimestampSchema,
+    lease_expires_at: databaseTimestampSchema,
     payload: z.unknown(),
     schema_version: z.literal(1),
     trace_id: z.uuid(),
@@ -48,7 +50,7 @@ const claimRowSchema = z
 const completionSchema = z
   .object({
     attemptNumber: z.number().int().positive(),
-    availableAt: z.iso.datetime(),
+    availableAt: databaseTimestampSchema,
     eventId: z.uuid(),
     idempotentReplay: z.boolean().optional().default(false),
     manualRetryEligible: z.boolean(),
@@ -59,10 +61,13 @@ const completionSchema = z
 const metricsSchema = z
   .object({
     expiredLeases: z.number().int().min(0),
-    generatedAt: z.iso.datetime(),
+    generatedAt: databaseTimestampSchema,
     manualRetryEligible: z.number().int().min(0),
-    oldestReadyAt: z.iso.datetime().nullable(),
+    oldestReadyAt: databaseTimestampSchema.nullable(),
     receiptStateCounts: z.record(z.string(), z.number().int().min(0)),
+    shareAccessResultCounts: z.record(z.string(), z.number().int().min(0)),
+    shareLifecycleCounts: z.record(z.string(), z.number().int().min(0)),
+    shareReconciliationCounts: z.record(z.string(), z.number().int().min(0)),
     statusCounts: z.record(z.string(), z.number().int().min(0)),
   })
   .strict();
